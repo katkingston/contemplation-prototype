@@ -62,7 +62,7 @@ export const radius = {
 
 export const timing = {
   /** Contemplation timer choices, in minutes. */
-  timerChoicesMin: [1, 2, 3, 5],
+  timerChoicesMin: [1, 2, 3, 5] as readonly number[],
   /** Default timer (user must still confirm via Begin). */
   defaultTimerMin: 1,
   /** Final pulse window before the timer ends, ms. */

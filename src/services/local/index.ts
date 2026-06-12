@@ -168,6 +168,15 @@ export class LocalServices implements AppServices {
     });
   }
 
+  async cancelAccess(): Promise<void> {
+    await this.write((d) => {
+      const now = new Date().toISOString();
+      d.grants.forEach((g) => {
+        if (g.expiresAt == null || g.expiresAt > now) g.expiresAt = now;
+      });
+    });
+  }
+
   async saveSettings(s: Partial<Settings>): Promise<void> {
     await this.write((d) => {
       d.settings = { ...d.settings, ...s };

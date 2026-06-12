@@ -63,6 +63,9 @@ export class SupabaseServices implements AppServices {
   grantAccess(_p: ProductType, _s?: string | null): Promise<void> {
     throw new Error(NOT_CONFIGURED); // Webhook-only in production — see header.
   }
+  cancelAccess(): Promise<void> {
+    throw new Error(NOT_CONFIGURED); // Store-managed in production.
+  }
   saveSettings(_s: Partial<Settings>): Promise<void> {
     throw new Error(NOT_CONFIGURED);
   }

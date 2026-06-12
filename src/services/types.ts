@@ -129,6 +129,8 @@ export interface AppServices {
 
   // -- access --
   grantAccess(productType: ProductType, seriesId?: string | null): Promise<void>;
+  /** Mock cancel: expires all active grants now. Real impl = store-managed. */
+  cancelAccess(): Promise<void>;
 
   // -- settings --
   saveSettings(s: Partial<Settings>): Promise<void>;
