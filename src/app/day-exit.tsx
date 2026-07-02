@@ -6,9 +6,15 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Button, Gap } from '@/components/ui';
 import { dayExit } from '@/content/copy';
+import { useApp } from '@/services/provider';
 import { space } from '@/theme/tokens';
 
 export default function DayExit() {
+  const { data } = useApp();
+  // Rotate the closing line by days practiced so it changes across the series.
+  const daysPracticed = new Set(data.sessions.map((s) => s.date)).size;
+  const closer = dayExit.closers[daysPracticed % dayExit.closers.length];
+
   return (
     <View style={styles.root}>
       <LinearGradient colors={['#1c2230', '#3e4f66']} style={StyleSheet.absoluteFill} />
@@ -20,6 +26,18 @@ export default function DayExit() {
         <Gap size="md" />
         <AppText variant="body" dark muted center>
           {dayExit.body}
+        </AppText>
+        <Gap size="sm" />
+        <AppText variant="body" dark muted center>
+          {dayExit.body2}
+        </AppText>
+        <Gap size="sm" />
+        <AppText variant="body" dark muted center>
+          {dayExit.body3}
+        </AppText>
+        <Gap size="lg" />
+        <AppText variant="body" dark center style={{ fontStyle: 'italic' }}>
+          {closer}
         </AppText>
         <View style={{ flex: 1 }} />
         <Button label="Done" dark onPress={() => router.replace('/home')} testID="day-exit-done" />

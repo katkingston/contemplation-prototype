@@ -242,15 +242,38 @@ export const SERIES: Series[] = [
   },
 ];
 
-/** The free taste shown during onboarding, before any purchase or account. */
-export const FREE_CONTEMPLATION: Contemplation = {
-  id: 'free-1',
-  sequenceIndex: 0,
-  prompt:
-    'Simply sit with a contemplation question for a few minutes and notice what arises. Curiosity is enough.',
-  videoUri: null,
-  gradient: ['#1f2430', '#52677a'],
-};
+/**
+ * Introductory contemplations — the ungated taste shown during onboarding,
+ * before any purchase or account. Gentle, universal, no mortality framing yet.
+ * The onboarding flow serves the first; the rest are available for rotation
+ * or a future multi-day intro experience.
+ */
+export const INTRO_CONTEMPLATIONS: Contemplation[] = [
+  {
+    id: 'intro-1',
+    sequenceIndex: 0,
+    prompt: 'What is present in your life right now that you would miss if it were gone tomorrow?',
+    videoUri: null,
+    gradient: ['#1f2430', '#52677a'],
+  },
+  {
+    id: 'intro-2',
+    sequenceIndex: 1,
+    prompt: 'When did you last feel fully present — and what made that moment different?',
+    videoUri: null,
+    gradient: ['#232838', '#5e738a'],
+  },
+  {
+    id: 'intro-3',
+    sequenceIndex: 2,
+    prompt: 'What are you moving too quickly past that deserves a longer look?',
+    videoUri: null,
+    gradient: ['#1d2630', '#4a5e72'],
+  },
+];
+
+/** Back-compat alias: the single intro contemplation used by onboarding. */
+export const FREE_CONTEMPLATION: Contemplation = INTRO_CONTEMPLATIONS[0];
 
 export function getSeries(id: string): Series | undefined {
   return SERIES.find((s) => s.id === id);

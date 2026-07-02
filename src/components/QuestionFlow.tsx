@@ -40,8 +40,10 @@ export function QuestionFlow({
 }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const q = questions[step];
   const value = answers[q.id];
+  const otherSelected = q.kind === 'multi' && Array.isArray(value) && value.includes('Other');
 
   const answered =
     q.kind === 'text'
@@ -53,8 +55,18 @@ export function QuestionFlow({
   const set = (v: AnswerValue) => setAnswers((a) => ({ ...a, [q.id]: v }));
 
   const next = () => {
+    // Fold typed "Other" text into the stored answer.
+    let final = answers;
+    const other = otherTexts[q.id]?.trim();
+    if (q.kind === 'multi' && Array.isArray(value) && value.includes('Other') && other) {
+      final = {
+        ...answers,
+        [q.id]: value.map((v) => (v === 'Other' ? `Other: ${other}` : v)),
+      };
+      setAnswers(final);
+    }
     if (step + 1 < questions.length) setStep(step + 1);
-    else onComplete(answers);
+    else onComplete(final);
   };
 
   return (
@@ -83,14 +95,35 @@ export function QuestionFlow({
         </View>
       )}
       {q.kind === 'multi' && (
-        <MultiChipGroup
-          options={q.options ?? []}
-          values={Array.isArray(value) ? value : []}
-          onToggle={(opt) => {
-            const cur = Array.isArray(value) ? value : [];
-            set(cur.includes(opt) ? cur.filter((x) => x !== opt) : [...cur, opt]);
-          }}
-        />
+        <View>
+          <MultiChipGroup
+            options={q.options ?? []}
+            values={Array.isArray(value) ? value : []}
+            onToggle={(opt) => {
+              const cur = Array.isArray(value) ? value : [];
+              set(cur.includes(opt) ? cur.filter((x) => x !== opt) : [...cur, opt]);
+            }}
+          />
+          {otherSelected && (
+            <TextInput
+              value={otherTexts[q.id] ?? ''}
+              onChangeText={(t) => setOtherTexts((o) => ({ ...o, [q.id]: t }))}
+              placeholder="Tell us who…"
+              placeholderTextColor={color.muted}
+              style={{
+                ...type.body,
+                marginTop: space.md,
+                borderWidth: 1,
+                borderColor: color.line,
+                borderRadius: radius.md,
+                padding: space.md,
+                backgroundColor: color.faint,
+                color: color.ink,
+              }}
+              testID="other-text-input"
+            />
+          )}
+        </View>
       )}
       {q.kind === 'text' && (
         <TextInput

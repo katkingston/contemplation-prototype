@@ -105,10 +105,16 @@ export interface Plan {
   detail: string;
 }
 
+/**
+ * Introductory deal (recommendation, implemented): ONE intro offer — a 3-day
+ * free trial on the ANNUAL plan (Apple allows a single intro offer per
+ * subscription; trials outconvert discounts in wellness). The $7.99 series
+ * pack is the low-commitment entry, so no extra discounting at launch.
+ */
 export const plans: Plan[] = [
-  { productType: 'series_pack', title: 'Series Pack', price: '$7.99', detail: 'Unlocks one series' },
+  { productType: 'series_pack', title: 'Series Pack', price: '$7.99', detail: 'Unlocks one series — try without committing' },
   { productType: 'monthly', title: 'Monthly', price: '$21.99 / month', detail: '30 days of all-access' },
-  { productType: 'annual', title: 'Annual (best value)', price: '$89.99 / year', detail: '$7.50 / mo equivalent' },
+  { productType: 'annual', title: 'Annual (best value)', price: '$89.99 / year', detail: '3 days free, then $7.50 / mo equivalent — save 66%' },
 ];
 
 export const intakeQuestions = [
@@ -173,7 +179,19 @@ export const baselineIntro = {
 
 export const dayExit = {
   title: 'See you tomorrow',
-  body: 'Your reflection is saved. Come back tomorrow for the next contemplation — if you miss a day, you’ll resume right where you left off.',
+  body: 'Your reflection is saved. What you noticed today will keep working quietly — some of the most important parts of this practice happen after you put the phone down.',
+  body2:
+    'Carry today’s question with you. If it resurfaces during your day, let it — that’s the practice taking root.',
+  body3:
+    'Come back tomorrow for the next contemplation. If you miss a day, you’ll resume right where you left off.',
+  /** One rotating closing line per day (indexed by day-of-practice). */
+  closers: [
+    'Nothing to solve. Just noticing.',
+    'A minute of attention is never wasted.',
+    'You showed up. That is the practice.',
+    'Let today be a little more deliberate.',
+    'Small awareness, repeated, becomes a way of living.',
+  ],
 } as const;
 
 export const splashTagline =

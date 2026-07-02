@@ -1,11 +1,12 @@
 /**
- * C1 — Home: next contemplation as the hero (press play), then the active
- * series (titled, no day numbers) and other content below.
+ * C1 — Home. The next contemplation fills the whole first screen (press play);
+ * scrolling down reveals the active series (contemplations collapsed under the
+ * series title) and the rest of the library. Menu top-left, account top-right.
  */
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { AppText, Button, Gap, ListRow, Row, Screen, StatusPill } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
@@ -22,6 +23,8 @@ import { color, radius, space } from '@/theme/tokens';
 
 export default function Home() {
   const { data } = useApp();
+  const { height: windowHeight } = useWindowDimensions();
+  const [listOpen, setListOpen] = useState(false);
   const series = activeSeries(data);
   const p = progressFor(data, series.id);
   const atWrap = isSeriesAtWrap(data, series);
@@ -29,6 +32,10 @@ export default function Home() {
   const next = series.contemplations[idx];
   const isFirstOfSeries = p.currentIndex === 0;
   const accessOk = hasActiveAccess(data, series.id);
+  const initial = (data.profile?.username?.[0] ?? '•').toUpperCase();
+
+  // Hero fills the first viewport (minus the header strip).
+  const heroHeight = Math.max(420, windowHeight - 150);
 
   const onPlay = () => {
     if (atWrap) {
@@ -51,30 +58,43 @@ export default function Home() {
       <Gap size="sm" />
       <Row between>
         <Button label="≡ Menu" kind="ghost" small onPress={() => router.push('/menu')} testID="menu-button" />
-        <View />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Account"
+          onPress={() => router.push('/account')}
+          style={styles.avatar}
+          testID="account-icon">
+          <AppText variant="small" style={{ color: color.ink, fontWeight: '700' }}>
+            {initial}
+          </AppText>
+        </Pressable>
       </Row>
-      <Gap size="md" />
-      <AppText variant="title">Today</AppText>
-      <Gap size="md" />
+      <Gap size="sm" />
       <Pressable accessibilityRole="button" onPress={onPlay} testID="hero-play">
-        <View style={styles.hero}>
+        <View style={[styles.hero, { height: heroHeight }]}>
           <LinearGradient
             colors={next ? [next.gradient[0], next.gradient[1]] : ['#333', '#555']}
             style={StyleSheet.absoluteFill}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           />
-          <AppText variant="small" style={{ color: 'rgba(255,255,255,0.85)' }} center>
-            {atWrap
-              ? 'Series complete — see your wrap-up'
-              : `next contemplation — ${questionFor(data, series, idx).slice(0, 60)}…`}
+          <AppText variant="small" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            Today
           </AppText>
-          <Gap size="md" />
+          <View style={{ flex: 1 }} />
+          <AppText variant="contemplation" center style={{ color: '#fff' }}>
+            {atWrap ? 'Series complete' : questionFor(data, series, idx)}
+          </AppText>
+          <Gap size="xl" />
           <View style={styles.play}>
             <AppText variant="heading" style={{ color: '#fff' }}>
               ▶
             </AppText>
           </View>
+          <View style={{ flex: 1 }} />
+          <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.6)' }} center>
+            {atWrap ? 'see your wrap-up' : 'scroll for your series'}
+          </AppText>
         </View>
       </Pressable>
       {!accessOk && (
@@ -86,27 +106,43 @@ export default function Home() {
         </>
       )}
       <Gap size="lg" />
-      <AppText variant="heading">
-        Series {series.displayOrder} — {series.title}
-      </AppText>
-      <Gap size="xs" />
-      {series.contemplations.map((c, i) => {
-        const done = i < p.currentIndex;
-        const today = i === p.currentIndex && !atWrap;
-        return (
-          <ListRow
-            key={c.id}
-            label={questionFor(data, series, i).split('?')[0].slice(0, 42) + '…'}
-            right={
-              <StatusPill
-                label={done ? '✓ Done' : today ? 'Today' : 'Upcoming'}
-                kind={done ? 'done' : today ? 'progress' : 'locked'}
-              />
-            }
-            onPress={today ? onPlay : undefined}
-          />
-        );
-      })}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: listOpen }}
+        onPress={() => setListOpen((o) => !o)}
+        testID="series-toggle">
+        <Row between>
+          <View style={{ flex: 1 }}>
+            <AppText variant="heading">
+              Series {series.displayOrder} — {series.title}
+            </AppText>
+            <AppText variant="caption" muted>
+              {p.currentIndex} of {seriesLength(series)} complete
+            </AppText>
+          </View>
+          <AppText variant="heading" muted>
+            {listOpen ? '⌃' : '⌄'}
+          </AppText>
+        </Row>
+      </Pressable>
+      {listOpen &&
+        series.contemplations.map((c, i) => {
+          const done = i < p.currentIndex;
+          const today = i === p.currentIndex && !atWrap;
+          return (
+            <ListRow
+              key={c.id}
+              label={questionFor(data, series, i).split('?')[0].slice(0, 42) + '…'}
+              right={
+                <StatusPill
+                  label={done ? '✓ Done' : today ? 'Today' : 'Upcoming'}
+                  kind={done ? 'done' : today ? 'progress' : 'locked'}
+                />
+              }
+              onPress={today ? onPlay : undefined}
+            />
+          );
+        })}
       <Gap size="lg" />
       <AppText variant="small" muted>
         All series
@@ -141,16 +177,26 @@ const styles = StyleSheet.create({
   hero: {
     borderRadius: radius.lg,
     overflow: 'hidden',
-    paddingVertical: space.xl,
+    paddingVertical: space.lg,
     paddingHorizontal: space.lg,
     alignItems: 'center',
   },
   play: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     borderWidth: 2,
     borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  avatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1.5,
+    borderColor: color.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },

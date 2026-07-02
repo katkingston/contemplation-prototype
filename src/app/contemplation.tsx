@@ -32,17 +32,27 @@ export default function Contemplation() {
       gradient={c.gradient}
       videoUri={c.videoUri}
       minutes={minutes}
-      onFinish={(_reason, seconds) =>
-        router.replace({
-          pathname: '/add-time',
-          params: {
-            seriesId: series.id,
-            index: String(index),
-            music: params.music ?? '1',
-            totalSeconds: String(carry + seconds),
-          },
-        })
-      }
+      onFinish={(reason, seconds) => {
+        const totalSeconds = String(carry + seconds);
+        if (reason === 'end') {
+          // Deliberate exit → straight to the journal, no Add Time detour.
+          router.replace({
+            pathname: '/journal',
+            params: { seriesId: series.id, index: String(index), totalSeconds },
+          });
+        } else {
+          // Timer ran out → offer to add time or move on.
+          router.replace({
+            pathname: '/add-time',
+            params: {
+              seriesId: series.id,
+              index: String(index),
+              music: params.music ?? '1',
+              totalSeconds,
+            },
+          });
+        }
+      }}
     />
   );
 }
