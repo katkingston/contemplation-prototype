@@ -1,13 +1,16 @@
 /**
- * C1 — Home. The next contemplation fills the whole first screen (press play);
- * scrolling down reveals the active series (contemplations collapsed under the
- * series title) and the rest of the library. Menu top-left, account top-right.
+ * C1 — Home. Empty top (nav lives in the bottom bar, per Open reference).
+ * The hero fills the first screen but REVEALS NOTHING: series, number within
+ * the series, and a one-or-two-word hint. The question itself appears only in
+ * the contemplation. Completed contemplations show their full prompt below.
  */
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { AppText, Button, Eyebrow, Gap, ListRow, Row, Screen, StatusPill } from '@/components/ui';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BottomNav } from '@/components/BottomNav';
+import { AppText, Button, Eyebrow, Gap, ListRow, Row, StatusPill } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
   activeSeries,
@@ -19,7 +22,7 @@ import {
   questionFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, radius, space } from '@/theme/tokens';
 
 export default function Home() {
   const { data } = useApp();
@@ -32,10 +35,9 @@ export default function Home() {
   const next = series.contemplations[idx];
   const isFirstOfSeries = p.currentIndex === 0;
   const accessOk = hasActiveAccess(data, series.id);
-  const initial = (data.profile?.username?.[0] ?? '•').toUpperCase();
 
-  // Hero fills the first viewport (minus the header strip).
-  const heroHeight = Math.max(420, windowHeight - 150);
+  // Hero fills the first viewport above the bottom bar.
+  const heroHeight = Math.max(420, windowHeight - 210);
 
   const onPlay = () => {
     if (atWrap) {
@@ -54,23 +56,12 @@ export default function Home() {
   };
 
   return (
-    <Screen testID="home-screen">
-      <Gap size="sm" />
-      <Row between>
-        <Button label="≡ Menu" kind="ghost" small onPress={() => router.push('/menu')} testID="menu-button" />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Account"
-          onPress={() => router.push('/account')}
-          style={styles.avatar}
-          testID="account-icon">
-          <AppText variant="small" style={{ color: color.ink, fontFamily: font.monoBold }}>
-            {initial}
-          </AppText>
-        </Pressable>
-      </Row>
-      <Gap size="sm" />
-      <View style={[styles.hero, { height: heroHeight }]}>
+    <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="home-screen">
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: 120, flexGrow: 1 }}>
+        <Gap size="md" />
+        <View style={[styles.hero, { height: heroHeight }]}>
           <LinearGradient
             colors={next ? [next.gradient[0], next.gradient[1]] : ['#333', '#555']}
             style={StyleSheet.absoluteFill}
@@ -81,8 +72,12 @@ export default function Home() {
             Today
           </AppText>
           <View style={{ flex: 1 }} />
-          <AppText variant="contemplation" style={{ color: '#efe9db' }}>
-            {atWrap ? 'Series complete' : questionFor(data, series, idx)}
+          <AppText variant="small" style={{ color: 'rgba(239,233,219,0.8)' }}>
+            {series.title}
+          </AppText>
+          <Gap size="sm" />
+          <AppText variant="display" style={{ color: '#efe9db' }}>
+            {atWrap ? 'Complete' : `No. ${idx + 1} — ${next?.hint ?? ''}`}
           </AppText>
           <Gap size="xl" />
           <Button
@@ -94,98 +89,91 @@ export default function Home() {
             testID="hero-play"
           />
           <View style={{ flex: 1 }} />
-          <AppText variant="label" style={{ color: 'rgba(239,233,219,0.6)' }}>
-            {atWrap ? 'wrap-up ready' : 'scroll for your series'}
-          </AppText>
-      </View>
-      {!accessOk && (
-        <>
-          <Gap size="sm" />
-          <AppText variant="caption" style={{ color: color.danger }}>
-            Your access has ended — renew in Subscription to continue.
-          </AppText>
-        </>
-      )}
-      <Eyebrow>Your series</Eyebrow>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded: listOpen }}
-        onPress={() => setListOpen((o) => !o)}
-        testID="series-toggle">
-        <Row between>
-          <View style={{ flex: 1 }}>
-            <AppText variant="heading">
-              Series {series.displayOrder} — {series.title}
+        </View>
+        {!accessOk && (
+          <>
+            <Gap size="sm" />
+            <AppText variant="caption" style={{ color: color.danger }}>
+              Your access has ended — renew in Subscription to continue.
             </AppText>
-            <AppText variant="label" muted>
-              {p.currentIndex} of {seriesLength(series)} complete
+          </>
+        )}
+        <Eyebrow>Your series</Eyebrow>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: listOpen }}
+          onPress={() => setListOpen((o) => !o)}
+          testID="series-toggle">
+          <Row between>
+            <View style={{ flex: 1 }}>
+              <AppText variant="heading">
+                Series {series.displayOrder} — {series.title}
+              </AppText>
+              <AppText variant="label" muted>
+                {p.currentIndex} of {seriesLength(series)} complete
+              </AppText>
+            </View>
+            <AppText variant="heading" muted>
+              {listOpen ? '⌃' : '⌄'}
             </AppText>
-          </View>
-          <AppText variant="heading" muted>
-            {listOpen ? '⌃' : '⌄'}
-          </AppText>
-        </Row>
-      </Pressable>
-      {listOpen &&
-        series.contemplations.map((c, i) => {
-          const done = i < p.currentIndex;
-          const today = i === p.currentIndex && !atWrap;
+          </Row>
+        </Pressable>
+        {listOpen &&
+          series.contemplations.map((c, i) => {
+            const done = i < p.currentIndex;
+            const today = i === p.currentIndex && !atWrap;
+            // Prompts stay hidden until completed — number + hint only.
+            const label = done ? questionFor(data, series, i) : `No. ${i + 1} — ${c.hint}`;
+            return (
+              <ListRow
+                key={c.id}
+                label={label}
+                right={
+                  <StatusPill
+                    label={done ? '✓ Done' : today ? 'Today' : 'Upcoming'}
+                    kind={done ? 'done' : today ? 'progress' : 'locked'}
+                  />
+                }
+                onPress={today ? onPlay : undefined}
+              />
+            );
+          })}
+        <Eyebrow>All series</Eyebrow>
+        {orderedSeries().map((s) => {
+          const completed = isSeriesCompleted(data, s);
+          const unlocked = isSeriesUnlocked(data, s);
+          const isActive = s.id === series.id;
           return (
             <ListRow
-              key={c.id}
-              label={questionFor(data, series, i).split('?')[0].slice(0, 42) + '…'}
+              key={s.id}
+              label={`${s.displayOrder} · ${s.title}`}
+              sub={s.theme}
               right={
                 <StatusPill
-                  label={done ? '✓ Done' : today ? 'Today' : 'Upcoming'}
-                  kind={done ? 'done' : today ? 'progress' : 'locked'}
+                  label={completed ? '✓ Done' : isActive ? 'In progress' : unlocked ? 'Available' : 'Locked'}
+                  kind={completed ? 'done' : isActive ? 'progress' : unlocked ? 'neutral' : 'locked'}
                 />
               }
-              onPress={today ? onPlay : undefined}
             />
           );
         })}
-      <Eyebrow>All series</Eyebrow>
-      {orderedSeries().map((s) => {
-        const completed = isSeriesCompleted(data, s);
-        const unlocked = isSeriesUnlocked(data, s);
-        const isActive = s.id === series.id;
-        return (
-          <ListRow
-            key={s.id}
-            label={`${s.displayOrder} · ${s.title}`}
-            sub={s.theme}
-            right={
-              <StatusPill
-                label={completed ? '✓ Done' : isActive ? 'In progress' : unlocked ? 'Available' : 'Locked'}
-                kind={completed ? 'done' : isActive ? 'progress' : unlocked ? 'neutral' : 'locked'}
-              />
-            }
-          />
-        );
-      })}
-      <Gap size="md" />
-      <AppText variant="caption" muted>
-        More series coming soon.
-      </AppText>
-    </Screen>
+        <Gap size="md" />
+        <AppText variant="caption" muted>
+          More series coming soon.
+        </AppText>
+      </ScrollView>
+      <BottomNav active="today" />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  shell: { flex: 1, backgroundColor: color.paper },
   hero: {
     borderRadius: radius.lg,
     overflow: 'hidden',
     paddingVertical: space.lg,
     paddingHorizontal: space.lg,
     alignItems: 'flex-start',
-  },
-  avatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1.5,
-    borderColor: color.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

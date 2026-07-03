@@ -184,5 +184,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(239,233,219,0.5)',
   },
-  controlText: { ...type.label, color: '#efe9db' },
+  controlText: { ...type.caption, textTransform: 'uppercase', letterSpacing: 0.8, color: '#efe9db' },
 });

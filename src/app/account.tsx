@@ -1,13 +1,13 @@
 /** A1 — Account: name/handle, email. */
-import { router } from 'expo-router';
 import React from 'react';
-import { AppText, Button, Gap, ListRow, Screen } from '@/components/ui';
+import { TabScreen } from '@/components/BottomNav';
+import { AppText, Gap, ListRow } from '@/components/ui';
 import { useApp } from '@/services/provider';
 
 export default function Account() {
   const { data } = useApp();
   return (
-    <Screen testID="account-screen">
+    <TabScreen active="account">
       <Gap size="xl" />
       <AppText variant="title">Account</AppText>
       <Gap size="md" />
@@ -17,8 +17,6 @@ export default function Account() {
         label="Member since"
         sub={data.profile ? new Date(data.profile.createdAt).toDateString() : '—'}
       />
-      <Gap size="xl" />
-      <Button label="Back" kind="ghost" onPress={() => router.back()} />
-    </Screen>
+    </TabScreen>
   );
 }

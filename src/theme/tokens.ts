@@ -28,14 +28,14 @@ export const font = {
 
 export const color = {
   // Paper & ink (stone card / espresso card references)
-  ink: '#221c16',
+  ink: '#272b18', // deep olive (was espresso near-black)
   paper: '#f0ece1',
   muted: '#8a8474',
   faint: '#e9e4d6',
   line: '#d8d2c2',
   // Dark surfaces (contemplation spaces)
-  dark: '#221c16',
-  darkElevated: '#322a22',
+  dark: '#20240f', // dark olive green surface
+  darkElevated: '#2e3319',
   onDark: '#efe9db',
   onDarkMuted: '#a89f8c',
   // Accents (Florilegium olive · Petit Merci chartreuse · oxblood)
@@ -66,16 +66,16 @@ export const seriesPalettes: Record<string, [string, string, string]> = {
 export const type = {
   display: {
     fontFamily: font.display,
-    fontSize: 32,
-    lineHeight: 38,
-    letterSpacing: -0.32, // -1%
+    fontSize: 42,
+    lineHeight: 46,
+    letterSpacing: -0.42, // -1%
     textTransform: 'uppercase' as const,
   },
   title: {
     fontFamily: font.display,
-    fontSize: 22,
-    lineHeight: 28,
-    letterSpacing: -0.22, // -1%
+    fontSize: 30,
+    lineHeight: 35,
+    letterSpacing: -0.3, // -1%
     textTransform: 'uppercase' as const,
   },
   heading: {

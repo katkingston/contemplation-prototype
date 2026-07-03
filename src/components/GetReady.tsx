@@ -4,6 +4,7 @@
  * Instructions hidden behind a button → pop-up.
  * The Begin tap IS the required timer confirmation (default 1 min).
  */
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { CrisisButton } from '@/components/CrisisButton';
@@ -50,7 +51,7 @@ export function GetReadyScreen({
     <Screen scroll={false} testID={testID}>
       <Gap size="sm" />
       <Row between>
-        <View />
+        <Button label="✕ Exit" kind="ghost" small onPress={() => router.back()} testID="get-ready-exit" />
         <CrisisButton />
       </Row>
       <Gap size="xl" />

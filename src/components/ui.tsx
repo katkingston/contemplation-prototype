@@ -407,10 +407,10 @@ export function Row({
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   button: {
-    // Open-style: hug-content pill, left-aligned by default.
+    // Open-style: hug-content, left-aligned; squared corners per Kat.
     paddingVertical: 12,
     paddingHorizontal: 26,
-    borderRadius: radius.pill,
+    borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'flex-start',

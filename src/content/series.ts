@@ -11,6 +11,8 @@ export interface Contemplation {
   /** 0-based order within the series. */
   sequenceIndex: number;
   prompt: string;
+  /** One-or-two-word teaser shown BEFORE completion — the prompt itself stays hidden until done. */
+  hint: string;
   videoUri: string | null;
   /** Gradient artwork stops for this contemplation (generated placeholder). */
   gradient: [string, string];
@@ -34,11 +36,13 @@ function mk(
   seriesId: string,
   prompts: string[],
   stops: [string, string][],
+  hints: string[],
 ): Contemplation[] {
   return prompts.map((prompt, i) => ({
     id: `${seriesId}-c${i + 1}`,
     sequenceIndex: i,
     prompt,
+    hint: hints[i] ?? 'Reflection',
     videoUri: null,
     gradient: stops[i % stops.length],
   }));
@@ -77,6 +81,7 @@ export const SERIES: Series[] = [
         ['#1d221a', '#515a30'],
         ['#242a1b', '#5f6633'],
       ],
+    ['Small joys', 'Lost things', 'Taken for granted', 'Unrepeatable day', 'Daily rhythm', 'Precious now', 'Passing moments'],
     ),
     wrapSlides: [
       'Awareness of impermanence is not meant to make life feel smaller.',
@@ -123,6 +128,7 @@ export const SERIES: Series[] = [
         ['#361f19', '#94493a'],
         ['#241210', '#66281f'],
       ],
+    ['Time spent', 'Unspoken thanks', 'Distractions', 'Unsaid words', 'Being missed', 'Fleeting bonds', 'One moment'],
     ),
     wrapSlides: [
       'This week you explored what and who matters most',
@@ -172,6 +178,7 @@ export const SERIES: Series[] = [
         ['#2d251b', '#7a7158'],
         ['#1f1a14', '#514a39'],
       ],
+    ['What arises', 'The unknown', 'Groundedness', 'One quality', 'Meaning', 'Finitude', 'Making peace'],
     ),
     wrapSlides: [
       'This week you practiced turning toward difficult questions rather than away from them',
@@ -219,6 +226,7 @@ export const SERIES: Series[] = [
         ['#383a20', '#a3b95a'],
         ['#262813', '#657529'],
       ],
+    ['Unseen devotion', 'No postponing', 'Passing wisdom', 'Daily values', 'One year', 'Remembrance', 'Presence'],
     ),
     wrapSlides: [
       'Over the past four weeks…',
@@ -252,6 +260,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
   {
     id: 'intro-1',
     sequenceIndex: 0,
+    hint: 'What remains',
     prompt: 'What is present in your life right now that you would miss if it were gone tomorrow?',
     videoUri: null,
     gradient: ['#242a1b', '#6f7036'],
@@ -259,6 +268,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
   {
     id: 'intro-2',
     sequenceIndex: 1,
+    hint: 'Full presence',
     prompt: 'When did you last feel fully present — and what made that moment different?',
     videoUri: null,
     gradient: ['#20261b', '#5a6136'],
@@ -266,6 +276,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
   {
     id: 'intro-3',
     sequenceIndex: 2,
+    hint: 'Slowing down',
     prompt: 'What are you moving too quickly past that deserves a longer look?',
     videoUri: null,
     gradient: ['#262b1c', '#4c5232'],

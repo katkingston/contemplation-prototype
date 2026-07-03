@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { CrisisButton } from '@/components/CrisisButton';
 import { VoiceRecorder, WordCapInput, countWords } from '@/components/diary';
-import { AppText, Button, Gap, Row, Screen, Sheet } from '@/components/ui';
+import { AppText, Button, Gap, Row, Screen, Sheet, Spacer } from '@/components/ui';
 import { journalHelp } from '@/content/copy';
 import { getSeries, seriesLength } from '@/content/series';
 import { questionFor } from '@/services/logic';
@@ -90,8 +90,9 @@ export default function Journal() {
       <WordCapInput value={text} onChange={setText} />
       <Gap size="md" />
       <VoiceRecorder onRecorded={(uri, sec) => setAudio({ uri, sec })} />
+      <Spacer />
       <Gap size="xl" />
-      <Button label="Submit" onPress={() => finishDay(true)} testID="journal-submit" />
+      <Button label="Submit" arrow onPress={() => finishDay(true)} testID="journal-submit" />
       <Gap size="sm" />
       <Button label="Skip" kind="ghost" onPress={() => finishDay(false)} testID="journal-skip" />
       <Gap size="md" />
