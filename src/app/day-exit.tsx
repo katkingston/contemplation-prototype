@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Button, Gap } from '@/components/ui';
 import { dayExit } from '@/content/copy';
+import { color } from '@/theme/tokens';
 import { useApp } from '@/services/provider';
 import { space } from '@/theme/tokens';
 
@@ -17,7 +18,7 @@ export default function DayExit() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient colors={['#221c16', '#57503f']} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={[color.dark, '#4a5233']} style={StyleSheet.absoluteFill} />
       <SafeAreaView style={styles.content}>
         <View style={{ flex: 1 }} />
         <AppText variant="title" dark>
@@ -48,6 +49,6 @@ export default function DayExit() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#221c16' },
+  root: { flex: 1, backgroundColor: color.dark },
   content: { flex: 1, paddingHorizontal: space.lg },
 });

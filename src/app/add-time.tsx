@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CrisisButton } from '@/components/CrisisButton';
 import { AppText, Button, Gap } from '@/components/ui';
 import { getSeries } from '@/content/series';
-import { radius, space, timing } from '@/theme/tokens';
+import { color, radius, space, timing } from '@/theme/tokens';
 
 export default function AddTime() {
   const params = useLocalSearchParams<{
@@ -92,7 +92,7 @@ export default function AddTime() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#221c16' },
+  root: { flex: 1, backgroundColor: color.dark },
   content: { flex: 1, paddingHorizontal: space.lg },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
