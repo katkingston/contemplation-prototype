@@ -1,12 +1,4 @@
-import {
-  Archivo_600SemiBold,
-  Archivo_700Bold,
-} from '@expo-google-fonts/archivo';
-import {
-  CourierPrime_400Regular,
-  CourierPrime_700Bold,
-  useFonts,
-} from '@expo-google-fonts/courier-prime';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
@@ -15,11 +7,15 @@ import { ServicesProvider } from '@/services/provider';
 import { color } from '@/theme/tokens';
 
 export default function RootLayout() {
+  // Brand fonts (all SIL OFL): BIZ UD Mincho (body voice), Karrik (display),
+  // Miedinger (caps labels / alternative sans).
   const [fontsLoaded] = useFonts({
-    CourierPrime_400Regular,
-    CourierPrime_700Bold,
-    Archivo_600SemiBold,
-    Archivo_700Bold,
+    'BIZUDMincho-Regular': require('../../assets/fonts/BIZUDMincho-Regular.ttf'),
+    'BIZUDMincho-Bold': require('../../assets/fonts/BIZUDMincho-Bold.ttf'),
+    'Karrik-Regular': require('../../assets/fonts/Karrik-Regular.otf'),
+    'Karrik-Italic': require('../../assets/fonts/Karrik-Italic.otf'),
+    'Miedinger-Book': require('../../assets/fonts/Miedinger-Book.otf'),
+    'Miedinger-Bold': require('../../assets/fonts/Miedinger-Bold.otf'),
   });
 
   if (!fontsLoaded) {

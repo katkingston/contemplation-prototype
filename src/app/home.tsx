@@ -19,7 +19,7 @@ import {
   questionFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { color, font, radius, space } from '@/theme/tokens';
 
 export default function Home() {
   const { data } = useApp();
@@ -64,7 +64,7 @@ export default function Home() {
           onPress={() => router.push('/account')}
           style={styles.avatar}
           testID="account-icon">
-          <AppText variant="small" style={{ color: color.ink, fontFamily: 'CourierPrime_700Bold' }}>
+          <AppText variant="small" style={{ color: color.ink, fontFamily: font.monoBold }}>
             {initial}
           </AppText>
         </Pressable>

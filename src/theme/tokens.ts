@@ -2,8 +2,8 @@
  * Theme tokens — the single restyle point for the whole app.
  *
  * DESIGN DIRECTION (from reference round 1):
- * Literary small-press anthology. Typewriter mono (Courier Prime) as the
- * body voice, bold grotesque (Archivo) for headlines. Warm stone paper,
+ * Literary small-press anthology. Literary mono-serif (BIZ UD Mincho) as the
+ * body voice, bold grotesque (Karrik) for headlines, Miedinger for labels. Warm stone paper,
  * espresso ink, olive/moss/chartreuse greens, oxblood accent. Soft
  * airbrushed gradients inside hard shapes (nail-art reference). Sharp,
  * print-like corners. Generous whitespace, letterspaced caps labels.
@@ -11,11 +11,19 @@
 
 export const APP_NAME = 'Contemplation'; // placeholder — candidates: Atma, Lila, Rasa, Mujo, Ephemera
 
+/**
+ * Brand fonts (owner-provided, all SIL OFL):
+ * - BIZ UD Mincho — the body voice: monospaced-feeling literary serif.
+ * - Karrik — bold vernacular grotesque, for limited display headlines.
+ * - Miedinger — alternative sans, for letterspaced caps labels.
+ */
 export const font = {
-  mono: 'CourierPrime_400Regular',
-  monoBold: 'CourierPrime_700Bold',
-  grotesk: 'Archivo_600SemiBold',
-  groteskBold: 'Archivo_700Bold',
+  mono: 'BIZUDMincho-Regular',
+  monoBold: 'BIZUDMincho-Bold',
+  display: 'Karrik-Regular',
+  displayItalic: 'Karrik-Italic',
+  grotesk: 'Miedinger-Book',
+  groteskBold: 'Miedinger-Bold',
 } as const;
 
 export const color = {
@@ -50,8 +58,8 @@ export const seriesPalettes: Record<string, [string, string, string]> = {
 };
 
 export const type = {
-  display: { fontFamily: font.groteskBold, fontSize: 32, lineHeight: 38, letterSpacing: 0.2 },
-  title: { fontFamily: font.groteskBold, fontSize: 24, lineHeight: 30, letterSpacing: 0.2 },
+  display: { fontFamily: font.display, fontSize: 32, lineHeight: 38, letterSpacing: 0.2 },
+  title: { fontFamily: font.display, fontSize: 24, lineHeight: 30, letterSpacing: 0.2 },
   heading: {
     fontFamily: font.grotesk,
     fontSize: 15,
