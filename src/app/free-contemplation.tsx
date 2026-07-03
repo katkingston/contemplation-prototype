@@ -7,7 +7,7 @@ import { useApp } from '@/services/provider';
 
 export default function FreeContemplation() {
   const { act } = useApp();
-  const params = useLocalSearchParams<{ minutes?: string }>();
+  const params = useLocalSearchParams<{ minutes?: string; music?: string }>();
   const minutes = Number(params.minutes ?? '1') || 1;
 
   const finish = async () => {
@@ -21,6 +21,7 @@ export default function FreeContemplation() {
       gradient={FREE_CONTEMPLATION.gradient}
       videoUri={FREE_CONTEMPLATION.videoUri}
       minutes={minutes}
+      musicOn={(params.music ?? '1') === '1'}
       onFinish={finish}
     />
   );
