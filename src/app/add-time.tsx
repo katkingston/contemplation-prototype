@@ -73,7 +73,7 @@ export default function AddTime() {
               onPress={() => addTime(m)}
               style={styles.chip}
               testID={`add-time-${m}`}>
-              <AppText variant="small" style={{ color: '#fff' }}>
+              <AppText variant="small" style={{ color: '#efe9db' }}>
                 +{m} min
               </AppText>
             </Pressable>
@@ -92,7 +92,7 @@ export default function AddTime() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#141417' },
+  root: { flex: 1, backgroundColor: '#221c16' },
   content: { flex: 1, paddingHorizontal: space.lg },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
@@ -100,6 +100,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.5)',
+    borderColor: 'rgba(239,233,219,0.5)',
   },
 });

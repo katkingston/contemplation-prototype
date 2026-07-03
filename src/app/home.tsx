@@ -64,7 +64,7 @@ export default function Home() {
           onPress={() => router.push('/account')}
           style={styles.avatar}
           testID="account-icon">
-          <AppText variant="small" style={{ color: color.ink, fontWeight: '700' }}>
+          <AppText variant="small" style={{ color: color.ink, fontFamily: 'CourierPrime_700Bold' }}>
             {initial}
           </AppText>
         </Pressable>
@@ -78,21 +78,21 @@ export default function Home() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           />
-          <AppText variant="small" style={{ color: 'rgba(255,255,255,0.7)' }}>
+          <AppText variant="small" style={{ color: 'rgba(239,233,219,0.75)' }}>
             Today
           </AppText>
           <View style={{ flex: 1 }} />
-          <AppText variant="contemplation" center style={{ color: '#fff' }}>
+          <AppText variant="contemplation" center style={{ color: '#efe9db' }}>
             {atWrap ? 'Series complete' : questionFor(data, series, idx)}
           </AppText>
           <Gap size="xl" />
           <View style={styles.play}>
-            <AppText variant="heading" style={{ color: '#fff' }}>
+            <AppText variant="heading" style={{ color: '#efe9db' }}>
               ▶
             </AppText>
           </View>
           <View style={{ flex: 1 }} />
-          <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.6)' }} center>
+          <AppText variant="caption" style={{ color: 'rgba(239,233,219,0.6)' }} center>
             {atWrap ? 'see your wrap-up' : 'scroll for your series'}
           </AppText>
         </View>
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: '#efe9db',
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',

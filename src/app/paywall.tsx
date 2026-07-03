@@ -31,7 +31,7 @@ export default function Paywall() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient colors={['#1f2430', '#3a4a5a']} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#221c16', '#4c5232']} style={StyleSheet.absoluteFill} />
       <SafeAreaView style={styles.content}>
         <Gap size="xl" />
         <AppText variant="title" dark>
@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderColor: 'rgba(239,233,219,0.3)',
     marginBottom: space.sm,
   },
-  planSelected: { borderColor: '#ffffff', backgroundColor: 'rgba(255,255,255,0.08)' },
+  planSelected: { borderColor: '#efe9db', backgroundColor: 'rgba(239,233,219,0.08)' },
 });

@@ -1,47 +1,69 @@
 /**
  * Theme tokens — the single restyle point for the whole app.
- * Final visual design lands here later; screens consume only these tokens.
+ *
+ * DESIGN DIRECTION (from reference round 1):
+ * Literary small-press anthology. Typewriter mono (Courier Prime) as the
+ * body voice, bold grotesque (Archivo) for headlines. Warm stone paper,
+ * espresso ink, olive/moss/chartreuse greens, oxblood accent. Soft
+ * airbrushed gradients inside hard shapes (nail-art reference). Sharp,
+ * print-like corners. Generous whitespace, letterspaced caps labels.
  */
 
 export const APP_NAME = 'Contemplation'; // placeholder — candidates: Atma, Lila, Rasa, Mujo, Ephemera
 
+export const font = {
+  mono: 'CourierPrime_400Regular',
+  monoBold: 'CourierPrime_700Bold',
+  grotesk: 'Archivo_600SemiBold',
+  groteskBold: 'Archivo_700Bold',
+} as const;
+
 export const color = {
-  // Base neutrals (low-fi for now)
-  ink: '#1a1a1f',
-  paper: '#ffffff',
-  muted: '#8a8a90',
-  faint: '#f7f7f8',
-  line: '#e2e2e5',
-  dark: '#141417',
-  darkElevated: '#26262c',
-  onDark: '#f2f2f4',
-  onDarkMuted: '#9a9aa2',
-  accent: '#8a6d3b',
-  danger: '#b5544e',
-  success: '#3d6b3d',
-  successBg: '#f1f7f1',
-  progress: '#866a32',
-  progressBg: '#f9f5ee',
-  locked: '#b0b0b0',
+  // Paper & ink (stone card / espresso card references)
+  ink: '#221c16',
+  paper: '#f0ece1',
+  muted: '#8a8474',
+  faint: '#e9e4d6',
+  line: '#d8d2c2',
+  // Dark surfaces (contemplation spaces)
+  dark: '#221c16',
+  darkElevated: '#322a22',
+  onDark: '#efe9db',
+  onDarkMuted: '#a89f8c',
+  // Accents (Florilegium olive · Petit Merci chartreuse · oxblood)
+  accent: '#6f7036',
+  accentBright: '#99b955',
+  danger: '#7d332b',
+  success: '#4a5a2e',
+  successBg: '#e4e6d2',
+  progress: '#6f7036',
+  progressBg: '#eae8d2',
+  locked: '#b0a996',
 } as const;
 
 /** Per-series ambient color continuum — gradient stops per contemplation drift between these. */
 export const seriesPalettes: Record<string, [string, string, string]> = {
-  's1-impermanence': ['#1f2430', '#3a4a5a', '#6e7f8d'],
-  's2-connection': ['#241f2e', '#4a3a56', '#8d6e85'],
-  's3-fear-identity': ['#1f2a26', '#3a564a', '#6e8d7f'],
-  's4-intention': ['#2e261f', '#56443a', '#8d7c6e'],
+  's1-impermanence': ['#232619', '#4c5232', '#6f7036'], // moss → olive
+  's2-connection': ['#2b1815', '#6e2a24', '#94493a'], // espresso → oxblood → rose
+  's3-fear-identity': ['#1e1913', '#4a4436', '#7a7158'], // espresso → stone
+  's4-intention': ['#2c2e17', '#7f8f3d', '#99b955'], // olive → chartreuse
 };
 
 export const type = {
-  display: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40 },
-  title: { fontSize: 24, fontWeight: '700' as const, lineHeight: 31 },
-  heading: { fontSize: 18, fontWeight: '700' as const, lineHeight: 24 },
-  body: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24 },
-  bodyBold: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24 },
-  small: { fontSize: 13, fontWeight: '400' as const, lineHeight: 19 },
-  caption: { fontSize: 11, fontWeight: '400' as const, lineHeight: 15 },
-  contemplation: { fontSize: 28, fontWeight: '600' as const, lineHeight: 40 },
+  display: { fontFamily: font.groteskBold, fontSize: 32, lineHeight: 38, letterSpacing: 0.2 },
+  title: { fontFamily: font.groteskBold, fontSize: 24, lineHeight: 30, letterSpacing: 0.2 },
+  heading: {
+    fontFamily: font.grotesk,
+    fontSize: 15,
+    lineHeight: 20,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase' as const,
+  },
+  body: { fontFamily: font.mono, fontSize: 15, lineHeight: 23 },
+  bodyBold: { fontFamily: font.monoBold, fontSize: 15, lineHeight: 23 },
+  small: { fontFamily: font.mono, fontSize: 13, lineHeight: 19 },
+  caption: { fontFamily: font.mono, fontSize: 11, lineHeight: 15, letterSpacing: 0.3 },
+  contemplation: { fontFamily: font.mono, fontSize: 26, lineHeight: 40, letterSpacing: 0.4 },
 } as const;
 
 export const space = {
@@ -53,10 +75,11 @@ export const space = {
   xxl: 48,
 } as const;
 
+/** Print-like: sharp corners, stamped shapes. */
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
+  sm: 3,
+  md: 5,
+  lg: 12,
   pill: 999,
 } as const;
 

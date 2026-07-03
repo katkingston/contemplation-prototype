@@ -140,7 +140,7 @@ export function Button({
       <Text
         style={[
           small ? type.small : type.bodyBold,
-          { color: fg, fontWeight: '600', textAlign: 'center' },
+          { color: fg, textAlign: 'center' },
         ]}>
         {label}
       </Text>

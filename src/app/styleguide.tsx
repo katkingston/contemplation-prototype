@@ -92,7 +92,7 @@ export default function StyleGuide() {
         <View key={k} style={{ marginBottom: space.sm }}>
           <AppText variant={k}>{k} — Everything changes.</AppText>
           <AppText variant="caption" muted>
-            {type[k].fontSize}px / {type[k].lineHeight} · weight {type[k].fontWeight}
+            {type[k].fontSize}px / {type[k].lineHeight} · {type[k].fontFamily}
           </AppText>
         </View>
       ))}
@@ -177,7 +177,7 @@ export default function StyleGuide() {
         <LinearGradient
           colors={[SERIES[0].contemplations[0].gradient[0], SERIES[0].contemplations[0].gradient[1]]}
           style={{ padding: space.xl, minHeight: 220, justifyContent: 'center' }}>
-          <AppText variant="contemplation" center style={{ color: '#fff' }}>
+          <AppText variant="contemplation" center style={{ color: '#efe9db' }}>
             {SERIES[0].contemplations[0].prompt}
           </AppText>
         </LinearGradient>

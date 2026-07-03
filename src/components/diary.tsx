@@ -163,7 +163,7 @@ export function VoiceRecorder({
             justifyContent: 'center',
           }}
           testID="voice-record">
-          <AppText variant="small" style={{ color: '#fff' }}>
+          <AppText variant="small" style={{ color: '#efe9db' }}>
             {recording ? '■' : '●'}
           </AppText>
         </Pressable>

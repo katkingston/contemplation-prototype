@@ -42,8 +42,8 @@ export function CrisisButton({ dim = false }: { dim?: boolean }) {
         accessibilityRole="button"
         accessibilityLabel="Crisis resources"
         onPress={() => setOpen(true)}
-        style={[styles.pill, dim && { opacity: 0.5, borderColor: 'rgba(255,255,255,0.4)' }]}>
-        <Text style={[type.caption, { color: dim ? '#fff' : color.danger }]}>✚ Crisis</Text>
+        style={[styles.pill, dim && { opacity: 0.5, borderColor: 'rgba(239,233,219,0.45)' }]}>
+        <Text style={[type.caption, { color: dim ? '#efe9db' : color.danger }]}>✚ Crisis</Text>
       </Pressable>
       <Sheet visible={open} onClose={() => setOpen(false)} title="Mental Health Resources">
         <ResourcesList />

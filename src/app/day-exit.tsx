@@ -17,7 +17,7 @@ export default function DayExit() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient colors={['#1c2230', '#3e4f66']} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#221c16', '#57503f']} style={StyleSheet.absoluteFill} />
       <SafeAreaView style={styles.content}>
         <View style={{ flex: 1 }} />
         <AppText variant="title" dark center>
@@ -48,6 +48,6 @@ export default function DayExit() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#141417' },
+  root: { flex: 1, backgroundColor: '#221c16' },
   content: { flex: 1, paddingHorizontal: space.lg },
 });

@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
   topRow: { alignItems: 'flex-end', paddingTop: space.sm },
   center: { flex: 1, justifyContent: 'center' },
-  prompt: { color: '#ffffff', textAlign: 'center' },
+  prompt: { color: '#efe9db', textAlign: 'center' },
   controls: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.45)',
+    borderColor: 'rgba(239,233,219,0.5)',
   },
-  controlText: { ...type.small, color: '#ffffff' },
+  controlText: { ...type.small, color: '#efe9db' },
 });
