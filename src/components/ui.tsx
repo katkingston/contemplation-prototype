@@ -91,6 +91,7 @@ export function Button({
   dark = false,
   disabled = false,
   small = false,
+  arrow = false,
   testID,
 }: {
   label: string;
@@ -99,6 +100,8 @@ export function Button({
   dark?: boolean;
   disabled?: boolean;
   small?: boolean;
+  /** Open-style trailing arrow for forward-motion CTAs. */
+  arrow?: boolean;
   testID?: string;
 }) {
   const bg =
@@ -142,9 +145,29 @@ export function Button({
           small ? type.small : type.bodyBold,
           { color: fg, textAlign: 'center' },
         ]}>
-        {label}
+        {arrow ? `${label} →` : label}
       </Text>
     </Pressable>
+  );
+}
+
+// ---------- Eyebrow (Open-style section label) ----------
+
+/** Hairline rule + small caps label marking the start of a section. */
+export function Eyebrow({ children, dark = false }: { children: string; dark?: boolean }) {
+  return (
+    <View
+      style={{
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: dark ? color.onDarkMuted : color.line,
+        paddingTop: space.sm,
+        marginTop: space.xl,
+        marginBottom: space.md,
+      }}>
+      <AppText variant="label" muted dark={dark}>
+        {children}
+      </AppText>
+    </View>
   );
 }
 
@@ -384,13 +407,15 @@ export function Row({
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   button: {
-    paddingVertical: 14,
-    paddingHorizontal: space.lg,
-    borderRadius: radius.md,
+    // Open-style: hug-content pill, left-aligned by default.
+    paddingVertical: 12,
+    paddingHorizontal: 26,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'flex-start',
   },
-  buttonSmall: { paddingVertical: 8, paddingHorizontal: space.md, alignSelf: 'center' },
+  buttonSmall: { paddingVertical: 7, paddingHorizontal: space.md },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
     paddingVertical: 9,

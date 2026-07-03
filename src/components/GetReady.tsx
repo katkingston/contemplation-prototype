@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { CrisisButton } from '@/components/CrisisButton';
-import { AppText, Button, ChipGroup, Gap, Row, Screen, Sheet, Spacer } from '@/components/ui';
+import { AppText, Button, ChipGroup, Eyebrow, Gap, Row, Screen, Sheet, Spacer } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { useApp } from '@/services/provider';
 import { space, timing } from '@/theme/tokens';
@@ -53,20 +53,16 @@ export function GetReadyScreen({
         <View />
         <CrisisButton />
       </Row>
-      <Gap size="lg" />
-      <AppText variant="title">Get ready to contemplate</AppText>
       <Gap size="xl" />
-      <AppText variant="heading">Choose your time</AppText>
-      <Gap size="md" />
+      <AppText variant="title">Get ready to contemplate</AppText>
+      <Eyebrow>Choose your time</Eyebrow>
       <ChipGroup
         options={timing.timerChoicesMin}
         value={minutes}
         onChange={setMinutes}
         labels={(m) => `${m} min`}
       />
-      <Gap size="xl" />
-      <AppText variant="heading">Music</AppText>
-      <Gap size="md" />
+      <Eyebrow>Music</Eyebrow>
       <ChipGroup
         options={['Music on', 'Music off'] as const}
         value={musicOn ? 'Music on' : 'Music off'}
@@ -81,7 +77,7 @@ export function GetReadyScreen({
         testID="instructions-button"
       />
       <Gap size="md" />
-      <Button label="Begin" onPress={() => onBegin(minutes, musicOn)} testID="begin-button" />
+      <Button label="Begin" arrow onPress={() => onBegin(minutes, musicOn)} testID="begin-button" />
       <Gap size="lg" />
       <Sheet
         visible={showInstructions}

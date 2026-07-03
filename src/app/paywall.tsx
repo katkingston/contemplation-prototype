@@ -79,7 +79,7 @@ export default function Paywall() {
           Prototype: purchases are simulated — no charge of any kind.
         </AppText>
         <Gap size="sm" />
-        <Button label={paywall.cta} dark onPress={purchase} testID="start-trial" />
+        <Button label={paywall.cta} dark arrow onPress={purchase} testID="start-trial" />
         <Gap size="lg" />
       </SafeAreaView>
     </View>

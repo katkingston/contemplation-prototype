@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { AppText, Button, Gap, ListRow, Row, Screen, StatusPill } from '@/components/ui';
+import { AppText, Button, Eyebrow, Gap, ListRow, Row, Screen, StatusPill } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
   activeSeries,
@@ -70,8 +70,7 @@ export default function Home() {
         </Pressable>
       </Row>
       <Gap size="sm" />
-      <Pressable accessibilityRole="button" onPress={onPlay} testID="hero-play">
-        <View style={[styles.hero, { height: heroHeight }]}>
+      <View style={[styles.hero, { height: heroHeight }]}>
           <LinearGradient
             colors={next ? [next.gradient[0], next.gradient[1]] : ['#333', '#555']}
             style={StyleSheet.absoluteFill}
@@ -82,21 +81,23 @@ export default function Home() {
             Today
           </AppText>
           <View style={{ flex: 1 }} />
-          <AppText variant="contemplation" center style={{ color: '#efe9db' }}>
+          <AppText variant="contemplation" style={{ color: '#efe9db' }}>
             {atWrap ? 'Series complete' : questionFor(data, series, idx)}
           </AppText>
           <Gap size="xl" />
-          <View style={styles.play}>
-            <AppText variant="heading" style={{ color: '#efe9db' }}>
-              ▶
-            </AppText>
-          </View>
+          <Button
+            label={atWrap ? 'See your wrap-up' : 'Begin'}
+            kind="secondary"
+            dark
+            arrow
+            onPress={onPlay}
+            testID="hero-play"
+          />
           <View style={{ flex: 1 }} />
-          <AppText variant="label" style={{ color: 'rgba(239,233,219,0.6)' }} center>
-            {atWrap ? 'see your wrap-up' : 'scroll for your series'}
+          <AppText variant="label" style={{ color: 'rgba(239,233,219,0.6)' }}>
+            {atWrap ? 'wrap-up ready' : 'scroll for your series'}
           </AppText>
-        </View>
-      </Pressable>
+      </View>
       {!accessOk && (
         <>
           <Gap size="sm" />
@@ -105,7 +106,7 @@ export default function Home() {
           </AppText>
         </>
       )}
-      <Gap size="lg" />
+      <Eyebrow>Your series</Eyebrow>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: listOpen }}
@@ -143,10 +144,7 @@ export default function Home() {
             />
           );
         })}
-      <Gap size="lg" />
-      <AppText variant="label" muted>
-        All series
-      </AppText>
+      <Eyebrow>All series</Eyebrow>
       {orderedSeries().map((s) => {
         const completed = isSeriesCompleted(data, s);
         const unlocked = isSeriesUnlocked(data, s);
@@ -179,17 +177,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     paddingVertical: space.lg,
     paddingHorizontal: space.lg,
-    alignItems: 'center',
-  },
-  play: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 2,
-    borderColor: '#efe9db',
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
+    alignItems: 'flex-start',
   },
   avatar: {
     width: 34,

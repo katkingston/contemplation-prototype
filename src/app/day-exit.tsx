@@ -20,23 +20,23 @@ export default function DayExit() {
       <LinearGradient colors={['#221c16', '#57503f']} style={StyleSheet.absoluteFill} />
       <SafeAreaView style={styles.content}>
         <View style={{ flex: 1 }} />
-        <AppText variant="title" dark center>
+        <AppText variant="title" dark>
           {dayExit.title}
         </AppText>
         <Gap size="md" />
-        <AppText variant="body" dark muted center>
+        <AppText variant="body" dark muted>
           {dayExit.body}
         </AppText>
         <Gap size="sm" />
-        <AppText variant="body" dark muted center>
+        <AppText variant="body" dark muted>
           {dayExit.body2}
         </AppText>
         <Gap size="sm" />
-        <AppText variant="body" dark muted center>
+        <AppText variant="body" dark muted>
           {dayExit.body3}
         </AppText>
         <Gap size="lg" />
-        <AppText variant="body" dark center style={{ fontStyle: 'italic' }}>
+        <AppText variant="body" dark style={{ fontStyle: 'italic' }}>
           {closer}
         </AppText>
         <View style={{ flex: 1 }} />

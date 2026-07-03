@@ -19,15 +19,15 @@ export default function BaselineIntro() {
           marginBottom: 24,
         }}
       />
-      <AppText variant="title" center>
+      <AppText variant="title">
         {baselineIntro.title}
       </AppText>
       <Gap size="md" />
-      <AppText variant="body" muted center>
+      <AppText variant="body" muted>
         {baselineIntro.body}
       </AppText>
       <Gap size="xl" />
-      <Button label="Begin" onPress={() => router.push('/intake')} testID="baseline-begin" />
+      <Button label="Begin" arrow onPress={() => router.push('/intake')} testID="baseline-begin" />
     </Screen>
   );
 }

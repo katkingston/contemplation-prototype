@@ -44,22 +44,23 @@ export default function SeriesIntro() {
       <Gap size="lg" />
       <Dots count={slides.length} active={slide} />
       <Gap size="lg" />
-      <AppText variant="small" muted center>
+      <AppText variant="label" muted>
         Series {series.displayOrder} — {series.title}
       </AppText>
       <Spacer />
-      <AppText variant="contemplation" center>
+      <AppText variant="contemplation">
         {slides[slide]}
       </AppText>
       <Spacer />
       {!last && (
-        <AppText variant="caption" muted center>
+        <AppText variant="caption" muted>
           No skip — the introduction completes before the first contemplation
         </AppText>
       )}
       <Gap size="sm" />
       <Button
         label={last ? (isReplayView ? 'Close' : 'Continue') : 'Next'}
+        arrow={!isReplayView}
         onPress={onNext}
         testID="intro-next"
       />

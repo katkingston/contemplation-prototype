@@ -37,17 +37,17 @@ export default function SeriesWrap() {
       <Gap size="lg" />
       <Dots count={slides.length + 1} active={Math.min(slide, slides.length)} />
       <Gap size="lg" />
-      <AppText variant="small" muted center>
+      <AppText variant="label" muted>
         Series {series.displayOrder} — {series.title}
       </AppText>
       <Spacer />
       {!onQuestion ? (
-        <AppText variant="contemplation" center>
+        <AppText variant="contemplation">
           {slides[slide]}
         </AppText>
       ) : (
         <View>
-          <AppText variant="title" center>
+          <AppText variant="title">
             {qualityOfLifeQuestion.prompt}
           </AppText>
           <Gap size="lg" />
@@ -73,6 +73,7 @@ export default function SeriesWrap() {
       <Spacer />
       <Button
         label={onQuestion ? 'Continue' : 'Next'}
+        arrow
         disabled={onQuestion && qol == null}
         onPress={onQuestion ? complete : () => setSlide(slide + 1)}
         testID="wrap-next"

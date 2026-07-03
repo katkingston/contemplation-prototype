@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
   topRow: { alignItems: 'flex-end', paddingTop: space.sm },
   center: { flex: 1, justifyContent: 'center' },
-  prompt: { color: '#efe9db', textAlign: 'center' },
+  prompt: { color: '#efe9db', textAlign: 'left' },
   controls: {
     flexDirection: 'row',
     justifyContent: 'center',
