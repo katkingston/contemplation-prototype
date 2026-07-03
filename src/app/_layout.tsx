@@ -15,6 +15,7 @@ export default function RootLayout() {
     'Karrik-Regular': require('../../assets/fonts/Karrik-Regular.otf'),
     'Karrik-Italic': require('../../assets/fonts/Karrik-Italic.otf'),
     'Miedinger-Book': require('../../assets/fonts/Miedinger-Book.otf'),
+    'Daniel-Regular': require('../../assets/fonts/Daniel-Regular.ttf'),
     'Miedinger-Bold': require('../../assets/fonts/Miedinger-Bold.otf'),
   });
 

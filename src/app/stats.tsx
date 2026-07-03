@@ -2,6 +2,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
+import { MemoPlayer } from '@/components/diary';
 import { AppText, Button, Gap, Screen } from '@/components/ui';
 import { getSeries } from '@/content/series';
 import { formatMinutes, statsFor } from '@/services/logic';
@@ -74,7 +75,13 @@ export default function Stats() {
               {e.prompt}
             </AppText>
             <Gap size="xs" />
-            <AppText variant="small">{e.text ?? '🎙 Voice memo'}</AppText>
+            {e.text ? <AppText variant="small">{e.text}</AppText> : null}
+            {e.audioUri ? (
+              <>
+                <Gap size="xs" />
+                <MemoPlayer uri={e.audioUri} />
+              </>
+            ) : null}
           </View>
         ))
       )}

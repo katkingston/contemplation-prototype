@@ -1,12 +1,15 @@
 /**
  * Diary inputs — 150-word capped text and ≤60s voice memo (expo-audio).
- * Both caps enforced in the UI per App-CLAUDE.md. Voice gracefully hides on
- * platforms without recording support (e.g. some web browsers).
+ * Voice memo: live soundwave while recording (mic metering when available),
+ * then replay / delete / re-record. `MemoPlayer` is reused by the stats
+ * screen to play revealed voice notes.
  */
 import {
   AudioModule,
   RecordingPresets,
   setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
   useAudioRecorder,
   useAudioRecorderState,
 } from 'expo-audio';
@@ -20,7 +23,7 @@ export function countWords(text: string): number {
   return t.length === 0 ? 0 : t.split(/\s+/).length;
 }
 
-/** Trim text to the word cap (keeps any trailing space the user just typed off). */
+/** Trim text to the word cap. */
 function capWords(text: string, max: number): string {
   const words = text.trimStart().split(/\s+/);
   if (words.length <= max) return text;
@@ -62,30 +65,125 @@ export function WordCapInput({
         testID="diary-text"
       />
       <Gap size="xs" />
-      <AppText variant="caption" muted style={{ textAlign: 'right', color: atCap ? color.danger : color.muted }}>
+      <AppText
+        variant="caption"
+        muted
+        style={{ textAlign: 'right', color: atCap ? color.danger : color.muted }}>
         {words} / {limits.diaryMaxWords} words{atCap ? ' — limit reached' : ''}
       </AppText>
     </View>
   );
 }
 
+// ---------- Soundwave ----------
+
+const BAR_COUNT = 28;
+
+/** Maps recorder metering (dB, ~-60..0) to a 0..1 level. */
+function meterToLevel(db: number | undefined): number {
+  if (db == null || !isFinite(db)) return 0.25 + Math.random() * 0.5; // visual fallback
+  const clamped = Math.max(-60, Math.min(0, db));
+  return Math.max(0.08, (clamped + 60) / 60);
+}
+
+function Soundwave({ levels, tint = color.danger }: { levels: number[]; tint?: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2, height: 30, flex: 1 }}>
+      {levels.map((l, i) => (
+        <View
+          key={i}
+          style={{
+            flex: 1,
+            height: Math.max(3, l * 30),
+            borderRadius: 1,
+            backgroundColor: tint,
+            opacity: 0.9,
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ---------- Memo playback (also used on the stats screen) ----------
+
+export function MemoPlayer({ uri, durationSec }: { uri: string; durationSec?: number | null }) {
+  const player = useAudioPlayer(uri);
+  const status = useAudioPlayerStatus(player);
+
+  useEffect(() => {
+    if (status.didJustFinish) {
+      player.pause();
+      player.seekTo(0);
+    }
+  }, [status.didJustFinish, player]);
+
+  const toggle = () => {
+    if (status.playing) player.pause();
+    else player.play();
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={status.playing ? 'Pause voice memo' : 'Play voice memo'}
+      onPress={toggle}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.sm,
+        alignSelf: 'flex-start',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: radius.sm,
+        borderWidth: 1,
+        borderColor: color.line,
+        backgroundColor: color.faint,
+      }}
+      testID="memo-play">
+      <AppText variant="bodyBold">{status.playing ? '❚❚' : '▶'}</AppText>
+      <AppText variant="small" muted>
+        Voice memo{durationSec ? ` · ${Math.round(durationSec)}s` : ''}
+      </AppText>
+    </Pressable>
+  );
+}
+
+// ---------- Recorder ----------
+
+type RecPhase = 'idle' | 'recording' | 'recorded';
+
 export function VoiceRecorder({
   onRecorded,
 }: {
   onRecorded: (uri: string | null, durationSec: number) => void;
 }) {
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const state = useAudioRecorderState(recorder, 500);
+  const recorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true,
+  });
+  const recState = useAudioRecorderState(recorder, 120);
+  const [phase, setPhase] = useState<RecPhase>('idle');
   const [permission, setPermission] = useState<'unknown' | 'granted' | 'denied'>('unknown');
   const [seconds, setSeconds] = useState(0);
-  const [doneUri, setDoneUri] = useState<string | null>(null);
+  const [memo, setMemo] = useState<{ uri: string; sec: number } | null>(null);
+  const [levels, setLevels] = useState<number[]>(Array(BAR_COUNT).fill(0.08));
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const phaseRef = useRef<RecPhase>('idle');
+  phaseRef.current = phase;
 
+  // Feed the soundwave from mic metering while recording.
   useEffect(() => {
-    return () => {
+    if (phase !== 'recording') return;
+    setLevels((prev) => [...prev.slice(1), meterToLevel(recState.metering ?? undefined)]);
+  }, [recState.metering, recState.durationMillis, phase]);
+
+  useEffect(
+    () => () => {
       if (tickRef.current) clearInterval(tickRef.current);
-    };
-  }, []);
+    },
+    [],
+  );
 
   const start = async () => {
     try {
@@ -99,12 +197,13 @@ export function VoiceRecorder({
       await recorder.prepareToRecordAsync();
       recorder.record();
       setSeconds(0);
-      setDoneUri(null);
+      setMemo(null);
+      setLevels(Array(BAR_COUNT).fill(0.08));
+      setPhase('recording');
+      onRecorded(null, 0);
       tickRef.current = setInterval(() => {
         setSeconds((s) => {
-          if (s + 1 >= limits.voiceMaxSeconds) {
-            void stop(s + 1);
-          }
+          if (s + 1 >= limits.voiceMaxSeconds) void stop(s + 1);
           return s + 1;
         });
       }, 1000);
@@ -118,14 +217,30 @@ export function VoiceRecorder({
       clearInterval(tickRef.current);
       tickRef.current = null;
     }
+    if (phaseRef.current !== 'recording') return;
     try {
       await recorder.stop();
       const uri = recorder.uri ?? null;
-      setDoneUri(uri);
-      onRecorded(uri, finalSeconds ?? seconds);
+      const sec = finalSeconds ?? seconds;
+      if (uri) {
+        setMemo({ uri, sec });
+        setPhase('recorded');
+        onRecorded(uri, sec);
+      } else {
+        setPhase('idle');
+        onRecorded(null, 0);
+      }
     } catch {
+      setPhase('idle');
       onRecorded(null, 0);
     }
+  };
+
+  const remove = () => {
+    setMemo(null);
+    setSeconds(0);
+    setPhase('idle');
+    onRecorded(null, 0);
   };
 
   // Recording unsupported in some web browsers — hide rather than break.
@@ -137,46 +252,81 @@ export function VoiceRecorder({
     );
   }
 
-  const recording = state.isRecording;
-
   return (
     <View
       style={{
         borderWidth: 1,
         borderColor: color.line,
-        borderRadius: radius.pill,
-        paddingVertical: space.sm,
-        paddingHorizontal: space.md,
+        borderRadius: radius.md,
+        padding: space.md,
         backgroundColor: color.faint,
+        gap: space.sm,
       }}>
-      <Row between>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={recording ? 'Stop recording' : 'Record a voice memo'}
-          onPress={recording ? () => stop() : start}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: recording ? color.ink : color.danger,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          testID="voice-record">
-          <AppText variant="small" style={{ color: '#efe9db' }}>
-            {recording ? '■' : '●'}
+      {phase === 'idle' && (
+        <Row between>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Record a voice memo"
+            onPress={start}
+            style={recordBtn(color.danger)}
+            testID="voice-record">
+            <AppText variant="small" style={{ color: '#fff' }}>
+              ●
+            </AppText>
+          </Pressable>
+          <AppText variant="small" muted style={{ flex: 1 }}>
+            {permission === 'denied'
+              ? 'Microphone unavailable'
+              : `Record a voice memo · up to ${limits.voiceMaxSeconds}s`}
           </AppText>
-        </Pressable>
-        <AppText variant="small" muted>
-          {recording
-            ? `Recording… ${seconds}s / ${limits.voiceMaxSeconds}s`
-            : doneUri
-              ? `Voice memo saved (${seconds}s)`
-              : permission === 'denied'
-                ? 'Microphone unavailable'
-                : `Voice memo · up to ${limits.voiceMaxSeconds}s`}
-        </AppText>
-      </Row>
+        </Row>
+      )}
+      {phase === 'recording' && (
+        <Row between>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Stop recording"
+            onPress={() => stop()}
+            style={recordBtn(color.ink)}
+            testID="voice-stop">
+            <AppText variant="small" style={{ color: '#fff' }}>
+              ■
+            </AppText>
+          </Pressable>
+          <Soundwave levels={levels} />
+          <AppText variant="label" muted>
+            {seconds}s / {limits.voiceMaxSeconds}s
+          </AppText>
+        </Row>
+      )}
+      {phase === 'recorded' && memo && (
+        <View style={{ gap: space.sm }}>
+          <MemoPlayer uri={memo.uri} durationSec={memo.sec} />
+          <Row>
+            <Pressable accessibilityRole="button" onPress={start} testID="voice-rerecord">
+              <AppText variant="caption" style={{ color: color.accent, textDecorationLine: 'underline' }}>
+                Re-record
+              </AppText>
+            </Pressable>
+            <Pressable accessibilityRole="button" onPress={remove} testID="voice-delete">
+              <AppText variant="caption" style={{ color: color.danger, textDecorationLine: 'underline' }}>
+                Delete
+              </AppText>
+            </Pressable>
+          </Row>
+        </View>
+      )}
     </View>
   );
+}
+
+function recordBtn(bg: string) {
+  return {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: bg,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  };
 }

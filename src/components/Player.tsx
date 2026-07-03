@@ -1,12 +1,15 @@
 /**
  * ContemplationPlayer — the core screen.
- * - Full-bleed ambient background: generated gradient with slow drift
- *   (cross-fading layers), or a video loop when `videoUri` is set (expo-video).
- * - Question large and centered, animated in.
- * - Hidden timer (no countdown UI); gentle pulse during the final 5 seconds;
- *   auto-finishes when time is up.
- * - Only small, dim Pause/End controls (wireframe) + persistent Crisis pill
- *   (App-CLAUDE.md hard rule).
+ * - Full-bleed video loop (placeholder for all contemplations) over an
+ *   ambient gradient fallback; covers the entire area.
+ * - Layered legibility scrim (heavier top/bottom, subtle center) + text
+ *   shadow so UI reads over ANY footage. Final 5 seconds: the scrim pulses
+ *   gently (the text itself no longer animates).
+ * - Question set in the handwriting face (stand-in for future handwritten
+ *   images) — contemplation mode only.
+ * - Ambient music (if chosen on Get Ready) plays ONLY here; pausing the
+ *   practice pauses the music too.
+ * - Only small, dim Pause/End controls + persistent Crisis pill (hard rule).
  */
 import { useAudioPlayer } from 'expo-audio';
 import { useVideoPlayer, VideoSource, VideoView } from 'expo-video';
@@ -24,13 +27,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CrisisButton } from '@/components/CrisisButton';
-import { color, space, timing, type } from '@/theme/tokens';
+import { color, font, space, timing, type } from '@/theme/tokens';
 
 export type FinishReason = 'time' | 'end';
 
 /** Placeholder media for ALL contemplations until per-contemplation assets exist. */
 const PLACEHOLDER_VIDEO: VideoSource = require('../../assets/media/contemplation-loop.mp4');
 const AMBIENT_MUSIC = require('../../assets/media/ambient-music.mp3');
+
+const SCRIM_RGB = '24,28,12'; // dark olive
 
 function VideoBackground({ source, paused }: { source: VideoSource; paused: boolean }) {
   const player = useVideoPlayer(source, (p) => {
@@ -42,7 +47,14 @@ function VideoBackground({ source, paused }: { source: VideoSource; paused: bool
     if (paused) player.pause();
     else player.play();
   }, [paused, player]);
-  return <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="cover" nativeControls={false} />;
+  return (
+    <VideoView
+      player={player}
+      style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
+      contentFit="cover"
+      nativeControls={false}
+    />
+  );
 }
 
 export function ContemplationPlayer({
@@ -62,22 +74,32 @@ export function ContemplationPlayer({
 }) {
   const totalSeconds = Math.round(minutes * 60);
   const [paused, setPaused] = useState(false);
-
-  // --- ambient music (placeholder track), honoring the Get Ready choice ---
-  const music = useAudioPlayer(AMBIENT_MUSIC);
-  useEffect(() => {
-    music.loop = true;
-    if (musicOn && !paused) music.play();
-    else music.pause();
-  }, [music, musicOn, paused]);
   const elapsedRef = useRef(0);
   const finishedRef = useRef(false);
   const [inFinalPulse, setInFinalPulse] = useState(false);
 
+  // --- ambient music: plays ONLY on this screen, only if chosen; pauses with the practice ---
+  const music = useAudioPlayer(AMBIENT_MUSIC);
+  useEffect(() => {
+    music.loop = true;
+    if (musicOn && !paused && !finishedRef.current) music.play();
+    else music.pause();
+  }, [music, musicOn, paused]);
+  useEffect(() => {
+    // Hard stop when leaving the contemplation, whatever the route.
+    return () => {
+      try {
+        music.pause();
+      } catch {
+        // player may already be released on unmount
+      }
+    };
+  }, [music]);
+
   // --- animations ---
   const textIn = useSharedValue(0);
   const drift = useSharedValue(0);
-  const pulse = useSharedValue(1);
+  const scrimPulse = useSharedValue(0);
 
   useEffect(() => {
     textIn.value = withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) });
@@ -87,16 +109,17 @@ export function ContemplationPlayer({
 
   useEffect(() => {
     if (inFinalPulse) {
-      pulse.value = withRepeat(
+      // The BACKGROUND breathes at the end — the text stays still.
+      scrimPulse.value = withRepeat(
         withSequence(
-          withTiming(1.04, { duration: 700, easing: Easing.inOut(Easing.quad) }),
-          withTiming(1.0, { duration: 700, easing: Easing.inOut(Easing.quad) }),
+          withTiming(1, { duration: 800, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 800, easing: Easing.inOut(Easing.quad) }),
         ),
         -1,
       );
     } else {
-      cancelAnimation(pulse);
-      pulse.value = withTiming(1, { duration: 200 });
+      cancelAnimation(scrimPulse);
+      scrimPulse.value = withTiming(0, { duration: 300 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inFinalPulse]);
@@ -111,23 +134,26 @@ export function ContemplationPlayer({
       if (remaining <= 0 && !finishedRef.current) {
         finishedRef.current = true;
         clearInterval(id);
+        music.pause();
         onFinish('time', elapsedRef.current);
       }
     }, 1000);
     return () => clearInterval(id);
-  }, [paused, totalSeconds, onFinish]);
+  }, [paused, totalSeconds, onFinish, music]);
 
   const handleEnd = () => {
     if (finishedRef.current) return;
     finishedRef.current = true;
+    music.pause();
     onFinish('end', elapsedRef.current);
   };
 
   const textStyle = useAnimatedStyle(() => ({
     opacity: textIn.value,
-    transform: [{ translateY: (1 - textIn.value) * 14 }, { scale: pulse.value }],
+    transform: [{ translateY: (1 - textIn.value) * 14 }],
   }));
   const driftStyle = useAnimatedStyle(() => ({ opacity: drift.value }));
+  const pulseStyle = useAnimatedStyle(() => ({ opacity: scrimPulse.value * 0.3 }));
 
   return (
     <View style={styles.root} testID="contemplation-player">
@@ -147,17 +173,32 @@ export function ContemplationPlayer({
         />
       </Animated.View>
       <VideoBackground source={videoUri ?? PLACEHOLDER_VIDEO} paused={paused} />
-      {/* Scrim for text legibility over bright footage. */}
-      <View style={styles.scrim} pointerEvents="none" />
+      {/* Layered scrim: flat base guarantees minimum contrast; gradient adds
+          weight at top (crisis) and bottom (controls). Legible over any footage. */}
+      <View style={styles.scrimBase} pointerEvents="none" />
+      <LinearGradient
+        pointerEvents="none"
+        colors={[
+          `rgba(${SCRIM_RGB},0.55)`,
+          `rgba(${SCRIM_RGB},0.18)`,
+          `rgba(${SCRIM_RGB},0.30)`,
+          `rgba(${SCRIM_RGB},0.65)`,
+        ]}
+        locations={[0, 0.3, 0.7, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Final-5s breathing layer. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: `rgb(${SCRIM_RGB})` }, pulseStyle]}
+      />
       {paused && <View style={styles.pausedOverlay} pointerEvents="none" />}
       <SafeAreaView style={styles.content}>
         <View style={styles.topRow}>
           <CrisisButton dim />
         </View>
         <View style={styles.center}>
-          <Animated.Text style={[type.contemplation, styles.prompt, textStyle]}>
-            {prompt}
-          </Animated.Text>
+          <Animated.Text style={[styles.prompt, textStyle]}>{prompt}</Animated.Text>
         </View>
         <View style={styles.controls}>
           <Pressable
@@ -182,18 +223,27 @@ export function ContemplationPlayer({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.dark },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.42)' },
+  scrimBase: { ...StyleSheet.absoluteFillObject, backgroundColor: `rgba(${SCRIM_RGB},0.30)` },
   pausedOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
   content: { flex: 1, paddingHorizontal: space.lg },
   topRow: { alignItems: 'flex-end', paddingTop: space.sm },
   center: { flex: 1, justifyContent: 'center' },
-  prompt: { color: '#efe9db', textAlign: 'left' },
+  prompt: {
+    // Handwriting stand-in — contemplation mode only (future: handwritten images).
+    fontFamily: font.hand,
+    fontSize: 34,
+    lineHeight: 48,
+    color: '#efe9db',
+    textAlign: 'left',
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
   controls: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: space.md,
     paddingBottom: space.lg,
-    opacity: 0.55,
   },
   control: {
     paddingVertical: 6,
@@ -201,6 +251,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(239,233,219,0.5)',
+    backgroundColor: `rgba(${SCRIM_RGB},0.55)`,
   },
-  controlText: { ...type.caption, textTransform: 'uppercase', letterSpacing: 0.8, color: '#efe9db' },
+  controlText: {
+    ...type.caption,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    color: '#efe9db',
+  },
 });

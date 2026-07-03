@@ -18,6 +18,8 @@ export const APP_NAME = 'Contemplation'; // placeholder — candidates: Atma, Li
  * - Miedinger — alternative sans, for letterspaced caps labels.
  */
 export const font = {
+  /** Handwriting stand-in for the eventual handwritten contemplation images. */
+  hand: 'Daniel-Regular',
   mono: 'BIZUDMincho-Regular',
   monoBold: 'BIZUDMincho-Bold',
   display: 'Karrik-Regular',
