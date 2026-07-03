@@ -78,7 +78,7 @@ export default function Home() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           />
-          <AppText variant="small" style={{ color: 'rgba(239,233,219,0.75)' }}>
+          <AppText variant="label" style={{ color: 'rgba(239,233,219,0.75)' }}>
             Today
           </AppText>
           <View style={{ flex: 1 }} />
@@ -92,7 +92,7 @@ export default function Home() {
             </AppText>
           </View>
           <View style={{ flex: 1 }} />
-          <AppText variant="caption" style={{ color: 'rgba(239,233,219,0.6)' }} center>
+          <AppText variant="label" style={{ color: 'rgba(239,233,219,0.6)' }} center>
             {atWrap ? 'see your wrap-up' : 'scroll for your series'}
           </AppText>
         </View>
@@ -116,7 +116,7 @@ export default function Home() {
             <AppText variant="heading">
               Series {series.displayOrder} — {series.title}
             </AppText>
-            <AppText variant="caption" muted>
+            <AppText variant="label" muted>
               {p.currentIndex} of {seriesLength(series)} complete
             </AppText>
           </View>
@@ -144,7 +144,7 @@ export default function Home() {
           );
         })}
       <Gap size="lg" />
-      <AppText variant="small" muted>
+      <AppText variant="label" muted>
         All series
       </AppText>
       {orderedSeries().map((s) => {

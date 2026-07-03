@@ -57,9 +57,27 @@ export const seriesPalettes: Record<string, [string, string, string]> = {
   's4-intention': ['#2c2e17', '#7f8f3d', '#99b955'], // olive → chartreuse
 };
 
+/**
+ * Type roles (per Kat, July 2026):
+ * - Karrik: ALL CAPS, limited display headlines only (display, title).
+ * - Mincho: ONLY certain small labels, all caps (the `label` variant).
+ * - Miedinger: everything else (headings, body, small, caption, contemplation).
+ */
 export const type = {
-  display: { fontFamily: font.display, fontSize: 32, lineHeight: 38, letterSpacing: 0.2 },
-  title: { fontFamily: font.display, fontSize: 24, lineHeight: 30, letterSpacing: 0.2 },
+  display: {
+    fontFamily: font.display,
+    fontSize: 32,
+    lineHeight: 38,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase' as const,
+  },
+  title: {
+    fontFamily: font.display,
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
   heading: {
     fontFamily: font.grotesk,
     fontSize: 15,
@@ -67,11 +85,19 @@ export const type = {
     letterSpacing: 1.6,
     textTransform: 'uppercase' as const,
   },
-  body: { fontFamily: font.mono, fontSize: 15, lineHeight: 23 },
-  bodyBold: { fontFamily: font.monoBold, fontSize: 15, lineHeight: 23 },
-  small: { fontFamily: font.mono, fontSize: 13, lineHeight: 19 },
-  caption: { fontFamily: font.mono, fontSize: 11, lineHeight: 15, letterSpacing: 0.3 },
-  contemplation: { fontFamily: font.mono, fontSize: 26, lineHeight: 40, letterSpacing: 0.4 },
+  body: { fontFamily: font.grotesk, fontSize: 15, lineHeight: 23 },
+  bodyBold: { fontFamily: font.groteskBold, fontSize: 15, lineHeight: 23 },
+  small: { fontFamily: font.grotesk, fontSize: 13, lineHeight: 19 },
+  caption: { fontFamily: font.grotesk, fontSize: 11, lineHeight: 15, letterSpacing: 0.3 },
+  /** Mincho's only role: deliberate small editorial labels, all caps. */
+  label: {
+    fontFamily: font.mono,
+    fontSize: 11,
+    lineHeight: 15,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase' as const,
+  },
+  contemplation: { fontFamily: font.grotesk, fontSize: 26, lineHeight: 38, letterSpacing: 0.3 },
 } as const;
 
 export const space = {

@@ -252,7 +252,7 @@ export function StatusPill({
   }[kind];
   return (
     <View style={[styles.statusPill, { backgroundColor: map.bg }]}>
-      <Text style={[type.caption, { color: map.fg }]}>{label}</Text>
+      <Text style={[type.label, { color: map.fg }]}>{label}</Text>
     </View>
   );
 }

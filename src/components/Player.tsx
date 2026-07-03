@@ -184,5 +184,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(239,233,219,0.5)',
   },
-  controlText: { ...type.small, color: '#efe9db' },
+  controlText: { ...type.label, color: '#efe9db' },
 });
