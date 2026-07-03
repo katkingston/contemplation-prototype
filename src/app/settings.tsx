@@ -107,6 +107,12 @@ export default function Settings() {
         onPress={fastForward}
         testID="fast-forward"
       />
+      <ListRow
+        label="Design system"
+        sub="living style guide — tokens & components"
+        onPress={() => router.push('/styleguide')}
+        testID="open-styleguide"
+      />
       <Gap size="xl" />
       <Button label="Back" kind="ghost" onPress={() => router.back()} />
       <Sheet
