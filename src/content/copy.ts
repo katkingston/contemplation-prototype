@@ -22,6 +22,8 @@ export interface ResourceLink {
   label: string;
   detail: string;
   url: string | null;
+  /** tel:/sms: link for one-tap contact — crisis surfaces must be tappable. */
+  tel?: string;
 }
 
 export const mentalHealthResources: ResourceLink[] = [
@@ -29,16 +31,19 @@ export const mentalHealthResources: ResourceLink[] = [
     label: '988 Suicide & Crisis Lifeline',
     detail: 'Call or text 988 (US) · 988lifeline.org',
     url: 'https://988lifeline.org/',
+    tel: 'tel:988',
   },
   {
     label: 'Crisis Text Line',
     detail: 'Text HOME to 741741 (US)',
     url: 'https://www.crisistextline.org/',
+    tel: 'sms:741741',
   },
   {
     label: 'The Mental Health & Grief Hotline',
     detail: 'Call (866) 903-3787',
     url: null,
+    tel: 'tel:+18669033787',
   },
   {
     label: 'GriefShare support groups',

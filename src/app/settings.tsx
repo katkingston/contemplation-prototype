@@ -13,6 +13,13 @@ import { activeSeries, progressFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
 
 
+/**
+ * Testing tools appear in dev builds, or when the build was exported with
+ * EXPO_PUBLIC_DEV_TOOLS=1 (the shared web prototype). TestFlight/App Store
+ * builds set neither, so the tools disappear there automatically.
+ */
+const SHOW_DEV_TOOLS = __DEV__ || process.env.EXPO_PUBLIC_DEV_TOOLS === '1';
+
 export default function Settings() {
   const { data, act, services } = useApp();
   const [showResources, setShowResources] = useState(false);
@@ -22,8 +29,14 @@ export default function Settings() {
     const json = await services.exportData();
     try {
       if (Platform.OS === 'web') {
-        // eslint-disable-next-line no-alert
-        alert('Your data (copy from below):\n\n' + json.slice(0, 4000));
+        // Full-fidelity download — never truncate a data export.
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'contemplation-export.json';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
         return;
       }
       const file = new File(Paths.cache, 'contemplation-export.json');
@@ -97,22 +110,26 @@ export default function Settings() {
         onPress={() => setConfirmDelete(true)}
         testID="delete-account"
       />
-      <Gap size="lg" />
-      <AppText variant="caption" muted>
-        Testing tools
-      </AppText>
-      <ListRow
-        label="Fast-forward one contemplation"
-        sub="dev shortcut: marks today’s contemplation complete"
-        onPress={fastForward}
-        testID="fast-forward"
-      />
-      <ListRow
-        label="Design system"
-        sub="living style guide — tokens & components"
-        onPress={() => router.push('/styleguide')}
-        testID="open-styleguide"
-      />
+      {SHOW_DEV_TOOLS && (
+        <>
+          <Gap size="lg" />
+          <AppText variant="caption" muted>
+            Testing tools (hidden in release builds)
+          </AppText>
+          <ListRow
+            label="Fast-forward one contemplation"
+            sub="dev shortcut: marks today’s contemplation complete"
+            onPress={fastForward}
+            testID="fast-forward"
+          />
+          <ListRow
+            label="Design system"
+            sub="living style guide — tokens & components"
+            onPress={() => router.push('/styleguide')}
+            testID="open-styleguide"
+          />
+        </>
+      )}
       <Gap size="xl" />
       <Button label="Back" kind="ghost" onPress={() => router.back()} />
       <Sheet

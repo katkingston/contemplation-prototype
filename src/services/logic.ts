@@ -111,8 +111,10 @@ export function statsFor(data: AppData, seriesId: string): SeriesStats {
 export function computeStreak(data: AppData): number {
   const days = [...new Set(data.sessions.map((s) => s.date))].sort().reverse();
   if (days.length === 0) return 0;
+  // LOCAL calendar dates — must match how sessions are stamped.
+  const p = (n: number) => String(n).padStart(2, '0');
+  const dayStr = (d: Date) => `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   const today = new Date();
-  const dayStr = (d: Date) => d.toISOString().slice(0, 10);
   const yesterday = new Date(today.getTime() - 86400_000);
   if (days[0] !== dayStr(today) && days[0] !== dayStr(yesterday)) return 0;
   let streak = 1;

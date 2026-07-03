@@ -16,16 +16,28 @@ export function ResourcesList() {
         If this content brings up difficult feelings, support is available.
       </AppText>
       {mentalHealthResources.map((r) => (
-        <Pressable
-          key={r.label}
-          accessibilityRole={r.url ? 'link' : undefined}
-          onPress={r.url ? () => Linking.openURL(r.url!) : undefined}
-          style={styles.resourceRow}>
-          <AppText variant="bodyBold">{r.label}</AppText>
-          <AppText variant="small" muted>
-            {r.detail}
-          </AppText>
-        </Pressable>
+        <View key={r.label} style={styles.resourceRow}>
+          <Pressable
+            accessibilityRole={r.url ? 'link' : undefined}
+            onPress={r.url ? () => Linking.openURL(r.url!) : undefined}
+            style={{ flex: 1 }}>
+            <AppText variant="bodyBold">{r.label}</AppText>
+            <AppText variant="small" muted>
+              {r.detail}
+            </AppText>
+          </Pressable>
+          {r.tel ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${r.tel.startsWith('sms') ? 'Text' : 'Call'} ${r.label}`}
+              onPress={() => Linking.openURL(r.tel!)}
+              style={styles.telChip}>
+              <AppText variant="caption" style={{ color: color.paper }}>
+                {r.tel.startsWith('sms') ? 'TEXT' : 'CALL'}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
       ))}
       <AppText variant="caption" muted style={{ marginTop: space.md }}>
         {resourcesFootnote}
@@ -65,5 +77,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: color.line,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  telChip: {
+    backgroundColor: color.danger,
+    borderRadius: radius.sm,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
 });

@@ -108,6 +108,16 @@ function Soundwave({ levels, tint = color.danger }: { levels: number[]; tint?: s
 // ---------- Memo playback (also used on the stats screen) ----------
 
 export function MemoPlayer({ uri, durationSec }: { uri: string; durationSec?: number | null }) {
+  // Web blob: URLs die with the browser session — probe before offering play.
+  const [available, setAvailable] = useState(true);
+  useEffect(() => {
+    if (Platform.OS === 'web' && uri.startsWith('blob:')) {
+      fetch(uri)
+        .then((r) => setAvailable(r.ok))
+        .catch(() => setAvailable(false));
+    }
+  }, [uri]);
+
   const player = useAudioPlayer(uri);
   const status = useAudioPlayerStatus(player);
 
@@ -122,6 +132,14 @@ export function MemoPlayer({ uri, durationSec }: { uri: string; durationSec?: nu
     if (status.playing) player.pause();
     else player.play();
   };
+
+  if (!available) {
+    return (
+      <AppText variant="caption" muted>
+        🎙 Voice memo (unavailable in this browser session)
+      </AppText>
+    );
+  }
 
   return (
     <Pressable
