@@ -51,7 +51,13 @@ export function GetReadyScreen({
     <Screen scroll={false} testID={testID}>
       <Gap size="sm" />
       <Row between>
-        <Button label="✕ Exit" kind="ghost" small onPress={() => router.back()} testID="get-ready-exit" />
+        <Button
+          label="✕ Exit"
+          kind="ghost"
+          small
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
+          testID="get-ready-exit"
+        />
         <CrisisButton />
       </Row>
       <Gap size="xl" />
@@ -79,6 +85,14 @@ export function GetReadyScreen({
       />
       <Gap size="md" />
       <Button label="Begin" arrow onPress={() => onBegin(minutes, musicOn)} testID="begin-button" />
+      <Gap size="sm" />
+      <Button
+        label="Go to homepage"
+        kind="ghost"
+        small
+        onPress={() => router.replace('/home')}
+        testID="go-home"
+      />
       <Gap size="lg" />
       <Sheet
         visible={showInstructions}

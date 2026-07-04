@@ -64,7 +64,7 @@ export default function Settings() {
     const p = progressFor(data, s.id);
     if (p.currentIndex >= s.contemplations.length) return;
     const c = s.contemplations[p.currentIndex];
-    await act((x) => x.recordContemplationComplete(s.id, c.id, 60));
+    await act((x) => x.recordContemplationComplete(s.id, c.id, 60, { backdate: true }));
   };
 
   return (

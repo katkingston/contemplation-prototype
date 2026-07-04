@@ -15,7 +15,7 @@ import { useAudioPlayer } from 'expo-audio';
 import { useVideoPlayer, VideoSource, VideoView } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -47,6 +47,26 @@ function VideoBackground({ source, paused }: { source: VideoSource; paused: bool
     if (paused) player.pause();
     else player.play();
   }, [paused, player]);
+  useEffect(() => {
+    // iPhone Safari hijacks non-inline video into the fullscreen player,
+    // covering the question. Force inline/muted/looping attributes on web.
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const fix = () => {
+      document.querySelectorAll('video').forEach((v) => {
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.muted = true;
+        v.loop = true;
+      });
+    };
+    fix();
+    const t = setInterval(fix, 500); // catch late mounts/replacements
+    const stop = setTimeout(() => clearInterval(t), 4000);
+    return () => {
+      clearInterval(t);
+      clearTimeout(stop);
+    };
+  }, []);
   return (
     <VideoView
       player={player}

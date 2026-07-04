@@ -48,7 +48,12 @@ export class SupabaseServices implements AppServices {
   saveSurvey(_s: string, _a: Record<string, AnswerValue>): Promise<void> {
     throw new Error(NOT_CONFIGURED); // TODO: survey_answers insert
   }
-  recordContemplationComplete(): Promise<void> {
+  recordContemplationComplete(
+    _seriesId?: string,
+    _cid?: string,
+    _seconds?: number,
+    _opts?: { backdate?: boolean },
+  ): Promise<void> {
     throw new Error(NOT_CONFIGURED); // TODO: user_progress upsert + sessions insert
   }
   markSeriesComplete(): Promise<void> {

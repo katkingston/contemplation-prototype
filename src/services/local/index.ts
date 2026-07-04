@@ -101,6 +101,7 @@ export class LocalServices implements AppServices {
     seriesId: string,
     contemplationId: string,
     seconds: number,
+    opts?: { backdate?: boolean },
   ): Promise<void> {
     await this.write((d) => {
       const p = d.progress[seriesId] ?? {
@@ -108,11 +109,16 @@ export class LocalServices implements AppServices {
         currentIndex: 0,
         completedAt: null,
         lastOpened: null,
+        lastCompletedAt: null,
         replayCount: 0,
         useAltQuestions: false,
       };
       p.currentIndex += 1;
       p.lastOpened = todayISO();
+      // Backdate (dev fast-forward) keeps the next daily drop unlocked for testers.
+      p.lastCompletedAt = opts?.backdate
+        ? new Date(Date.now() - 26 * 3600_000).toISOString()
+        : new Date().toISOString();
       d.progress[seriesId] = p;
       d.sessions.push({ id: uid(), seriesId, contemplationId, seconds, date: todayISO() });
     });

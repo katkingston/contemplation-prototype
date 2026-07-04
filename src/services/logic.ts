@@ -12,10 +12,47 @@ export function progressFor(data: AppData, seriesId: string): SeriesProgress {
       currentIndex: 0,
       completedAt: null,
       lastOpened: null,
+      lastCompletedAt: null,
       replayCount: 0,
       useAltQuestions: false,
     }
   );
+}
+
+// ---------- daily drop (6pm LOCAL) ----------
+
+/** Hour of day (local timezone — JS Date math is inherently local) when a new contemplation drops. */
+export const DROP_HOUR = 18;
+
+/**
+ * The next contemplation unlocks at the first 6pm (user's local time) AFTER
+ * their previous completion. Sequential order is already enforced by
+ * currentIndex; this adds the time gate. No completions yet → available now.
+ */
+export function nextDropAt(data: AppData, seriesId: string): Date | null {
+  const p = progressFor(data, seriesId);
+  const last = p.lastCompletedAt ?? null;
+  if (!last) return null; // nothing completed → first item is available immediately
+  const lastDone = new Date(last);
+  const drop = new Date(lastDone);
+  drop.setHours(DROP_HOUR, 0, 0, 0);
+  if (drop.getTime() <= lastDone.getTime()) drop.setDate(drop.getDate() + 1);
+  return drop;
+}
+
+export function isDropAvailable(data: AppData, seriesId: string): boolean {
+  const at = nextDropAt(data, seriesId);
+  return at == null || Date.now() >= at.getTime();
+}
+
+/** "6:00 PM today" / "6:00 PM tomorrow" label for the locked state. */
+export function dropLabel(at: Date): string {
+  const now = new Date();
+  const sameDay =
+    at.getFullYear() === now.getFullYear() &&
+    at.getMonth() === now.getMonth() &&
+    at.getDate() === now.getDate();
+  return `6:00 PM ${sameDay ? 'today' : 'tomorrow'}`;
 }
 
 export function isSeriesCompleted(data: AppData, s: Series): boolean {

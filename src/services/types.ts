@@ -17,7 +17,9 @@ export interface SeriesProgress {
   /** 0-based index of the NEXT contemplation to do. completed = index past the last one (computed). */
   currentIndex: number;
   completedAt: string | null;
-  lastOpened: string | null; // ISO date of last completed contemplation day
+  lastOpened: string | null; // local date (YYYY-MM-DD) of last completed contemplation
+  /** Full timestamp of the last completion — drives the 6pm daily-drop gate. */
+  lastCompletedAt: string | null;
   /** Number of times this series has been completed before the current run. */
   replayCount: number;
   /** When replaying, serve alternate questions instead of the originals. */
@@ -120,7 +122,12 @@ export interface AppServices {
   saveSurvey(seriesId: string, answers: Record<string, AnswerValue>): Promise<void>;
 
   // -- progress --
-  recordContemplationComplete(seriesId: string, contemplationId: string, seconds: number): Promise<void>;
+  recordContemplationComplete(
+    seriesId: string,
+    contemplationId: string,
+    seconds: number,
+    opts?: { backdate?: boolean },
+  ): Promise<void>;
   markSeriesComplete(seriesId: string): Promise<void>;
   startReplay(seriesId: string, useAltQuestions: boolean): Promise<void>;
 

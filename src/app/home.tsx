@@ -14,10 +14,13 @@ import { AppText, Button, Eyebrow, Gap, ListRow, Row, StatusPill } from '@/compo
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
   activeSeries,
+  dropLabel,
   hasActiveAccess,
+  isDropAvailable,
   isSeriesAtWrap,
   isSeriesCompleted,
   isSeriesUnlocked,
+  nextDropAt,
   progressFor,
   questionFor,
 } from '@/services/logic';
@@ -35,6 +38,8 @@ export default function Home() {
   const next = series.contemplations[idx];
   const isFirstOfSeries = p.currentIndex === 0;
   const accessOk = hasActiveAccess(data, series.id);
+  const dropReady = isDropAvailable(data, series.id);
+  const dropAt = nextDropAt(data, series.id);
 
   // Hero fills the first viewport above the bottom bar.
   const heroHeight = Math.max(420, windowHeight - 210);
@@ -48,6 +53,7 @@ export default function Home() {
       router.push('/subscription');
       return;
     }
+    if (!dropReady) return; // next contemplation hasn't dropped yet
     if (isFirstOfSeries) {
       router.push({ pathname: '/series-intro', params: { seriesId: series.id } });
     } else {
@@ -80,14 +86,20 @@ export default function Home() {
             {atWrap ? 'Complete' : `No. ${idx + 1} — ${next?.hint ?? ''}`}
           </AppText>
           <Gap size="xl" />
-          <Button
-            label={atWrap ? 'See your wrap-up' : 'Begin'}
-            kind="secondary"
-            dark
-            arrow
-            onPress={onPlay}
-            testID="hero-play"
-          />
+          {!atWrap && !dropReady && dropAt ? (
+            <AppText variant="label" style={{ color: 'rgba(239,233,219,0.85)' }}>
+              New contemplation at {dropLabel(dropAt)}
+            </AppText>
+          ) : (
+            <Button
+              label={atWrap ? 'See your wrap-up' : 'Begin'}
+              kind="secondary"
+              dark
+              arrow
+              onPress={onPlay}
+              testID="hero-play"
+            />
+          )}
           <View style={{ flex: 1 }} />
         </View>
         {!accessOk && (

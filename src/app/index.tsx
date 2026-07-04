@@ -4,6 +4,14 @@ import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { AppText, Gap, Screen } from '@/components/ui';
 import { splashTagline } from '@/content/copy';
+import { seriesLength } from '@/content/series';
+import {
+  activeSeries,
+  hasActiveAccess,
+  isDropAvailable,
+  isSeriesAtWrap,
+  progressFor,
+} from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { APP_NAME, color, radius, space } from '@/theme/tokens';
 
@@ -15,7 +23,26 @@ export default function Splash() {
     if (!hydrated || !navState?.key) return;
     const t = setTimeout(() => {
       if (data.onboardingStep === 'done' && data.profile) {
-        router.replace('/home');
+        // Returning users land on the pre-contemplation page for immediate
+        // engagement — if today's contemplation is available. Otherwise Home.
+        const series = activeSeries(data);
+        const p = progressFor(data, series.id);
+        const ready =
+          !isSeriesAtWrap(data, series) &&
+          p.currentIndex < seriesLength(series) &&
+          hasActiveAccess(data, series.id) &&
+          isDropAvailable(data, series.id);
+        if (!ready) {
+          router.replace('/home');
+        } else if (p.currentIndex === 0) {
+          // First contemplation of a series must pass through its introduction.
+          router.replace({ pathname: '/series-intro', params: { seriesId: series.id } });
+        } else {
+          router.replace({
+            pathname: '/get-ready',
+            params: { seriesId: series.id, index: String(p.currentIndex) },
+          });
+        }
       } else if (data.disclaimerAcceptedAt == null) {
         router.replace('/disclaimer');
       } else {
