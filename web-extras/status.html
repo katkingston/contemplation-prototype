@@ -19,7 +19,6 @@
   .sub{color:var(--muted)}
   .cta{display:inline-block;background:var(--dark);color:var(--cream);text-decoration:none;padding:14px 28px;border-radius:3px;font-weight:700;margin:18px 12px 6px 0}
   .cta.secondary{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
-  .hero .cta.secondary{color:var(--cream);border-color:rgba(239,233,219,.75)}
   ul{list-style:none}
   li{padding:7px 0;border-bottom:1px solid var(--faint)}
   li::before{content:"—";color:var(--olive);margin-right:10px}
@@ -47,8 +46,7 @@
     <div class="label">Try it now — no install, works on your phone's browser</div>
     <p style="font-size:22px;margin:12px 0 4px;font-weight:700">The full V1 experience, working end to end.</p>
     <p>Onboarding → free contemplation → plans → daily practice → private thought diary → series completion.</p>
-    <a class="cta" href="./index.html">Launch the prototype →</a>
-    <a class="cta secondary" href="./styleguide.html">Design system →</a>
+    <a class="cta" href="./">Launch the prototype →</a>
   </div>
 
   <h2>How to review (5 minutes)</h2>
@@ -76,15 +74,6 @@
     <li>Handwriting font stands in for future handwritten contemplation imagery</li>
     <li>Accounts, payments, and sync are simulated on-device — production backend is designed and scaffolded, not yet live</li>
   </ul>
-
-  <h2>Path to the App Store</h2>
-  <table>
-    <tr><td>Backend</td><td>Supabase (auth, sync, storage) — schema written, adapter slot ready · ~1–2 weeks</td></tr>
-    <tr><td>Payments</td><td>RevenueCat + App Store products incl. 3-day trial on annual · ~1 week + Apple lead time</td></tr>
-    <tr><td>Native build</td><td>Device builds via EAS, push notifications, media optimization · days</td></tr>
-    <tr><td>Store readiness</td><td>Assets, privacy policy, sensitive-content review prep (largely built in) · ~1 week</td></tr>
-    <tr><td>Estimate</td><td><b>4–7 weeks to submission</b> from green light</td></tr>
-  </table>
 
   <div class="note">
     Everything on this page runs from a single codebase that is the production starting point, not a throwaway —
