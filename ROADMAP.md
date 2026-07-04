@@ -16,15 +16,16 @@ production system. This file lists what remains, in order, split by who does it.
 5. **Expo/EAS account** — expo.dev signup (free tier works; paid speeds builds).
 
 ## Phase B — Real backend (code, ~1–2 weeks)
-1. Implement the Supabase adapter (`src/services/supabase/`) against the same
-   `AppServices` interface — screens don't change. Flip `EXPO_PUBLIC_DATA_PROVIDER`.
-2. Real auth: email (Supabase) first; then **Sign in with Apple** (required by
-   Apple since we offer Google) + Google OAuth.
-3. Voice memos → Supabase Storage upload; diary rows reference storage paths.
-4. Account deletion Edge Function (true server-side delete — Apple 5.1.1(v)).
-5. Transcription Edge Function (gpt-4o-mini-transcribe) — server-side key only.
-6. Migrate content (series/contemplations) into the DB tables so new series ship
-   without app updates.
+1. ✅ Supabase adapter implemented against `AppServices` — screens unchanged.
+   Activate by creating the project + keys (see PROGRESS.md).
+2. ✅ Email auth (passwordless 6-digit code). ⏳ Sign in with Apple + Google →
+   native build phase (entitlements/OAuth config).
+3. ✅ Voice memos → private `memos` bucket, signed URLs on read.
+4. ✅ Account deletion Edge Function written (`supabase/functions/delete-account`);
+   deploy with `npx supabase functions deploy delete-account`.
+5. ⏳ Transcription Edge Function (gpt-4o-mini-transcribe) — server-side key only.
+6. ⏳ Migrate content (series/contemplations) into the DB tables so new series
+   ship without app updates.
 
 ## Phase C — Payments (joint, ~1 week + Apple lag)
 1. You: create the app in **App Store Connect**; create the 3 IAP products

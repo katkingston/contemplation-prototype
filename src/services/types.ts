@@ -113,6 +113,14 @@ export interface AppServices {
   acceptDisclaimer(): Promise<void>;
   setOnboardingStep(step: AppData['onboardingStep']): Promise<void>;
   createAccount(email: string, username: string): Promise<void>;
+  /**
+   * Passwordless email auth (cloud adapters only — absent on the local mock).
+   * The login screen switches to a two-step code flow when these exist.
+   */
+  requestEmailCode?(email: string): Promise<void>;
+  verifyEmailCode?(email: string, code: string, username: string): Promise<void>;
+  /** Sign out of the cloud session (cloud adapters only). */
+  signOut?(): Promise<void>;
   /** Full wipe — Apple 5.1.1(v): really deletes data, not deactivates. */
   deleteAccount(): Promise<void>;
   exportData(): Promise<string>; // JSON string of everything

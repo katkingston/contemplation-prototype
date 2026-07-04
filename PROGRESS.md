@@ -39,6 +39,22 @@ wireframes implemented as a real Expo app, fully testable today.
   voice recording.
 - Data is per-device (local). Delete account in Settings to reset to first-run.
 
+## Backend (Phase B) — IMPLEMENTED, awaiting project keys
+
+The Supabase adapter is fully implemented (`src/services/supabase/`):
+passwordless email-code auth, full data sync (progress incl. the 6pm-drop
+timestamp, diary with voice-memo uploads to a private `memos` bucket + signed
+URLs, intake/surveys, grants), pre-auth onboarding held locally and imported
+on first sign-in, sign-out, and true account deletion via the
+`delete-account` Edge Function (fallback: sign-out until deployed).
+
+**To activate (~10 min):** create a supabase.com project → SQL editor: run
+`supabase/schema.sql` then `supabase/setup-extras.sql` → confirm Email auth
+enabled → copy URL + anon key into `.env` and set
+`EXPO_PUBLIC_DATA_PROVIDER=supabase`. Deploy deletion:
+`npx supabase login && npx supabase link --project-ref <ref> && npx supabase functions deploy delete-account`.
+The public share-URL build intentionally stays on the local provider.
+
 ## Architecture seams (for the real build-out)
 
 - `src/services/types.ts` — service contract; screens import only this.

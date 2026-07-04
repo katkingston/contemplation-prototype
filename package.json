@@ -17,6 +17,7 @@
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.33",
+    "@supabase/supabase-js": "^2.110.0",
     "expo": "~55.0.26",
     "expo-audio": "~55.0.14",
     "expo-constants": "~55.0.16",
