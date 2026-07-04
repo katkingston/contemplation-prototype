@@ -115,9 +115,10 @@ export class LocalServices implements AppServices {
       };
       p.currentIndex += 1;
       p.lastOpened = todayISO();
-      // Backdate (dev fast-forward) keeps the next daily drop unlocked for testers.
+      // Backdate (dev fast-forward) two days so the next daily drop is
+      // already past for testers (drop = completion day + 1, at 6pm).
       p.lastCompletedAt = opts?.backdate
-        ? new Date(Date.now() - 26 * 3600_000).toISOString()
+        ? new Date(Date.now() - 50 * 3600_000).toISOString()
         : new Date().toISOString();
       d.progress[seriesId] = p;
       d.sessions.push({ id: uid(), seriesId, contemplationId, seconds, date: todayISO() });

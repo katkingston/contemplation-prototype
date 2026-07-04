@@ -25,18 +25,18 @@ export function progressFor(data: AppData, seriesId: string): SeriesProgress {
 export const DROP_HOUR = 18;
 
 /**
- * The next contemplation unlocks at the first 6pm (user's local time) AFTER
- * their previous completion. Sequential order is already enforced by
- * currentIndex; this adds the time gate. No completions yet → available now.
+ * HARD CAP: one contemplation per calendar day, and drops happen at 6pm —
+ * the next item unlocks at 6:00 PM (user's local time) on the calendar day
+ * AFTER their last completion, no matter what time they completed. Sequential
+ * order is already enforced by currentIndex. No completions yet → available now.
  */
 export function nextDropAt(data: AppData, seriesId: string): Date | null {
   const p = progressFor(data, seriesId);
   const last = p.lastCompletedAt ?? null;
   if (!last) return null; // nothing completed → first item is available immediately
-  const lastDone = new Date(last);
-  const drop = new Date(lastDone);
+  const drop = new Date(last);
+  drop.setDate(drop.getDate() + 1);
   drop.setHours(DROP_HOUR, 0, 0, 0);
-  if (drop.getTime() <= lastDone.getTime()) drop.setDate(drop.getDate() + 1);
   return drop;
 }
 
