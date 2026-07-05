@@ -37,11 +37,11 @@ export default function Login() {
   const proceedLocal = async (provider?: 'apple' | 'google') => {
     const e = provider ? `${provider}-user@example.com` : email.trim();
     const u = username.trim() || (provider ? `${provider}_user` : 'contemplator');
-    await act(async (s) => {
+    const ok = await act(async (s) => {
       await s.createAccount(e, u);
       await s.setOnboardingStep('intake');
     });
-    router.replace('/baseline-intro');
+    if (ok) router.replace('/baseline-intro');
   };
 
   const sendCode = async () => {

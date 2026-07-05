@@ -28,11 +28,21 @@ function makeServices(): AppServices {
 
 interface Ctx {
   hydrated: boolean;
+  /** Initial data load failed (e.g. network) — splash offers retry. */
+  hydrationFailed: boolean;
   data: AppData;
   services: AppServices;
   refresh: () => Promise<void>;
-  /** Run a service action then refresh the snapshot. */
-  act: (fn: (s: AppServices) => Promise<void>) => Promise<void>;
+  /**
+   * Run a service action then refresh the snapshot.
+   * Returns false (and surfaces a banner) on failure — callers that navigate
+   * afterwards MUST check the result so users never advance past a lost write.
+   */
+  act: (fn: (s: AppServices) => Promise<void>) => Promise<boolean>;
+  /** Last surfaced error message, shown by the global banner. */
+  error: string | null;
+  clearError: () => void;
+  retryHydration: () => Promise<void>;
 }
 
 const ServicesContext = createContext<Ctx | null>(null);
@@ -41,38 +51,66 @@ export function ServicesProvider({ children }: { children: React.ReactNode }) {
   const services = useMemo(makeServices, []);
   const [data, setData] = useState<AppData>(EMPTY_DATA);
   const [hydrated, setHydrated] = useState(false);
+  const [hydrationFailed, setHydrationFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setData(await services.loadAll());
   }, [services]);
 
-  useEffect(() => {
-    let cancelled = false;
-    services
-      .loadAll()
-      .then((d) => {
-        if (!cancelled) {
-          setData(d);
-          setHydrated(true);
-        }
-      })
-      .catch(() => setHydrated(true));
-    return () => {
-      cancelled = true;
-    };
+  const hydrate = useCallback(async () => {
+    try {
+      setData(await services.loadAll());
+      setHydrationFailed(false);
+    } catch {
+      // Never silently show a first-run state to an existing user.
+      setHydrationFailed(true);
+    } finally {
+      setHydrated(true);
+    }
   }, [services]);
 
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
   const act = useCallback(
-    async (fn: (s: AppServices) => Promise<void>) => {
-      await fn(services);
-      await refresh();
+    async (fn: (s: AppServices) => Promise<void>): Promise<boolean> => {
+      try {
+        await fn(services);
+        await refresh();
+        return true;
+      } catch (e) {
+        setError(
+          e instanceof Error && e.message
+            ? e.message
+            : 'Something went wrong — your last change may not have saved. Please try again.',
+        );
+        return false;
+      }
     },
     [services, refresh],
   );
 
+  const clearError = useCallback(() => setError(null), []);
+  const retryHydration = useCallback(async () => {
+    setHydrated(false);
+    await hydrate();
+  }, [hydrate]);
+
   const value = useMemo(
-    () => ({ hydrated, data, services, refresh, act }),
-    [hydrated, data, services, refresh, act],
+    () => ({
+      hydrated,
+      hydrationFailed,
+      data,
+      services,
+      refresh,
+      act,
+      error,
+      clearError,
+      retryHydration,
+    }),
+    [hydrated, hydrationFailed, data, services, refresh, act, error, clearError, retryHydration],
   );
 
   return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;

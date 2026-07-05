@@ -11,8 +11,7 @@ export default function Disclaimer() {
   const [showResources, setShowResources] = useState(false);
 
   const onContinue = async () => {
-    await act((s) => s.acceptDisclaimer());
-    router.replace('/get-ready-free');
+    if (await act((s) => s.acceptDisclaimer())) router.replace('/get-ready-free');
   };
 
   return (

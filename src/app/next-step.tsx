@@ -31,8 +31,8 @@ export default function NextStep() {
   };
 
   const replay = async (useAlt: boolean) => {
-    await act((s) => s.startReplay(seriesId, useAlt));
-    router.replace({ pathname: '/series-intro', params: { seriesId } });
+    if (await act((s) => s.startReplay(seriesId, useAlt)))
+      router.replace({ pathname: '/series-intro', params: { seriesId } });
   };
 
   return (

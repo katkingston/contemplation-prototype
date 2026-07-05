@@ -25,11 +25,11 @@ export default function SeriesWrap() {
   const onQuestion = slide >= slides.length;
 
   const complete = async () => {
-    await act(async (s) => {
+    const ok = await act(async (s) => {
       await s.saveSurvey(series.id, { [qualityOfLifeQuestion.id]: qol ?? 0 });
       await s.markSeriesComplete(series.id);
     });
-    router.replace({ pathname: '/stats', params: { seriesId: series.id } });
+    if (ok) router.replace({ pathname: '/stats', params: { seriesId: series.id } });
   };
 
   return (

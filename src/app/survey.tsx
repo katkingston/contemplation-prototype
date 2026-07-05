@@ -14,8 +14,8 @@ export default function Survey() {
       questions={surveyQuestions}
       completeLabel="Complete"
       onComplete={async (answers) => {
-        await act((s) => s.saveSurvey(seriesId, answers));
-        router.replace({ pathname: '/next-step', params: { seriesId } });
+        if (await act((s) => s.saveSurvey(seriesId, answers)))
+          router.replace({ pathname: '/next-step', params: { seriesId } });
       }}
     />
   );

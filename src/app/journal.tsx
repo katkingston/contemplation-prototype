@@ -43,7 +43,7 @@ export default function Journal() {
   const contemplation = series.contemplations[index];
 
   const finishDay = async (saveEntry: boolean) => {
-    await act(async (s) => {
+    const ok = await act(async (s) => {
       if (saveEntry && (countWords(text) > 0 || audio.uri)) {
         await s.saveDiaryEntry({
           seriesId: series.id,
@@ -56,6 +56,7 @@ export default function Journal() {
       }
       await s.recordContemplationComplete(series.id, contemplation.id, totalSeconds);
     });
+    if (!ok) return; // never advance past a lost reflection — banner explains
     // Last contemplation of the series → wrap-up; otherwise day exit.
     const willBeIndex = index + 1;
     if (willBeIndex >= seriesLength(series)) {

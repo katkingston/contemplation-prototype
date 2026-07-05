@@ -21,12 +21,12 @@ export default function Paywall() {
 
   const purchase = async () => {
     const introSeries = orderedSeries()[0];
-    await act(async (s) => {
+    const ok = await act(async (s) => {
       // MOCK purchase — no real charge. Series pack scopes to the intro series.
       await s.grantAccess(selected, selected === 'series_pack' ? introSeries.id : null);
       await s.setOnboardingStep('login');
     });
-    router.replace('/login');
+    if (ok) router.replace('/login');
   };
 
   return (

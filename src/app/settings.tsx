@@ -52,8 +52,9 @@ export default function Settings() {
   };
 
   const doDelete = async () => {
-    await act((s) => s.deleteAccount());
+    const ok = await act((s) => s.deleteAccount());
     setConfirmDelete(false);
+    if (!ok) return; // deletion failed — banner explains; don't pretend it worked
     router.dismissAll?.();
     router.replace('/');
   };
@@ -78,7 +79,7 @@ export default function Settings() {
         right={
           <Switch
             value={data.settings.notificationsEnabled}
-            onValueChange={(v) => act((s) => s.saveSettings({ notificationsEnabled: v }))}
+            onValueChange={(v) => void act((s) => s.saveSettings({ notificationsEnabled: v }))}
           />
         }
       />
@@ -88,7 +89,7 @@ export default function Settings() {
         right={
           <Switch
             value={data.settings.musicDefaultOn}
-            onValueChange={(v) => act((s) => s.saveSettings({ musicDefaultOn: v }))}
+            onValueChange={(v) => void act((s) => s.saveSettings({ musicDefaultOn: v }))}
           />
         }
       />

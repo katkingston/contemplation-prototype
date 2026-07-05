@@ -2,7 +2,7 @@
 import { router, useRootNavigationState } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { AppText, Gap, Screen } from '@/components/ui';
+import { AppText, Button, Gap, Screen } from '@/components/ui';
 import { splashTagline } from '@/content/copy';
 import { seriesLength } from '@/content/series';
 import {
@@ -16,11 +16,11 @@ import { useApp } from '@/services/provider';
 import { APP_NAME, color, radius, space } from '@/theme/tokens';
 
 export default function Splash() {
-  const { hydrated, data } = useApp();
+  const { hydrated, hydrationFailed, data, retryHydration } = useApp();
   const navState = useRootNavigationState();
 
   useEffect(() => {
-    if (!hydrated || !navState?.key) return;
+    if (!hydrated || hydrationFailed || !navState?.key) return;
     const t = setTimeout(() => {
       if (data.onboardingStep === 'done' && data.profile) {
         // Returning users land on the pre-contemplation page for immediate
@@ -62,7 +62,23 @@ export default function Splash() {
       }
     }, 900); // brief brand moment
     return () => clearTimeout(t);
-  }, [hydrated, navState?.key, data]);
+  }, [hydrated, hydrationFailed, navState?.key, data]);
+
+  if (hydrated && hydrationFailed) {
+    return (
+      <Screen scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <AppText variant="title" center>
+          Couldn’t load your data
+        </AppText>
+        <Gap size="sm" />
+        <AppText variant="body" muted center style={{ maxWidth: 300 }}>
+          Check your connection and try again — nothing has been lost.
+        </AppText>
+        <Gap size="lg" />
+        <Button label="Try again" arrow onPress={() => void retryHydration()} testID="retry-hydration" />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>

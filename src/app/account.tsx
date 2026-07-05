@@ -6,11 +6,11 @@ import { AppText, Gap, ListRow } from '@/components/ui';
 import { useApp } from '@/services/provider';
 
 export default function Account() {
-  const { data, services, refresh } = useApp();
+  const { data, services, act } = useApp();
 
   const signOut = async () => {
-    await services.signOut?.();
-    await refresh();
+    if (!(await act(async (s) => s.signOut && (await s.signOut()))))
+      return; // sign-out failed — stay put, banner explains
     router.dismissAll?.();
     router.replace('/');
   };
