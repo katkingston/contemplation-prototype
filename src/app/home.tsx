@@ -5,8 +5,10 @@
  * image-led rows for all series. Section headers carry SEE ALL links.
  */
 import { router } from 'expo-router';
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import React, { useEffect } from 'react';
+import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
@@ -26,6 +28,53 @@ import {
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, radius, seriesPalettes, space } from '@/theme/tokens';
+
+const HERO_VIDEO = require('../../assets/media/contemplation-loop.mp4');
+/** The hero loops only the FIRST 5 seconds of the day's footage. */
+const HERO_LOOP_SECONDS = 5;
+
+function HeroVideo() {
+  const player = useVideoPlayer(HERO_VIDEO, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.timeUpdateEventInterval = 0.25;
+    p.play();
+  });
+  useEffect(() => {
+    player.play(); // setup callback can fire before the element is ready (web)
+    const sub = player.addListener('timeUpdate', (e) => {
+      if (e.currentTime >= HERO_LOOP_SECONDS) player.currentTime = 0;
+    });
+    return () => sub.remove();
+  }, [player]);
+  // iPhone Safari: force inline playback so the loop never goes fullscreen.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const force = () => {
+      document.querySelectorAll('video').forEach((v) => {
+        v.setAttribute('playsinline', 'true');
+        v.setAttribute('webkit-playsinline', 'true');
+        v.muted = true;
+      });
+    };
+    const id = setInterval(force, 500);
+    const stop = setTimeout(() => clearInterval(id), 4000);
+    return () => {
+      clearInterval(id);
+      clearTimeout(stop);
+    };
+  }, []);
+  return (
+    <VideoView
+      player={player}
+      style={StyleSheet.absoluteFill}
+      contentFit="cover"
+      nativeControls={false}
+      accessible={false}
+      importantForAccessibility="no"
+    />
+  );
+}
 
 function SectionHeader({ label, onSeeAll }: { label: string; onSeeAll?: () => void }) {
   return (
@@ -50,6 +99,7 @@ function SectionHeader({ label, onSeeAll }: { label: string; onSeeAll?: () => vo
 
 export default function Home() {
   const { data } = useApp();
+  const reducedMotion = useReducedMotion();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const series = activeSeries(data);
   const palette = seriesPalettes[series.id] ?? ['#232619', '#4c5232', '#6f7036'];
@@ -118,6 +168,8 @@ export default function Home() {
               seed={shownIdx}
               style={StyleSheet.absoluteFill as never}
             />
+            {/* Day's footage, 5s loop. Reduce Motion gets the still artwork. */}
+            {!reducedMotion && <HeroVideo />}
             <View style={styles.heroScrim} />
             <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
               Today ·{' '}

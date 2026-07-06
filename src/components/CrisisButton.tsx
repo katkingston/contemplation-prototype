@@ -46,7 +46,15 @@ export function ResourcesList() {
   );
 }
 
-export function CrisisButton({ dim = false }: { dim?: boolean }) {
+export function CrisisButton({
+  dim = false,
+  onPress,
+}: {
+  dim?: boolean;
+  /** Override the default sheet (the player ends the contemplation and
+      routes to the full-screen /crisis page). */
+  onPress?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -54,7 +62,7 @@ export function CrisisButton({ dim = false }: { dim?: boolean }) {
         accessibilityRole="button"
         accessibilityLabel="Crisis resources"
         hitSlop={12}
-        onPress={() => setOpen(true)}
+        onPress={onPress ?? (() => setOpen(true))}
         style={[styles.pill, dim && { opacity: 0.5, borderColor: 'rgba(239,233,219,0.45)' }]}>
         <Text style={[type.caption, { textTransform: 'uppercase', letterSpacing: 0.8, color: dim ? '#efe9db' : color.danger }]}>✚ Crisis</Text>
       </Pressable>

@@ -47,6 +47,7 @@ export function WordCapInput({
       <Gap size="xs" />
       <TextInput
         multiline
+        accessibilityLabel="Write your thoughts"
         value={value}
         onChangeText={(t) => onChange(capWords(t, limits.diaryMaxWords))}
         placeholder="There are no right answers…"

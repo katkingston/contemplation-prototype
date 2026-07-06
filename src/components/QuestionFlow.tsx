@@ -108,7 +108,8 @@ export function QuestionFlow({
             <TextInput
               value={otherTexts[q.id] ?? ''}
               onChangeText={(t) => setOtherTexts((o) => ({ ...o, [q.id]: t }))}
-              placeholder="Tell us who…"
+              accessibilityLabel="Tell us who"
+          placeholder="Tell us who…"
               placeholderTextColor={color.muted}
               style={{
                 ...type.body,
@@ -130,6 +131,7 @@ export function QuestionFlow({
           multiline
           value={typeof value === 'string' ? value : ''}
           onChangeText={(t) => set(t)}
+          accessibilityLabel="Your answer"
           placeholder="Write as little or as much as you like…"
           placeholderTextColor={color.muted}
           style={{

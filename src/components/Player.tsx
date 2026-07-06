@@ -13,6 +13,7 @@
  */
 import { useAudioPlayer } from 'expo-audio';
 import { useVideoPlayer, VideoSource, VideoView } from 'expo-video';
+import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -224,7 +225,9 @@ export function ContemplationPlayer({
       {paused && <View style={styles.pausedOverlay} pointerEvents="none" />}
       <SafeAreaView style={styles.content}>
         <View style={styles.topRow}>
-          <CrisisButton dim />
+          {/* Crisis ENDS the contemplation immediately (media stops on
+              unmount, nothing recorded) and opens full-screen support. */}
+          <CrisisButton dim onPress={() => router.replace('/crisis')} />
         </View>
         <View style={styles.center}>
           <Animated.Text style={[styles.prompt, textStyle]}>{prompt}</Animated.Text>

@@ -54,6 +54,7 @@ export function Screen({
   dark = false,
   scroll = true,
   padded = true,
+  fade = true,
   children,
   style,
   testID,
@@ -61,6 +62,8 @@ export function Screen({
   dark?: boolean;
   scroll?: boolean;
   padded?: boolean;
+  /** Crisis/support screens set false: help must appear instantly. */
+  fade?: boolean;
   children: React.ReactNode;
   style?: ViewStyle;
   testID?: string;
@@ -74,12 +77,14 @@ export function Screen({
           style={styles.flex}
           contentContainerStyle={[pad, { paddingBottom: space.xxl, flexGrow: 1 }, style]}
           keyboardShouldPersistTaps="handled">
-          <ScreenFade>{children}</ScreenFade>
+          {fade ? <ScreenFade>{children}</ScreenFade> : children}
         </ScrollView>
-      ) : (
+      ) : fade ? (
         <ScreenFade style={{ flex: 1 }}>
           <View style={[styles.flex, pad, style]}>{children}</View>
         </ScreenFade>
+      ) : (
+        <View style={[styles.flex, pad, style]}>{children}</View>
       )}
     </SafeAreaView>
   );

@@ -91,6 +91,7 @@ export default function Login() {
           value={code}
           onChangeText={setCode}
           placeholder="123456"
+          accessibilityLabel="Six digit code"
           placeholderTextColor={color.muted}
           keyboardType="number-pad"
           maxLength={6}
@@ -132,6 +133,7 @@ export default function Login() {
         value={email}
         onChangeText={setEmail}
         placeholder="name@example.com"
+          accessibilityLabel="Email address"
         placeholderTextColor={color.muted}
         autoCapitalize="none"
         keyboardType="email-address"
@@ -147,6 +149,7 @@ export default function Login() {
         value={username}
         onChangeText={setUsername}
         placeholder="username"
+          accessibilityLabel="Username"
         placeholderTextColor={color.muted}
         autoCapitalize="none"
         style={inputStyle}

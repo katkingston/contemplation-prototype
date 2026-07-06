@@ -130,6 +130,13 @@ export const timing = {
   addTimeChoicesMin: [1, 2, 3, 5],
 } as const;
 
+/** Rating-prompt logic — tune freely; RatingPrompt.tsx reads these. */
+export const review = {
+  minCompletions: 3,
+  cooldownDays: 14,
+  maxAsks: 2,
+} as const;
+
 export const limits = {
   diaryMaxWords: 150,
   voiceMaxSeconds: 60,

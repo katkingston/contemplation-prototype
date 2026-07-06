@@ -10,7 +10,7 @@ import { TabScreen } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap } from '@/components/ui';
-import { orderedSeries, seriesLength } from '@/content/series';
+import { COMING_SOON, orderedSeries, seriesLength } from '@/content/series';
 import {
   isSeriesCompleted,
   isSeriesUnlocked,
@@ -67,10 +67,27 @@ export default function Library() {
           </Pressable>
         );
       })}
-      <Gap size="md" />
-      <AppText variant="caption" muted>
-        More series coming soon.
+      <Gap size="xl" />
+      <AppText variant="label" muted>
+        Coming soon
       </AppText>
+      {COMING_SOON.map((c) => (
+        <View key={c.title} style={[styles.row, { opacity: 0.5 }]}>
+          <View style={[styles.thumb, { backgroundColor: color.faint }]} />
+          <View style={{ flex: 1 }}>
+            <AppText variant="label" muted>
+              {c.tag}
+            </AppText>
+            <AppText variant="bodyBold" muted>
+              {c.title}
+            </AppText>
+          </View>
+          <AppText variant="label" muted>
+            Soon
+          </AppText>
+        </View>
+      ))}
+      <Gap size="lg" />
     </TabScreen>
   );
 }

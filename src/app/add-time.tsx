@@ -8,7 +8,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CrisisButton } from '@/components/CrisisButton';
 import { AppText, Button, Gap } from '@/components/ui';
 import { getSeries } from '@/content/series';
 import { color, radius, space, timing } from '@/theme/tokens';
@@ -57,9 +56,6 @@ export default function AddTime() {
         style={[StyleSheet.absoluteFill, { opacity: 0.45 }]}
       />
       <SafeAreaView style={styles.content}>
-        <View style={{ alignItems: 'flex-end', paddingTop: space.sm }}>
-          <CrisisButton dim />
-        </View>
         <View style={{ flex: 1 }} />
         <AppText variant="title" dark>
           Add Time

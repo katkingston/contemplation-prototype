@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import React, { useState } from 'react';
-import { Alert, Platform, Share, Switch } from 'react-native';
+import { Alert, Linking, Platform, Share, Switch } from 'react-native';
 import { ResourcesList } from '@/components/CrisisButton';
 import { AppText, Button, Gap, ListRow, Screen, Sheet } from '@/components/ui';
 import { activeSeries, progressFor } from '@/services/logic';
@@ -103,6 +103,14 @@ export default function Settings() {
         sub="includes thoughts & voice memo references"
         onPress={exportData}
         testID="export-data"
+      />
+      <ListRow
+        label="Send feedback"
+        sub="tell us what to improve"
+        onPress={() =>
+          Linking.openURL('mailto:hey@katkingston.design?subject=Contemplate%20feedback')
+        }
+        testID="settings-feedback"
       />
       <ListRow
         label="Delete account"

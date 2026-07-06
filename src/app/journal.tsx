@@ -6,7 +6,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { CrisisButton } from '@/components/CrisisButton';
 import { VoiceRecorder, WordCapInput, countWords } from '@/components/diary';
 import { AppText, Button, Gap, Row, Screen, Sheet, Spacer } from '@/components/ui';
 import { journalHelp } from '@/content/copy';
@@ -71,7 +70,6 @@ export default function Journal() {
       <Gap size="sm" />
       <Row between>
         <Button label="Instructions ?" kind="ghost" small onPress={() => setShowHelp(true)} />
-        <CrisisButton />
       </Row>
       <Gap size="md" />
       <AppText variant="title">Reflect</AppText>

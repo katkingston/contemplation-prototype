@@ -304,3 +304,21 @@ export function orderedSeries(): Series[] {
 export function seriesLength(s: Series): number {
   return s.contemplations.length;
 }
+
+/**
+ * Coming-soon series (titles approved July 2026). Source frameworks kept for
+ * the content team: Yalom's four concerns; anticipatory grief & ambiguous
+ * loss; Erikson & TMT; Neimeyer & Janoff-Bulman; Stroebe & Schut's dual
+ * process model; Buddhist Five Remembrances; Continuing Bonds; Worden.
+ */
+export const COMING_SOON: { title: string; tag: string }[] = [
+  { title: 'Contemplations for Legacy Work', tag: 'Legacy' },
+  { title: 'Existential Givens', tag: 'Identity' },
+  { title: 'Contemplations for Caregiving', tag: 'Caregiving' },
+  { title: 'Contemplations for Generativity', tag: 'Purpose' },
+  { title: 'Meaning Reconstruction After Loss', tag: 'Loss' },
+  { title: 'Movement Between Grieving and Living', tag: 'Grief' },
+  { title: 'The Five Remembrances', tag: 'Tradition' },
+  { title: 'Maintaining Relationship with the Deceased', tag: 'Continuing bonds' },
+  { title: 'Worden\u2019s Tasks in Mourning', tag: 'Mourning' },
+];

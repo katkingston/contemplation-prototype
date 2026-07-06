@@ -5,11 +5,10 @@
  * Subscription lives on Account, not here.
  */
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
-import { ResourcesList } from '@/components/CrisisButton';
-import { AppText, Gap, Sheet } from '@/components/ui';
+import { AppText, Gap } from '@/components/ui';
 import { getSeries, orderedSeries } from '@/content/series';
 import { isSeriesCompleted } from '@/services/logic';
 import { useApp } from '@/services/provider';
@@ -17,12 +16,31 @@ import { space } from '@/theme/tokens';
 
 const INDEX: { label: string; route: string; testID: string }[] = [
   { label: 'Series', route: '/library', testID: 'journey-series' },
-  { label: 'Journal', route: '/reflections', testID: 'journey-journal' },
+  { label: 'Your Journal', route: '/reflections', testID: 'journey-journal' },
+  { label: 'Learn', route: '/learn', testID: 'journey-learn' },
+];
+
+/** Rotates daily. Death-awareness voices across traditions. */
+const QUOTES: { text: string; by: string }[] = [
+  {
+    text: 'You could leave life right now. Let that determine what you do and say and think.',
+    by: 'Marcus Aurelius',
+  },
+  { text: 'Death is not the opposite of life, but a part of it.', by: 'Haruki Murakami' },
+  { text: 'Let me not die while I am still alive.', by: 'Jewish proverb' },
+  { text: 'The trouble is, you think you have time.', by: 'attributed to Buddhist teaching' },
+  {
+    text: 'To begin depriving death of its greatest advantage over us, let us deprive death of its strangeness.',
+    by: 'Michel de Montaigne',
+  },
 ];
 
 export default function Journey() {
   const { data } = useApp();
-  const [showResources, setShowResources] = useState(false);
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400_000,
+  );
+  const quote = QUOTES[dayOfYear % QUOTES.length];
   const recent = [...data.diary]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 3);
@@ -30,7 +48,15 @@ export default function Journey() {
 
   return (
     <TabScreen active="journey" dark>
-      <Gap size="xxl" />
+      <Gap size="xl" />
+      <AppText variant="body" dark style={{ fontStyle: 'italic' }}>
+        “{quote.text}”
+      </AppText>
+      <Gap size="xs" />
+      <AppText variant="label" dark muted>
+        {quote.by}
+      </AppText>
+      <Gap size="xl" />
       {INDEX.map((item) => (
         <Pressable
           key={item.route}
@@ -122,36 +148,22 @@ export default function Journey() {
         ))
       )}
 
-      <Gap size="xxl" />
+      {/* Push resources toward the bottom of the screen */}
+      <View style={{ flexGrow: 1, minHeight: space.xxl }} />
       <View style={styles.rule} />
-      {[
-        {
-          label: 'Mental Health Resources',
-          onPress: () => setShowResources(true),
-          testID: 'journey-resources',
-        },
-      ].map((row) => (
-        <Pressable
-          key={row.label}
-          accessibilityRole="button"
-          accessibilityLabel={row.label}
-          onPress={row.onPress}
-          style={({ pressed }) => [styles.utilityRow, pressed && { opacity: 0.6 }]}
-          testID={row.testID}>
-          <AppText variant="bodyBold" dark>
-            {row.label}
-          </AppText>
-          <AppText variant="body" dark muted>
-            {'›'}
-          </AppText>
-        </Pressable>
-      ))}
-      <Sheet
-        visible={showResources}
-        onClose={() => setShowResources(false)}
-        title="Mental Health Resources">
-        <ResourcesList />
-      </Sheet>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Mental Health Resources"
+        onPress={() => router.push('/resources')}
+        style={({ pressed }) => [styles.utilityRow, pressed && { opacity: 0.6 }]}
+        testID="journey-resources">
+        <AppText variant="bodyBold" dark>
+          Mental Health Resources
+        </AppText>
+        <AppText variant="body" dark muted>
+          {'\u203a'}
+        </AppText>
+      </Pressable>
     </TabScreen>
   );
 }

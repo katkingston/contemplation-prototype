@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ScreenFade } from '@/components/Transitions';
+import { Fade } from '@/components/Transitions';
 import { activeSeries, dropLabel, isDropAvailable, nextDropAt } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, space, type } from '@/theme/tokens';
@@ -87,7 +87,7 @@ export function TabScreen({
           { paddingBottom: 120, flexGrow: 1 },
         ]}
         keyboardShouldPersistTaps="handled">
-        <ScreenFade>{children}</ScreenFade>
+        <Fade style={{ flex: 1 }}>{children}</Fade>
       </ScrollView>
       <BottomNav active={active} />
     </SafeAreaView>

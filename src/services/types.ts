@@ -64,6 +64,10 @@ export interface Settings {
   notificationsEnabled: boolean;
   musicDefaultOn: boolean;
   timerDefaultMin: number;
+  /** App Store rating prompt state (logic/tuning in tokens.ts `review`). */
+  reviewAsks: number;
+  reviewLastAt: string | null;
+  reviewDone: boolean;
 }
 
 export type AnswerValue = number | string | string[];
@@ -86,6 +90,9 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: false,
   musicDefaultOn: true,
   timerDefaultMin: 1,
+  reviewAsks: 0,
+  reviewLastAt: null,
+  reviewDone: false,
 };
 
 export const EMPTY_DATA: AppData = {
