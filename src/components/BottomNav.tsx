@@ -44,9 +44,15 @@ export function BottomNav({ active }: { active: TabKey }) {
             onPress={() => !isActive && router.replace(t.route as never)}
             style={styles.item}
             testID={`tab-${t.key}`}>
-            <Text style={[styles.glyph, { opacity: isActive ? 1 : 0.45 }]}>
-              {t.glyph(initial)}
-            </Text>
+            {t.key === 'account' ? (
+              <View style={[styles.avatarCircle, { opacity: isActive ? 1 : 0.45 }]}>
+                <Text style={styles.avatarInitial}>{initial}</Text>
+              </View>
+            ) : (
+              <Text style={[styles.glyph, { opacity: isActive ? 1 : 0.45 }]}>
+                {t.glyph(initial)}
+              </Text>
+            )}
             {isActive && <Text style={styles.label}>{t.label}</Text>}
           </Pressable>
         );
@@ -105,6 +111,20 @@ const styles = StyleSheet.create({
   },
   item: { flex: 1, alignItems: 'center', gap: 6, minHeight: 44 },
   glyph: { fontSize: 20, color: color.onDark, fontFamily: type.body.fontFamily },
+  avatarCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    borderColor: color.onDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    fontSize: 11,
+    color: color.onDark,
+    fontFamily: type.bodyBold.fontFamily,
+  },
   label: {
     ...type.caption,
     textTransform: 'uppercase',
