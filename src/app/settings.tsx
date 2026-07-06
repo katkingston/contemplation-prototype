@@ -125,7 +125,7 @@ export default function Settings() {
           />
           <ListRow
             label="Design system"
-            sub="living style guide — tokens & components"
+            sub="living style guide · tokens & components"
             onPress={() => router.push('/styleguide')}
             testID="open-styleguide"
           />
@@ -141,14 +141,14 @@ export default function Settings() {
       </Sheet>
       <Sheet visible={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete account?">
         <AppText variant="body">
-          This permanently deletes your account and all data — progress, reflections, and voice
+          This permanently deletes your account and all data: progress, reflections, and voice
           memos. This cannot be undone.
         </AppText>
         <Gap size="lg" />
         <Button label="Delete everything" kind="danger" onPress={doDelete} testID="confirm-delete" />
         <Gap size="xs" />
         <AppText variant="caption" muted center>
-          True deletion, not deactivation — required by Apple guideline 5.1.1(v).
+          True deletion, not deactivation. Required by Apple guideline 5.1.1(v).
         </AppText>
       </Sheet>
     </Screen>

@@ -70,7 +70,7 @@ export default function SeriesDetail() {
       return;
     }
     if (!unlocked) {
-      notify('Complete the current series first — this one unlocks after.');
+      notify('Complete the current series first. This one unlocks after.');
       return;
     }
     if (!dropReady) {
@@ -88,7 +88,7 @@ export default function SeriesDetail() {
   };
 
   const onShare = () =>
-    shareMessage(`${series.title} — a contemplation series on Contemplate. ${SHARE_URL}`);
+    shareMessage(`${series.title}, a contemplation series on Contemplate. ${SHARE_URL}`);
 
   return (
     <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="series-detail">
@@ -117,7 +117,7 @@ export default function SeriesDetail() {
         <View style={{ paddingHorizontal: space.lg }}>
           <Gap size="lg" />
           <AppText variant="label" muted>
-            Series {series.displayOrder} · {len} contemplations
+            {series.tag} · {len} contemplations
           </AppText>
           <Gap size="sm" />
           <AppText variant="title">{series.title}</AppText>
@@ -154,7 +154,7 @@ export default function SeriesDetail() {
                   ) : null}
                 </View>
                 <AppText variant="small" muted>
-                  {done ? '✓' : today ? '—' : ''}
+                  {done ? '✓' : today ? '·' : ''}
                 </AppText>
               </View>
             );

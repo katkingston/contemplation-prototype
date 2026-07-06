@@ -22,6 +22,8 @@ export interface Series {
   id: string;
   /** 1-based display order; also gating order (a series unlocks when the prior one completes). */
   displayOrder: number;
+  /** Category tag shown in place of series numbers (catalog will keep growing). */
+  tag: string;
   title: string;
   theme: string;
   introSlides: string[];
@@ -51,6 +53,7 @@ function mk(
 export const SERIES: Series[] = [
   {
     id: 's1-impermanence',
+    tag: 'Impermanence',
     displayOrder: 1,
     title: 'Becoming Aware of Impermanence',
     theme:
@@ -99,6 +102,7 @@ export const SERIES: Series[] = [
   },
   {
     id: 's2-connection',
+    tag: 'Connection',
     displayOrder: 2,
     title: 'Deepening Appreciation and Connection',
     theme: 'Connect awareness of impermanence to gratitude and relationships.',
@@ -149,6 +153,7 @@ export const SERIES: Series[] = [
   },
   {
     id: 's3-fear-identity',
+    tag: 'Identity',
     displayOrder: 3,
     title: 'Exploring Fear and Identity',
     theme: 'Gently introducing emotional and existential reflection.',
@@ -197,6 +202,7 @@ export const SERIES: Series[] = [
   },
   {
     id: 's4-intention',
+    tag: 'Intention',
     displayOrder: 4,
     title: 'Living With Greater Intention',
     theme: 'Integrating mortality awareness into purposeful living.',
@@ -269,7 +275,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
     id: 'intro-2',
     sequenceIndex: 1,
     hint: 'Full presence',
-    prompt: 'When did you last feel fully present — and what made that moment different?',
+    prompt: 'When did you last feel fully present, and what made that moment different?',
     videoUri: null,
     gradient: ['#20261b', '#5a6136'],
   },

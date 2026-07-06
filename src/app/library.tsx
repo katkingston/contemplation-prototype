@@ -23,7 +23,7 @@ export default function Library() {
   const { data } = useApp();
 
   return (
-    <TabScreen active="menu">
+    <TabScreen active="journey">
       <Gap size="xl" />
       <AppText variant="title">Series</AppText>
       <Gap size="sm" />
@@ -55,7 +55,7 @@ export default function Library() {
             </View>
             <View style={{ flex: 1 }}>
               <AppText variant="label" muted>
-                Series {s.displayOrder}
+                {s.tag}
               </AppText>
               <AppText variant="bodyBold">{s.title}</AppText>
               <Gap size="xs" />

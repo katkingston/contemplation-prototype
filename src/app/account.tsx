@@ -51,8 +51,17 @@ export default function Account() {
 
   const shareGuestPass = () =>
     shareMessage(
-      `${firstName} sent you a week on ${APP_NAME} — a daily contemplation practice. ${SHARE_URL}`,
+      `${firstName} sent you a week on ${APP_NAME}, a daily contemplation practice. ${SHARE_URL}`,
     );
+
+  // Current plan, from the newest active grant (mock until RevenueCat).
+  const now = Date.now();
+  const activeGrant = [...data.grants]
+    .filter((g) => (g.expiresAt == null || new Date(g.expiresAt).getTime() > now))
+    .sort((a, b) => b.startsAt.localeCompare(a.startsAt))[0];
+  const planName = activeGrant
+    ? { series_pack: 'Series Pack', monthly: 'Monthly', annual: 'Annual' }[activeGrant.productType]
+    : 'No active plan';
 
   const statCells = [
     { n: stats.currentStreak, label: 'Current streak' },
@@ -84,6 +93,21 @@ export default function Account() {
           </AppText>
         </View>
       </Row>
+
+      {/* Subscription */}
+      <Eyebrow>Subscription</Eyebrow>
+      <ListRow
+        label={planName}
+        sub={
+          activeGrant?.expiresAt
+            ? `access until ${new Date(activeGrant.expiresAt).toLocaleDateString()}`
+            : activeGrant
+              ? 'active'
+              : 'choose a plan to continue your practice'
+        }
+        onPress={() => router.push('/subscription')}
+        testID="account-subscription"
+      />
 
       {/* Practice stats */}
       <Eyebrow>Practice stats</Eyebrow>
@@ -133,7 +157,7 @@ export default function Account() {
         <Gap size="lg" />
         <Row between>
           <AppText variant="caption" style={{ color: color.onDarkMuted, flex: 1 }}>
-            Prototype: shares a link to the app — real passes arrive with payments.
+            Prototype: shares a link to the app. Real passes arrive with payments.
           </AppText>
           <Button label="Share" kind="secondary" dark small onPress={shareGuestPass} testID="guest-pass-share" />
         </Row>
@@ -160,7 +184,7 @@ export default function Account() {
                 month: 'long',
                 day: 'numeric',
               })
-            : '—'}
+            : '·'}
         </AppText>
       </Pressable>
       <Gap size="lg" />

@@ -72,7 +72,7 @@ export default function Splash() {
         </AppText>
         <Gap size="sm" />
         <AppText variant="body" muted center style={{ maxWidth: 300 }}>
-          Check your connection and try again — nothing has been lost.
+          Check your connection and try again. Nothing has been lost.
         </AppText>
         <Gap size="lg" />
         <Button label="Try again" arrow onPress={() => void retryHydration()} testID="retry-hydration" />

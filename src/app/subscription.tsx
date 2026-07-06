@@ -53,7 +53,7 @@ export default function Subscription() {
           </AppText>
         )}
         <AppText variant="caption" muted>
-          Prototype: purchases are simulated — no real charges.
+          Prototype: purchases are simulated, no real charges.
         </AppText>
       </View>
       <Gap size="md" />

@@ -84,7 +84,7 @@ export function ServicesProvider({ children }: { children: React.ReactNode }) {
         setError(
           e instanceof Error && e.message
             ? e.message
-            : 'Something went wrong — your last change may not have saved. Please try again.',
+            : 'Something went wrong. Your last change may not have saved, please try again.',
         );
         return false;
       }

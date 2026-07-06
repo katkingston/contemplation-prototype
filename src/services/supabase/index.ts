@@ -287,7 +287,7 @@ export class SupabaseServices implements AppServices {
     const { error } = await sb.functions.invoke('delete-account');
     if (error) {
       throw new Error(
-        'Account deletion failed on the server — nothing was deleted. Please try again.',
+        'Account deletion failed on the server. Nothing was deleted, please try again.',
       );
     }
     await sb.auth.signOut().catch(() => {});

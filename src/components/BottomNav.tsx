@@ -12,11 +12,11 @@ import { activeSeries, dropLabel, isDropAvailable, nextDropAt } from '@/services
 import { useApp } from '@/services/provider';
 import { color, space, type } from '@/theme/tokens';
 
-export type TabKey = 'today' | 'menu' | 'account';
+export type TabKey = 'today' | 'journey' | 'account';
 
 const TABS: { key: TabKey; glyph: (initial: string) => string; label: string; route: string }[] = [
   { key: 'today', glyph: () => '❋', label: 'Today', route: '/home' },
-  { key: 'menu', glyph: () => '≡', label: 'Menu', route: '/menu' },
+  { key: 'journey', glyph: () => '≡', label: 'Journey', route: '/journey' },
   { key: 'account', glyph: (initial) => initial, label: 'Account', route: '/account' },
 ];
 

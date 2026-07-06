@@ -15,7 +15,7 @@ export const disclaimer = {
     'By continuing, you confirm you are 12 years of age or older and have read this notice.',
   ],
   resourcesButton: 'Mental Health Resources',
-  continueButton: 'I Understand — Continue',
+  continueButton: 'I Understand · Continue',
 } as const;
 
 export interface ResourceLink {
@@ -75,17 +75,17 @@ export const instructions = {
     'Set your in-app timer. Spend as much time as you like.\nTo get started, we recommend:',
   steps: [
     'Read the contemplation, then sit with your initial thoughts for 1–2 minutes.',
-    'Read it again. Notice which words draw your attention — stay with those for 1–2 minutes.',
+    'Read it again. Notice which words draw your attention, stay with those for 1–2 minutes.',
     'Read it a third time. Reflect on how these thoughts might be showing up in your relationships or choices.',
   ],
   outro:
-    'The videos and artwork are there to spark curiosity. Sit with what arises, then when ready, use the thought diary to write, or voice-record your insights — follow what feels right.',
+    'The videos and artwork are there to spark curiosity. Sit with what arises, then when ready, use the thought diary to write, or voice-record your insights, follow what feels right.',
 } as const;
 
 export const journalHelp = {
   title: 'Your Thought Diary',
   paragraphs: [
-    'Write or speak freely — there are no right answers.',
+    'Write or speak freely, there are no right answers.',
     'Your reflections are saved to your private bank and revealed back to you when you complete the series.',
     'If you return to a contemplation you have reflected on before, your past reflection will be shown.',
   ],
@@ -97,7 +97,7 @@ export const paywall = {
     'A daily practice that turns mortality from a source of fear into one of clarity, gratitude, and presence.',
   trialTitle: 'Start with 3 days free',
   trialNote:
-    'No charge today — payment confirmed now, billed only after trial. We’ll send reminders before your free trial ends. Cancel anytime in Subscription.',
+    'No charge today · payment confirmed now, billed only after trial. We’ll send reminders before your free trial ends. Cancel anytime in Subscription.',
   cta: 'Start free trial',
 } as const;
 
@@ -117,9 +117,9 @@ export interface Plan {
  * pack is the low-commitment entry, so no extra discounting at launch.
  */
 export const plans: Plan[] = [
-  { productType: 'series_pack', title: 'Series Pack', price: '$7.99', detail: 'Unlocks one series — try without committing' },
+  { productType: 'series_pack', title: 'Series Pack', price: '$7.99', detail: 'Unlocks one series · try without committing' },
   { productType: 'monthly', title: 'Monthly', price: '$21.99 / month', detail: '30 days of all-access' },
-  { productType: 'annual', title: 'Annual (best value)', price: '$89.99 / year', detail: '3 days free, then $7.50 / mo equivalent — save 66%' },
+  { productType: 'annual', title: 'Annual (best value)', price: '$89.99 / year', detail: '3 days free, then $7.50 / mo equivalent · save 66%' },
 ];
 
 export const intakeQuestions = [
@@ -184,9 +184,9 @@ export const baselineIntro = {
 
 export const dayExit = {
   title: 'See you tomorrow',
-  body: 'Your reflection is saved. What you noticed today will keep working quietly — some of the most important parts of this practice happen after you put the phone down.',
+  body: 'Your reflection is saved. What you noticed today will keep working quietly, some of the most important parts of this practice happen after you put the phone down.',
   body2:
-    'Carry today’s question with you. If it resurfaces during your day, let it — that’s the practice taking root.',
+    'Carry today’s question with you. If it resurfaces during your day, let it, that’s the practice taking root.',
   body3:
     'Come back tomorrow for the next contemplation. If you miss a day, you’ll resume right where you left off.',
   /** One rotating closing line per day (indexed by day-of-practice). */

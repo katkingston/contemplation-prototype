@@ -36,7 +36,7 @@ function SectionHeader({ label, onSeeAll }: { label: string; onSeeAll?: () => vo
       {onSeeAll ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`See all — ${label}`}
+          accessibilityLabel={`See all, ${label}`}
           hitSlop={10}
           onPress={onSeeAll}>
           <AppText variant="label" muted>
@@ -103,7 +103,8 @@ export default function Home() {
             />
             <View style={styles.heroScrim} />
             <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
-              Today
+              Today ·{' '}
+              {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
             </AppText>
             <View style={{ flex: 1 }} />
             <AppText variant="small" style={{ color: 'rgba(239,233,219,0.85)' }}>
@@ -111,7 +112,7 @@ export default function Home() {
             </AppText>
             <Gap size="sm" />
             <AppText variant="display" style={{ color: '#efe9db' }}>
-              {atWrap ? 'Complete' : `No. ${idx + 1} — ${next?.hint ?? ''}`}
+              {atWrap ? 'Complete' : `No. ${idx + 1} · ${next?.hint ?? ''}`}
             </AppText>
             <Gap size="xl" />
             {!atWrap && !dropReady && dropAt ? (
@@ -134,7 +135,7 @@ export default function Home() {
             <>
               <Gap size="sm" />
               <AppText variant="caption" style={{ color: color.danger }}>
-                Your access has ended — renew in Subscription to continue.
+                Your access has ended. Renew in Subscription to continue.
               </AppText>
             </>
           )}
@@ -159,7 +160,7 @@ export default function Home() {
               <Pressable
                 key={c.id}
                 accessibilityRole="button"
-                accessibilityLabel={`No. ${i + 1} — ${c.hint}`}
+                accessibilityLabel={`No. ${i + 1} · ${c.hint}`}
                 onPress={today ? onPlay : () => openSeries(series.id)}
                 style={({ pressed }) => [{ width: cardW }, pressed && { opacity: 0.7 }]}
                 testID={`rail-${c.id}`}>
@@ -224,7 +225,7 @@ export default function Home() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <AppText variant="label" muted>
-                    Series {s.displayOrder}
+                    {s.tag}
                     {completed ? ' · Complete' : !unlocked ? ' · Locked' : ''}
                   </AppText>
                   <AppText variant="bodyBold" numberOfLines={2}>

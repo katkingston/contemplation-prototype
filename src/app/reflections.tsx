@@ -13,52 +13,73 @@ import { useApp } from '@/services/provider';
 
 export default function Reflections() {
   const { data } = useApp();
-  const revealed = data.diary.filter((e) => e.isRevealed);
 
   return (
-    <TabScreen active="menu">
+    <TabScreen active="journey">
       <Gap size="xl" />
       <AppText variant="title">Journal</AppText>
       <Gap size="sm" />
       <AppText variant="small" muted>
-        Reflections are revealed when you complete their series — then they live here.
+        Every reflection is registered the day you write it. The words themselves are
+        revealed when you complete their series.
       </AppText>
-      {revealed.length === 0 ? (
+      {data.diary.length === 0 ? (
         <>
           <Gap size="xl" />
           <AppText variant="body" muted>
-            Nothing revealed yet. Keep sitting with the daily contemplations — when a
-            series completes, everything you wrote and recorded returns to you at once.
+            Nothing here yet. Your first reflection arrives with your first
+            contemplation.
           </AppText>
         </>
       ) : (
         orderedSeries().map((s) => {
-          const entries = revealed.filter((e) => e.seriesId === s.id);
+          const entries = data.diary.filter((e) => e.seriesId === s.id);
           if (entries.length === 0) return null;
           return (
             <View key={s.id}>
               <Eyebrow>{`${getSeries(s.id)?.title ?? s.id}`}</Eyebrow>
-              {entries.map((e) => (
-                <View key={e.id} style={{ marginBottom: 20 }}>
-                  <AppText variant="label" muted>
-                    {new Date(e.createdAt).toDateString()}
-                  </AppText>
-                  <Gap size="xs" />
-                  <AppText variant="bodyBold">{e.prompt}</AppText>
-                  {e.text ? (
-                    <>
-                      <Gap size="xs" />
-                      <AppText variant="body">{e.text}</AppText>
-                    </>
-                  ) : null}
-                  {e.audioUri ? (
-                    <>
-                      <Gap size="sm" />
-                      <MemoPlayer uri={e.audioUri} durationSec={e.audioDurationSec} />
-                    </>
-                  ) : null}
-                </View>
-              ))}
+              {entries.map((e) =>
+                e.isRevealed ? (
+                  <View key={e.id} style={{ marginBottom: 20 }}>
+                    <AppText variant="label" muted>
+                      {new Date(e.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </AppText>
+                    <Gap size="xs" />
+                    <AppText variant="bodyBold">{e.prompt}</AppText>
+                    {e.text ? (
+                      <>
+                        <Gap size="xs" />
+                        <AppText variant="body">{e.text}</AppText>
+                      </>
+                    ) : null}
+                    {e.audioUri ? (
+                      <>
+                        <Gap size="sm" />
+                        <MemoPlayer uri={e.audioUri} durationSec={e.audioDurationSec} />
+                      </>
+                    ) : null}
+                  </View>
+                ) : (
+                  // Registered but not yet revealed: date and series only, grayed.
+                  <View key={e.id} style={{ marginBottom: 20, opacity: 0.45 }}>
+                    <AppText variant="label" muted>
+                      {new Date(e.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </AppText>
+                    <Gap size="xs" />
+                    <AppText variant="body" muted>
+                      A reflection is held here. It reveals when the series completes.
+                    </AppText>
+                  </View>
+                ),
+              )}
             </View>
           );
         })

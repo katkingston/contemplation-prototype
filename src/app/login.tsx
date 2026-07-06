@@ -51,7 +51,7 @@ export default function Login() {
       await services.requestEmailCode!(email.trim());
       setStage('code');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send the code — try again.');
+      setError(err instanceof Error ? err.message : 'Could not send the code. Try again.');
     } finally {
       setBusy(false);
     }
@@ -67,7 +67,7 @@ export default function Login() {
       // Returning users land on Home with their data; only new users take intake.
       router.replace(fresh.onboardingStep === 'done' ? '/home' : '/baseline-intro');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'That code didn’t work — try again.');
+      setError(err instanceof Error ? err.message : 'That code didn’t work. Try again.');
     } finally {
       setBusy(false);
     }

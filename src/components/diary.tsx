@@ -69,7 +69,7 @@ export function WordCapInput({
         variant="caption"
         muted
         style={{ textAlign: 'right', color: atCap ? color.danger : color.muted }}>
-        {words} / {limits.diaryMaxWords} words{atCap ? ' — limit reached' : ''}
+        {words} / {limits.diaryMaxWords} words{atCap ? ' · limit reached' : ''}
       </AppText>
     </View>
   );
