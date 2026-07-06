@@ -14,6 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenFade } from '@/components/Transitions';
 import { color, radius, space, type } from '@/theme/tokens';
 
 // ---------- Text ----------
@@ -73,10 +74,12 @@ export function Screen({
           style={styles.flex}
           contentContainerStyle={[pad, { paddingBottom: space.xxl, flexGrow: 1 }, style]}
           keyboardShouldPersistTaps="handled">
-          {children}
+          <ScreenFade>{children}</ScreenFade>
         </ScrollView>
       ) : (
-        <View style={[styles.flex, pad, style]}>{children}</View>
+        <ScreenFade style={{ flex: 1 }}>
+          <View style={[styles.flex, pad, style]}>{children}</View>
+        </ScreenFade>
       )}
     </SafeAreaView>
   );

@@ -7,6 +7,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '@/services/provider';
 import { color, radius, space, type } from '@/theme/tokens';
@@ -31,12 +32,19 @@ const AUTO_DISMISS_MS = 3500;
 export function NoticeHost() {
   const insets = useSafeAreaInsets();
   const { error, clearError } = useApp();
+  const reducedMotion = useReducedMotion();
   const [msg, setMsg] = useState<Msg | null>(null);
   const slide = useRef(new Animated.Value(-120)).current;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dismiss = () => {
     if (timer.current) clearTimeout(timer.current);
+    if (reducedMotion) {
+      slide.setValue(-120);
+      setMsg(null);
+      if (error) clearError();
+      return;
+    }
     Animated.timing(slide, {
       toValue: -120,
       duration: 220,
@@ -51,12 +59,16 @@ export function NoticeHost() {
   const show = (m: Msg) => {
     if (timer.current) clearTimeout(timer.current);
     setMsg(m);
-    Animated.timing(slide, {
-      toValue: 0,
-      duration: 260,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false, // web has no native driver; JS is fine for a pill
-    }).start();
+    if (reducedMotion) {
+      slide.setValue(0); // appear in place, no motion
+    } else {
+      Animated.timing(slide, {
+        toValue: 0,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false, // web has no native driver; JS is fine for a pill
+      }).start();
+    }
     timer.current = setTimeout(dismiss, AUTO_DISMISS_MS);
   };
 
@@ -73,12 +85,16 @@ export function NoticeHost() {
     if (error) {
       if (timer.current) clearTimeout(timer.current);
       setMsg({ id: ++seq, kind: 'error', text: error });
-      Animated.timing(slide, {
-        toValue: 0,
-        duration: 260,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false, // web has no native driver; JS is fine for a pill
-      }).start();
+      if (reducedMotion) {
+        slide.setValue(0);
+      } else {
+        Animated.timing(slide, {
+          toValue: 0,
+          duration: 260,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false, // web has no native driver; JS is fine for a pill
+        }).start();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);

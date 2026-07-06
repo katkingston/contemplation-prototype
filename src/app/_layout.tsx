@@ -29,7 +29,12 @@ export default function RootLayout() {
       <StatusBar style="auto" />
       <View style={{ flex: 1 }}>
         <Stack
-          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.paper } }}
+          screenOptions={{
+            headerShown: false,
+            animation: 'fade',
+            animationDuration: 260,
+            contentStyle: { backgroundColor: color.paper },
+          }}
         />
         <NoticeHost />
       </View>
