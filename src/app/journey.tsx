@@ -125,7 +125,6 @@ export default function Journey() {
       <Gap size="xxl" />
       <View style={styles.rule} />
       {[
-        { label: 'Settings', onPress: () => router.push('/settings'), testID: 'journey-settings' },
         {
           label: 'Mental Health Resources',
           onPress: () => setShowResources(true),

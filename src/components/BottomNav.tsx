@@ -16,7 +16,7 @@ export type TabKey = 'today' | 'journey' | 'account';
 
 const TABS: { key: TabKey; glyph: (initial: string) => string; label: string; route: string }[] = [
   { key: 'today', glyph: () => '❋', label: 'Today', route: '/home' },
-  { key: 'journey', glyph: () => '≡', label: 'Journey', route: '/journey' },
+  { key: 'journey', glyph: () => '꩜', label: 'Journey', route: '/journey' },
   { key: 'account', glyph: (initial) => initial, label: 'Account', route: '/account' },
 ];
 

@@ -178,6 +178,12 @@ export default function Account() {
 
       {/* Utility */}
       <Gap size="xl" />
+      <ListRow
+        label="Settings"
+        sub="notifications, music, data export, deletion"
+        onPress={() => router.push('/settings')}
+        testID="account-settings"
+      />
       {services.signOut ? (
         <ListRow label="Sign out" sub="your data stays safely in your account" onPress={signOut} />
       ) : null}
