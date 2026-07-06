@@ -4,10 +4,10 @@
  * this page grows as more series open up.
  */
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
+import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
@@ -17,7 +17,7 @@ import {
   progressFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { color, radius, seriesPalettes, space } from '@/theme/tokens';
 
 export default function Library() {
   const { data } = useApp();
@@ -45,11 +45,11 @@ export default function Library() {
             style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}
             testID={`library-${s.id}`}>
             <View style={styles.thumb}>
-              <LinearGradient
-                colors={[s.contemplations[0].gradient[0], s.contemplations[0].gradient[1]]}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+              <SeriesArt
+                gradient={s.contemplations[0].gradient}
+                accent={(seriesPalettes[s.id] ?? ['#232619', '#4c5232', '#6f7036'])[2]}
+                seed={s.displayOrder}
+                style={StyleSheet.absoluteFill as never}
               />
               {!unlocked && !done ? <View style={styles.thumbVeil} /> : null}
             </View>

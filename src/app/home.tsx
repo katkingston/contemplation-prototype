@@ -1,17 +1,17 @@
 /**
- * C1 — Home. Empty top (nav lives in the bottom bar, per Open reference).
- * The hero fills the first screen but REVEALS NOTHING: series, number within
- * the series, and a one-or-two-word hint. The question itself appears only in
- * the contemplation. Completed contemplations show their full prompt below.
+ * C1 — Home, Open-Discover style: artwork-led. The today hero REVEALS
+ * NOTHING (series, number, hint only — the question appears only inside the
+ * contemplation). Below: a horizontal artwork rail for the active series and
+ * image-led rows for all series. Section headers carry SEE ALL links.
  */
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '@/components/BottomNav';
+import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Button, Eyebrow, Gap, ListRow, Row, StatusPill } from '@/components/ui';
+import { AppText, Button, Gap } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
   activeSeries,
@@ -23,27 +23,48 @@ import {
   isSeriesUnlocked,
   nextDropAt,
   progressFor,
-  questionFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { color, radius, seriesPalettes, space } from '@/theme/tokens';
+
+function SectionHeader({ label, onSeeAll }: { label: string; onSeeAll?: () => void }) {
+  return (
+    <View style={styles.sectionHeader}>
+      <AppText variant="label" muted>
+        {label}
+      </AppText>
+      {onSeeAll ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`See all — ${label}`}
+          hitSlop={10}
+          onPress={onSeeAll}>
+          <AppText variant="label" muted>
+            See all →
+          </AppText>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
 
 export default function Home() {
   const { data } = useApp();
-  const { height: windowHeight } = useWindowDimensions();
-  const [listOpen, setListOpen] = useState(false);
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const series = activeSeries(data);
+  const palette = seriesPalettes[series.id] ?? ['#232619', '#4c5232', '#6f7036'];
   const p = progressFor(data, series.id);
   const atWrap = isSeriesAtWrap(data, series);
-  const idx = Math.min(p.currentIndex, seriesLength(series) - 1);
+  const len = seriesLength(series);
+  const idx = Math.min(p.currentIndex, len - 1);
   const next = series.contemplations[idx];
   const isFirstOfSeries = p.currentIndex === 0;
   const accessOk = hasActiveAccess(data, series.id);
   const dropReady = isDropAvailable(data, series.id);
   const dropAt = nextDropAt(data, series.id);
 
-  // Hero fills the first viewport above the bottom bar.
-  const heroHeight = Math.max(420, windowHeight - 210);
+  const heroHeight = Math.min(680, Math.max(420, windowHeight - 230));
+  const cardW = Math.min(190, windowWidth * 0.44);
 
   const onPlay = () => {
     if (atWrap) {
@@ -62,129 +83,171 @@ export default function Home() {
     }
   };
 
+  const openSeries = (id: string) =>
+    router.push({ pathname: '/series/[seriesId]', params: { seriesId: id } });
+
   return (
     <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="home-screen">
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: 120, flexGrow: 1 }}>
+        contentContainerStyle={{ paddingBottom: 120, flexGrow: 1 }}>
         <Gap size="md" />
-        <View style={[styles.hero, { height: heroHeight }]}>
-          <LinearGradient
-            colors={next ? [next.gradient[0], next.gradient[1]] : ['#333', '#555']}
-            style={StyleSheet.absoluteFill}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-          <AppText variant="label" style={{ color: 'rgba(239,233,219,0.75)' }}>
-            Today
-          </AppText>
-          <View style={{ flex: 1 }} />
-          <AppText variant="small" style={{ color: 'rgba(239,233,219,0.8)' }}>
-            {series.title}
-          </AppText>
-          <Gap size="sm" />
-          <AppText variant="display" style={{ color: '#efe9db' }}>
-            {atWrap ? 'Complete' : `No. ${idx + 1} — ${next?.hint ?? ''}`}
-          </AppText>
-          <Gap size="xl" />
-          {!atWrap && !dropReady && dropAt ? (
-            <AppText variant="label" style={{ color: 'rgba(239,233,219,0.85)' }}>
-              New contemplation at {dropLabel(dropAt)}
-            </AppText>
-          ) : (
-            <Button
-              label={atWrap ? 'See your wrap-up' : 'Begin'}
-              kind="secondary"
-              dark
-              arrow
-              onPress={onPlay}
-              testID="hero-play"
+        {/* Today hero — artwork-led */}
+        <View style={{ paddingHorizontal: space.lg }}>
+          <View style={[styles.hero, { height: heroHeight }]}>
+            <SeriesArt
+              gradient={next ? next.gradient : ['#333', '#555']}
+              accent={palette[2]}
+              seed={idx}
+              style={StyleSheet.absoluteFill as never}
             />
-          )}
-          <View style={{ flex: 1 }} />
-        </View>
-        {!accessOk && (
-          <>
+            <View style={styles.heroScrim} />
+            <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
+              Today
+            </AppText>
+            <View style={{ flex: 1 }} />
+            <AppText variant="small" style={{ color: 'rgba(239,233,219,0.85)' }}>
+              {series.title}
+            </AppText>
             <Gap size="sm" />
-            <AppText variant="caption" style={{ color: color.danger }}>
-              Your access has ended — renew in Subscription to continue.
+            <AppText variant="display" style={{ color: '#efe9db' }}>
+              {atWrap ? 'Complete' : `No. ${idx + 1} — ${next?.hint ?? ''}`}
             </AppText>
-          </>
-        )}
-        <Eyebrow>Your series</Eyebrow>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded: listOpen }}
-          onPress={() => setListOpen((o) => !o)}
-          testID="series-toggle">
-          <Row between>
-            <View style={{ flex: 1 }}>
-              <AppText variant="heading">
-                Series {series.displayOrder} — {series.title}
+            <Gap size="xl" />
+            {!atWrap && !dropReady && dropAt ? (
+              <AppText variant="label" style={{ color: 'rgba(239,233,219,0.9)' }}>
+                New contemplation at {dropLabel(dropAt)}
               </AppText>
-              <AppText variant="label" muted>
-                {p.currentIndex} of {seriesLength(series)} complete
+            ) : (
+              <Button
+                label={atWrap ? 'See your wrap-up' : 'Begin'}
+                kind="secondary"
+                dark
+                arrow
+                onPress={onPlay}
+                testID="hero-play"
+              />
+            )}
+            <View style={{ flex: 1 }} />
+          </View>
+          {!accessOk && (
+            <>
+              <Gap size="sm" />
+              <AppText variant="caption" style={{ color: color.danger }}>
+                Your access has ended — renew in Subscription to continue.
               </AppText>
-            </View>
-            <AppText variant="heading" muted>
-              {listOpen ? '⌃' : '⌄'}
-            </AppText>
-          </Row>
-        </Pressable>
-        {listOpen &&
-          series.contemplations.map((c, i) => {
+            </>
+          )}
+        </View>
+
+        {/* Active series — horizontal artwork rail */}
+        <Gap size="xl" />
+        <View style={{ paddingHorizontal: space.lg }}>
+          <SectionHeader
+            label={`This series · ${p.currentIndex} of ${len}`}
+            onSeeAll={() => openSeries(series.id)}
+          />
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: space.lg, gap: space.md }}>
+          {series.contemplations.map((c, i) => {
             const done = i < p.currentIndex;
             const today = i === p.currentIndex && !atWrap;
-            // Prompts stay hidden until completed — number + hint only.
-            const label = done ? questionFor(data, series, i) : `No. ${i + 1} — ${c.hint}`;
             return (
-              <ListRow
+              <Pressable
                 key={c.id}
-                label={label}
-                right={
-                  <StatusPill
-                    label={done ? '✓ Done' : today ? 'Today' : 'Upcoming'}
-                    kind={done ? 'done' : today ? 'progress' : 'locked'}
+                accessibilityRole="button"
+                accessibilityLabel={`No. ${i + 1} — ${c.hint}`}
+                onPress={today ? onPlay : () => openSeries(series.id)}
+                style={({ pressed }) => [{ width: cardW }, pressed && { opacity: 0.7 }]}
+                testID={`rail-${c.id}`}>
+                <View
+                  style={[
+                    styles.card,
+                    { width: cardW, height: cardW * 1.2 },
+                    !done && !today && { opacity: 0.55 },
+                  ]}>
+                  <SeriesArt
+                    gradient={c.gradient}
+                    accent={palette[2]}
+                    seed={i}
+                    style={StyleSheet.absoluteFill as never}
                   />
-                }
-                onPress={today ? onPlay : undefined}
-              />
+                  {done ? (
+                    <View style={styles.cardCheck}>
+                      <AppText variant="caption" style={{ color: color.onDark }}>
+                        ✓
+                      </AppText>
+                    </View>
+                  ) : null}
+                </View>
+                <Gap size="sm" />
+                <AppText variant="label" muted>
+                  No. {i + 1}
+                  {today ? ' · Today' : ''}
+                </AppText>
+                <AppText variant="bodyBold" numberOfLines={1}>
+                  {c.hint}
+                </AppText>
+              </Pressable>
             );
           })}
-        <Eyebrow>All series</Eyebrow>
-        {orderedSeries().map((s) => {
-          const completed = isSeriesCompleted(data, s);
-          const unlocked = isSeriesUnlocked(data, s);
-          const isActive = s.id === series.id;
-          const sp = progressFor(data, s.id);
-          return (
-            <ListRow
-              key={s.id}
-              label={`${s.displayOrder} · ${s.title}`}
-              sub={s.theme}
-              onPress={() =>
-                router.push({ pathname: '/series/[seriesId]', params: { seriesId: s.id } })
-              }
-              right={
-                <View style={{ alignItems: 'flex-end', gap: 6 }}>
-                  <StatusPill
-                    label={completed ? '✓ Done' : isActive ? 'In progress' : unlocked ? 'Available' : 'Locked'}
-                    kind={completed ? 'done' : isActive ? 'progress' : unlocked ? 'neutral' : 'locked'}
-                  />
-                  <SeriesDashes
-                    total={seriesLength(s)}
-                    done={Math.min(sp.currentIndex, seriesLength(s))}
-                    active={isActive && !completed}
+        </ScrollView>
+
+        {/* All series — image-led rows */}
+        <Gap size="xl" />
+        <View style={{ paddingHorizontal: space.lg }}>
+          <SectionHeader label="All series" onSeeAll={() => router.push('/library')} />
+          {orderedSeries().map((s) => {
+            const completed = isSeriesCompleted(data, s);
+            const unlocked = isSeriesUnlocked(data, s);
+            const sp = progressFor(data, s.id);
+            const sPalette = seriesPalettes[s.id] ?? palette;
+            const sLen = seriesLength(s);
+            return (
+              <Pressable
+                key={s.id}
+                accessibilityRole="button"
+                accessibilityLabel={s.title}
+                onPress={() => openSeries(s.id)}
+                style={({ pressed }) => [styles.seriesRow, pressed && { opacity: 0.6 }]}
+                testID={`home-series-${s.id}`}>
+                <View style={[styles.thumb, !unlocked && !completed && { opacity: 0.45 }]}>
+                  <SeriesArt
+                    gradient={s.contemplations[0].gradient}
+                    accent={sPalette[2]}
+                    seed={s.displayOrder}
+                    style={StyleSheet.absoluteFill as never}
                   />
                 </View>
-              }
-            />
-          );
-        })}
-        <Gap size="md" />
-        <AppText variant="caption" muted>
-          More series coming soon.
-        </AppText>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="label" muted>
+                    Series {s.displayOrder}
+                    {completed ? ' · Complete' : !unlocked ? ' · Locked' : ''}
+                  </AppText>
+                  <AppText variant="bodyBold" numberOfLines={2}>
+                    {s.title}
+                  </AppText>
+                  <Gap size="xs" />
+                  <SeriesDashes
+                    total={sLen}
+                    done={Math.min(sp.currentIndex, sLen)}
+                    active={s.id === series.id && !completed}
+                  />
+                </View>
+                <AppText variant="body" muted>
+                  {completed ? '✓' : '›'}
+                </AppText>
+              </Pressable>
+            );
+          })}
+          <Gap size="md" />
+          <AppText variant="caption" muted>
+            More series coming soon.
+          </AppText>
+        </View>
       </ScrollView>
       <BottomNav active="today" />
     </SafeAreaView>
@@ -200,4 +263,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     alignItems: 'flex-start',
   },
+  heroScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.30)' },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.line,
+    paddingTop: space.sm,
+    marginBottom: space.md,
+  },
+  card: {
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+  },
+  cardCheck: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(24,28,12,0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  seriesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingVertical: space.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: color.line,
+  },
+  thumb: { width: 64, height: 64, borderRadius: radius.sm, overflow: 'hidden' },
 });

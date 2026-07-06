@@ -5,12 +5,12 @@
  * hidden until completed (hard rule). Start + Share pinned LOW at the bottom.
  */
 import { router, useLocalSearchParams } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { notify } from '@/components/Notice';
 import { shareMessage } from '@/services/share';
+import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Button, Gap, Row } from '@/components/ui';
 import { getSeries, seriesLength } from '@/content/series';
@@ -24,7 +24,7 @@ import {
   questionFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { color, radius, seriesPalettes, space } from '@/theme/tokens';
 
 const SHARE_URL = 'https://katkingston.github.io/contemplation-prototype/';
 
@@ -96,11 +96,11 @@ export default function SeriesDetail() {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={styles.hero}>
-          <LinearGradient
-            colors={[series.contemplations[0].gradient[0], series.contemplations[0].gradient[1]]}
-            style={StyleSheet.absoluteFill}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <SeriesArt
+            gradient={series.contemplations[0].gradient}
+            accent={(seriesPalettes[series.id] ?? ['#232619', '#4c5232', '#6f7036'])[2]}
+            seed={series.displayOrder}
+            style={StyleSheet.absoluteFill as never}
           />
           <Pressable
             accessibilityRole="button"
