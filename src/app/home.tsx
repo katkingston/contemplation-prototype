@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Button, Gap } from '@/components/ui';
+import { AppText, Gap } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
   activeSeries,
@@ -66,6 +66,12 @@ export default function Home() {
   const heroHeight = Math.min(680, Math.max(420, windowHeight - 230));
   const cardW = Math.min(190, windowWidth * 0.44);
 
+  // Done for today: show the COMPLETED contemplation with a note (never
+  // tease tomorrow's hint early). Otherwise the hero is one big Start link.
+  const doneToday = !atWrap && !dropReady && dropAt != null && p.currentIndex > 0;
+  const shownIdx = doneToday ? p.currentIndex - 1 : idx;
+  const shown = series.contemplations[shownIdx];
+
   const onPlay = () => {
     if (atWrap) {
       router.push({ pathname: '/series-wrap', params: { seriesId: series.id } });
@@ -92,13 +98,24 @@ export default function Home() {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 120, flexGrow: 1 }}>
         <Gap size="md" />
-        {/* Today hero — artwork-led */}
+        {/* Today hero — artwork-led. Done-today shows the completed item;
+            otherwise the whole card is the Start link. */}
         <View style={{ paddingHorizontal: space.lg }}>
-          <View style={[styles.hero, { height: heroHeight }]}>
+          <Pressable
+            accessibilityRole={doneToday ? undefined : 'button'}
+            accessibilityLabel={doneToday ? undefined : 'Start today’s contemplation'}
+            disabled={doneToday}
+            onPress={onPlay}
+            style={({ pressed }) => [
+              styles.hero,
+              { height: heroHeight },
+              pressed && !doneToday && { opacity: 0.85 },
+            ]}
+            testID="hero-play">
             <SeriesArt
-              gradient={next ? next.gradient : ['#333', '#555']}
+              gradient={shown ? shown.gradient : ['#333', '#555']}
               accent={palette[2]}
-              seed={idx}
+              seed={shownIdx}
               style={StyleSheet.absoluteFill as never}
             />
             <View style={styles.heroScrim} />
@@ -112,25 +129,28 @@ export default function Home() {
             </AppText>
             <Gap size="sm" />
             <AppText variant="display" style={{ color: '#efe9db' }}>
-              {atWrap ? 'Complete' : `No. ${idx + 1} · ${next?.hint ?? ''}`}
+              {atWrap ? 'Complete' : `No. ${shownIdx + 1} · ${shown?.hint ?? ''}`}
             </AppText>
             <Gap size="xl" />
-            {!atWrap && !dropReady && dropAt ? (
-              <AppText variant="label" style={{ color: 'rgba(239,233,219,0.9)' }}>
-                New contemplation at {dropLabel(dropAt)}
-              </AppText>
+            {doneToday ? (
+              <>
+                <AppText variant="bodyBold" style={{ color: '#efe9db' }}>
+                  ✓ Completed today
+                </AppText>
+                <Gap size="xs" />
+                <AppText variant="label" style={{ color: 'rgba(239,233,219,0.9)' }}>
+                  New contemplation at {dropLabel(dropAt!)}
+                </AppText>
+              </>
             ) : (
-              <Button
-                label={atWrap ? 'See your wrap-up' : 'Begin'}
-                kind="secondary"
-                dark
-                arrow
-                onPress={onPlay}
-                testID="hero-play"
-              />
+              <View style={styles.startPill}>
+                <AppText variant="bodyBold" style={{ color: '#efe9db' }}>
+                  {atWrap ? 'See your wrap-up →' : 'Start →'}
+                </AppText>
+              </View>
             )}
             <View style={{ flex: 1 }} />
-          </View>
+          </Pressable>
           {!accessOk && (
             <>
               <Gap size="sm" />
@@ -265,6 +285,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   heroScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.30)' },
+  startPill: {
+    borderWidth: 1.5,
+    borderColor: 'rgba(239,233,219,0.9)',
+    borderRadius: radius.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 26,
+    alignSelf: 'flex-start',
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
