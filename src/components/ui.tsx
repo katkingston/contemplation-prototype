@@ -131,6 +131,7 @@ export function Button({
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
+      hitSlop={small ? 10 : undefined}
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [

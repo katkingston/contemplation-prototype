@@ -53,6 +53,7 @@ export function CrisisButton({ dim = false }: { dim?: boolean }) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Crisis resources"
+        hitSlop={12}
         onPress={() => setOpen(true)}
         style={[styles.pill, dim && { opacity: 0.5, borderColor: 'rgba(239,233,219,0.45)' }]}>
         <Text style={[type.caption, { textTransform: 'uppercase', letterSpacing: 0.8, color: dim ? '#efe9db' : color.danger }]}>✚ Crisis</Text>

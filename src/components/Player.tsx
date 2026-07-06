@@ -20,6 +20,7 @@ import Animated, {
   cancelAnimation,
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withSequence,
@@ -73,6 +74,8 @@ function VideoBackground({ source, paused }: { source: VideoSource; paused: bool
       style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
       contentFit="cover"
       nativeControls={false}
+      accessible={false}
+      importantForAccessibility="no"
     />
   );
 }
@@ -116,19 +119,25 @@ export function ContemplationPlayer({
     };
   }, [music]);
 
-  // --- animations ---
+  // --- animations (respect OS reduce-motion) ---
+  const reducedMotion = useReducedMotion();
   const textIn = useSharedValue(0);
   const drift = useSharedValue(0);
   const scrimPulse = useSharedValue(0);
 
   useEffect(() => {
+    if (reducedMotion) {
+      textIn.value = 1;
+      drift.value = 0.5;
+      return;
+    }
     textIn.value = withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) });
     drift.value = withRepeat(withTiming(1, { duration: 9000, easing: Easing.inOut(Easing.quad) }), -1, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reducedMotion]);
 
   useEffect(() => {
-    if (inFinalPulse) {
+    if (inFinalPulse && !reducedMotion) {
       // The BACKGROUND breathes at the end — the text stays still.
       scrimPulse.value = withRepeat(
         withSequence(
@@ -142,7 +151,7 @@ export function ContemplationPlayer({
       scrimPulse.value = withTiming(0, { duration: 300 });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inFinalPulse]);
+  }, [inFinalPulse, reducedMotion]);
 
   // --- hidden timer ---
   useEffect(() => {
@@ -223,6 +232,8 @@ export function ContemplationPlayer({
         <View style={styles.controls}>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={paused ? 'Resume contemplation' : 'Pause contemplation'}
+            hitSlop={12}
             onPress={() => setPaused((p) => !p)}
             style={styles.control}
             testID="pause-button">
@@ -230,6 +241,8 @@ export function ContemplationPlayer({
           </Pressable>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="End contemplation and go to journal"
+            hitSlop={12}
             onPress={handleEnd}
             style={styles.control}
             testID="end-button">

@@ -57,6 +57,10 @@ production system. This file lists what remains, in order, split by who does it.
    extra review time; have the reviewer notes explain the death-education framing.
 5. **TestFlight**: internal testers first (instant), then external (one-time
    beta review, ~1 day). This replaces the web-share URL for real testing.
+6. **Accessibility (ADA / WCAG 2.1 AA)**: contrast-audited tokens ✓, reduced-motion
+   support ✓, 44pt touch targets ✓, decorative media hidden from screen readers ✓
+   (July 2026). Remaining: VoiceOver/TalkBack traversal audit on device during the
+   Phase D device pass, and Dynamic Type (font scaling) verification.
 
 ## Phase F — Submission
 1. `eas build --profile production` + `eas submit`.

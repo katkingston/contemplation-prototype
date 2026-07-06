@@ -32,7 +32,7 @@ export const color = {
   // Paper & ink (stone card / espresso card references)
   ink: '#272b18', // deep olive (was espresso near-black)
   paper: '#f0ece1',
-  muted: '#8a8474',
+  muted: '#6b665a', // WCAG AA 4.5:1 on paper & faint (was #8a8474 @ 3.2)
   faint: '#e9e4d6',
   line: '#d8d2c2',
   // Dark surfaces (contemplation spaces)
@@ -41,14 +41,14 @@ export const color = {
   onDark: '#efe9db',
   onDarkMuted: '#a89f8c',
   // Accents (Florilegium olive · Petit Merci chartreuse · oxblood)
-  accent: '#6f7036',
+  accent: '#6a6b33', // WCAG AA as text on paper/faint (was #6f7036 @ 4.4)
   accentBright: '#99b955',
   danger: '#7d332b',
   success: '#4a5a2e',
   successBg: '#e4e6d2',
-  progress: '#6f7036',
+  progress: '#6a6b33', // AA on progressBg
   progressBg: '#eae8d2',
-  locked: '#b0a996',
+  locked: '#696559', // AA on faint pills (was #b0a996 @ 1.8 — unreadable)
 } as const;
 
 /** Per-series ambient color continuum — gradient stops per contemplation drift between these. */
