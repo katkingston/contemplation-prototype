@@ -176,6 +176,17 @@ export class SupabaseServices implements AppServices {
   private async importLocalOnFirstSignIn(uid_: string): Promise<void> {
     const sb = getSupabase();
     try {
+      // Only a TRUE first sign-in imports. A returning user signing in on a
+      // new device already has cloud data — importing that device's pre-auth
+      // scraps would append duplicate rows (and re-inject local mock grants).
+      const { count } = await sb
+        .from('user_progress')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', uid_);
+      if (count && count > 0) {
+        await this.pre.deleteAccount(); // discard pre-auth scraps — cloud is truth
+        return;
+      }
       const local = await this.pre.loadAll();
       const updates: Record<string, unknown> = {};
       if (local.disclaimerAcceptedAt) updates.disclaimer_accepted_at = local.disclaimerAcceptedAt;
@@ -255,20 +266,28 @@ export class SupabaseServices implements AppServices {
 
   async deleteAccount(): Promise<void> {
     const sb = getSupabase();
-    try {
-      // True deletion (Apple 5.1.1(v)) — server-side Edge Function.
-      const { error } = await sb.functions.invoke('delete-account');
-      if (error) throw error;
-    } catch {
-      // Function not deployed yet: sign out so no further writes happen.
-      // Rows remain until the function is deployed — documented in PROGRESS.md.
+    // True deletion (Apple 5.1.1(v)) — server-side Edge Function. If the call
+    // fails for ANY reason (not deployed, server error, network), we throw so
+    // the UI reports failure — never claim deletion that didn't happen.
+    const { error } = await sb.functions.invoke('delete-account');
+    if (error) {
+      throw new Error(
+        'Account deletion failed on the server — nothing was deleted. Please try again.',
+      );
     }
     await sb.auth.signOut().catch(() => {});
     await this.pre.deleteAccount();
   }
 
   async exportData(): Promise<string> {
-    return JSON.stringify(await this.loadAll(), null, 2);
+    // Redact signed memo URLs: they are live, unauthenticated links to private
+    // recordings — an exported/shared JSON must not carry them.
+    const data = await this.loadAll();
+    const diary = data.diary.map((e) => ({
+      ...e,
+      audioUri: e.audioUri ? '[voice memo stored in your account]' : null,
+    }));
+    return JSON.stringify({ ...data, diary }, null, 2);
   }
 
   // ---------- intake / surveys ----------
@@ -372,8 +391,17 @@ export class SupabaseServices implements AppServices {
 
   private async uploadMemo(uid_: string, localUri: string): Promise<string> {
     const sb = getSupabase();
+    // Only device-local recordings — never fetch remote URLs into the bucket.
+    if (!/^(file|blob|content):/.test(localUri)) {
+      throw new Error('Invalid memo source');
+    }
     const resp = await fetch(localUri);
     const buf = await resp.arrayBuffer();
+    // ~60s of AAC/Opus is well under 2MB; 8MB is generous headroom, and the
+    // bucket enforces the same cap server-side (setup-extras.sql).
+    if (buf.byteLength > 8 * 1024 * 1024) {
+      throw new Error('Voice memo exceeds the maximum size');
+    }
     const ext = localUri.includes('.webm') ? 'webm' : 'm4a';
     const path = `${uid_}/${uid()}.${ext}`;
     const { error } = await sb.storage.from('memos').upload(path, buf, {

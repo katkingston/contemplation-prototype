@@ -33,7 +33,10 @@ create policy "own grants insert (PROTOTYPE ONLY)" on access_grants
 --    whitespace-separated tokens with headroom (150 words + margin).
 alter table diary_entries drop constraint if exists diary_text_word_cap;
 alter table diary_entries add constraint diary_text_word_cap
-  check (text is null or array_length(regexp_split_to_array(trim(text), '\s+'), 1) <= 160);
+  check (text is null or (
+    char_length(text) <= 2000  -- hard byte-ish bound: word counts alone don't limit size
+    and array_length(regexp_split_to_array(trim(text), '\s+'), 1) <= 160
+  ));
 alter table diary_entries drop constraint if exists diary_audio_duration_cap;
 alter table diary_entries add constraint diary_audio_duration_cap
   check (audio_duration_sec is null or audio_duration_sec between 0 and 65);
@@ -46,10 +49,28 @@ alter table contemplation_sessions add constraint session_seconds_sane
 alter table user_progress drop constraint if exists progress_index_sane;
 alter table user_progress add constraint progress_index_sane
   check (current_index between 0 and 500 and replay_count between 0 and 10000);
+-- JSONB payloads: bound size so a tampered client can't store megabyte blobs.
+alter table intake_answers drop constraint if exists intake_answers_size_cap;
+alter table intake_answers add constraint intake_answers_size_cap
+  check (pg_column_size(answers) <= 16384);
+alter table survey_answers drop constraint if exists survey_answers_size_cap;
+alter table survey_answers add constraint survey_answers_size_cap
+  check (pg_column_size(answers) <= 16384);
+alter table profiles drop constraint if exists profiles_settings_size_cap;
+alter table profiles add constraint profiles_settings_size_cap
+  check (pg_column_size(settings) <= 16384);
+alter table diary_entries drop constraint if exists diary_prompt_size_cap;
+alter table diary_entries add constraint diary_prompt_size_cap
+  check (char_length(prompt) <= 1000);
 
--- 5. Private storage bucket for voice memos.
-insert into storage.buckets (id, name, public) values ('memos', 'memos', false)
-on conflict (id) do nothing;
+-- 5. Private storage bucket for voice memos. Server-side size + MIME caps so
+--    a tampered client can't use the bucket as arbitrary file storage.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('memos', 'memos', false, 8388608,
+        array['audio/m4a','audio/x-m4a','audio/mp4','audio/webm'])
+on conflict (id) do update
+  set file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
 
 create policy "own memos read" on storage.objects
   for select to authenticated

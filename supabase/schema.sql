@@ -103,9 +103,14 @@ alter table access_grants enable row level security;
 alter table series enable row level security;
 alter table contemplations enable row level security;
 
--- Content: readable by any authenticated user.
-create policy "series readable" on series for select to authenticated using (true);
-create policy "contemplations readable" on contemplations for select to authenticated using (true);
+-- Content: published series readable by any authenticated user. Drafts stay
+-- hidden. (Note: while content ships inside the app bundle, per-purchase
+-- gating here is moot — revisit if/when content moves fully server-side.)
+create policy "series readable" on series
+  for select to authenticated using (is_published);
+create policy "contemplations readable" on contemplations
+  for select to authenticated
+  using (exists (select 1 from series s where s.id = series_id and s.is_published));
 
 -- Per-user tables: a user can read/write only their own rows.
 create policy "own profile" on profiles
