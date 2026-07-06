@@ -26,7 +26,28 @@ create trigger on_auth_user_created
 create policy "own grants insert (PROTOTYPE ONLY)" on access_grants
   for insert to authenticated with check (user_id = auth.uid());
 
--- 4. Private storage bucket for voice memos.
+-- 4. Server-side validation: mirror the UI limits at the database layer so a
+--    tampered client can't write oversized or nonsensical rows. Limits live in
+--    src/theme/tokens.ts (limits.diaryMaxWords=150, limits.voiceMaxSeconds=60);
+--    keep these in sync if those change. Word count approximated generously as
+--    whitespace-separated tokens with headroom (150 words + margin).
+alter table diary_entries drop constraint if exists diary_text_word_cap;
+alter table diary_entries add constraint diary_text_word_cap
+  check (text is null or array_length(regexp_split_to_array(trim(text), '\s+'), 1) <= 160);
+alter table diary_entries drop constraint if exists diary_audio_duration_cap;
+alter table diary_entries add constraint diary_audio_duration_cap
+  check (audio_duration_sec is null or audio_duration_sec between 0 and 65);
+alter table diary_entries drop constraint if exists diary_audio_path_own_folder;
+alter table diary_entries add constraint diary_audio_path_own_folder
+  check (audio_path is null or audio_path like (user_id::text || '/%'));
+alter table contemplation_sessions drop constraint if exists session_seconds_sane;
+alter table contemplation_sessions add constraint session_seconds_sane
+  check (seconds between 0 and 7200);
+alter table user_progress drop constraint if exists progress_index_sane;
+alter table user_progress add constraint progress_index_sane
+  check (current_index between 0 and 500 and replay_count between 0 and 10000);
+
+-- 5. Private storage bucket for voice memos.
 insert into storage.buckets (id, name, public) values ('memos', 'memos', false)
 on conflict (id) do nothing;
 
