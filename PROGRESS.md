@@ -69,7 +69,10 @@ read ZERO of user A's diary/progress/grants and could not sign user A's memo
 URL, while shared content stayed readable** → **fail-closed deletion: with the
 Edge Function not yet deployed, "Delete everything" surfaced an error and left
 data intact** (the silent-success bug from the adversarial review stays fixed).
-Remaining to verify once the Edge Function is deployed: the actual data wipe.
+**Deletion verified same day:** Edge Function deployed via CLI; "Delete
+everything" in-app removed the auth user (403 on lookup) and cascaded every
+row to zero (profiles/diary/progress/sessions/intake/grants), local session
+cleared, app returned to first-run. Full Phase B verification is COMPLETE.
 
 ## Architecture seams (for the real build-out)
 
