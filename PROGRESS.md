@@ -46,7 +46,8 @@ passwordless email-code auth, full data sync (progress incl. the 6pm-drop
 timestamp, diary with voice-memo uploads to a private `memos` bucket + signed
 URLs, intake/surveys, grants), pre-auth onboarding held locally and imported
 on first sign-in, sign-out, and true account deletion via the
-`delete-account` Edge Function (fallback: sign-out until deployed).
+`delete-account` Edge Function. Deleting FAILS VISIBLY until the function
+is deployed — the app never claims a deletion that didn't happen.
 
 **To activate (~10 min):** create a supabase.com project → SQL editor: run
 `supabase/schema.sql` then `supabase/setup-extras.sql` → confirm Email auth
