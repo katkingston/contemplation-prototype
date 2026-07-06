@@ -9,6 +9,7 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
 import { AppText, Gap } from '@/components/ui';
+import { dailyQuote } from '@/content/copy';
 import { getSeries, orderedSeries } from '@/content/series';
 import { isSeriesCompleted } from '@/services/logic';
 import { useApp } from '@/services/provider';
@@ -20,27 +21,10 @@ const INDEX: { label: string; route: string; testID: string }[] = [
   { label: 'Learn', route: '/learn', testID: 'journey-learn' },
 ];
 
-/** Rotates daily. Death-awareness voices across traditions. */
-const QUOTES: { text: string; by: string }[] = [
-  {
-    text: 'You could leave life right now. Let that determine what you do and say and think.',
-    by: 'Marcus Aurelius',
-  },
-  { text: 'Death is not the opposite of life, but a part of it.', by: 'Haruki Murakami' },
-  { text: 'Let me not die while I am still alive.', by: 'Jewish proverb' },
-  { text: 'The trouble is, you think you have time.', by: 'attributed to Buddhist teaching' },
-  {
-    text: 'To begin depriving death of its greatest advantage over us, let us deprive death of its strangeness.',
-    by: 'Michel de Montaigne',
-  },
-];
 
 export default function Journey() {
   const { data } = useApp();
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400_000,
-  );
-  const quote = QUOTES[dayOfYear % QUOTES.length];
+  const quote = dailyQuote();
   const recent = [...data.diary]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 3);

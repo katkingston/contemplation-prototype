@@ -172,7 +172,6 @@ export default function Home() {
             {!reducedMotion && <HeroVideo />}
             <View style={styles.heroScrim} />
             <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
-              Today ·{' '}
               {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
             </AppText>
             <View style={{ flex: 1 }} />

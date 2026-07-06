@@ -12,7 +12,7 @@ export default function Intake() {
       questions={intakeQuestions}
       completeLabel="Complete"
       onComplete={async (answers) => {
-        if (await act((s) => s.saveIntake(answers))) router.replace('/home');
+        if (await act((s) => s.saveIntake(answers))) router.replace('/drop-time');
       }}
     />
   );

@@ -64,6 +64,9 @@ export interface Settings {
   notificationsEnabled: boolean;
   musicDefaultOn: boolean;
   timerDefaultMin: number;
+  /** Daily drop time, user-set (defaults to 6:00 PM local). */
+  dropHour: number;
+  dropMinute: number;
   /** App Store rating prompt state (logic/tuning in tokens.ts `review`). */
   reviewAsks: number;
   reviewLastAt: string | null;
@@ -90,6 +93,8 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: false,
   musicDefaultOn: true,
   timerDefaultMin: 1,
+  dropHour: 18,
+  dropMinute: 0,
   reviewAsks: 0,
   reviewLastAt: null,
   reviewDone: false,

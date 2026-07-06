@@ -7,10 +7,11 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import React, { useState } from 'react';
 import { Alert, Linking, Platform, Share, Switch } from 'react-native';
-import { ResourcesList } from '@/components/CrisisButton';
-import { AppText, Button, Gap, ListRow, Screen, Sheet } from '@/components/ui';
+import { DropTimeInput } from '@/components/DropTimeInput';
+import { AppText, Button, Gap, ListRow, Screen, Select, Sheet } from '@/components/ui';
 import { activeSeries, progressFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
+import { timing } from '@/theme/tokens';
 
 
 /**
@@ -22,7 +23,6 @@ const SHOW_DEV_TOOLS = __DEV__ || process.env.EXPO_PUBLIC_DEV_TOOLS === '1';
 
 export default function Settings() {
   const { data, act, services } = useApp();
-  const [showResources, setShowResources] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const exportData = async () => {
@@ -93,11 +93,31 @@ export default function Settings() {
           />
         }
       />
-      <ListRow
-        label="Mental Health Resources"
-        sub="crisis and support links"
-        onPress={() => setShowResources(true)}
+      <Gap size="lg" />
+      <AppText variant="label" muted>
+        Daily contemplation time
+      </AppText>
+      <Gap size="sm" />
+      <DropTimeInput />
+      <Gap size="lg" />
+      <AppText variant="label" muted>
+        Default timer
+      </AppText>
+      <Gap size="sm" />
+      <Select
+        label="Default timer"
+        options={timing.timerChoicesMin}
+        value={
+          timing.timerChoicesMin.includes(data.settings.timerDefaultMin)
+            ? data.settings.timerDefaultMin
+            : timing.defaultTimerMin
+        }
+        onChange={(m) => void act((s) => s.saveSettings({ timerDefaultMin: m }))}
+        labels={(m) => `${m} minute${m === 1 ? '' : 's'}`}
+        testID="settings-default-timer"
       />
+      <Gap size="lg" />
+
       <ListRow
         label="Export my data"
         sub="includes thoughts & voice memo references"
@@ -141,12 +161,6 @@ export default function Settings() {
       )}
       <Gap size="xl" />
       <Button label="Back" kind="ghost" onPress={() => router.back()} />
-      <Sheet
-        visible={showResources}
-        onClose={() => setShowResources(false)}
-        title="Mental Health Resources">
-        <ResourcesList />
-      </Sheet>
       <Sheet visible={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete account?">
         <AppText variant="body">
           This permanently deletes your account and all data: progress, reflections, and voice

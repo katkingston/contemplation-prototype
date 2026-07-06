@@ -21,7 +21,7 @@ export function progressFor(data: AppData, seriesId: string): SeriesProgress {
 
 // ---------- daily drop (6pm LOCAL) ----------
 
-/** Hour of day (local timezone — JS Date math is inherently local) when a new contemplation drops. */
+/** Default drop hour — users can change it in Settings (settings.dropHour/dropMinute). */
 export const DROP_HOUR = 18;
 
 /**
@@ -36,7 +36,7 @@ export function nextDropAt(data: AppData, seriesId: string): Date | null {
   if (!last) return null; // nothing completed → first item is available immediately
   const drop = new Date(last);
   drop.setDate(drop.getDate() + 1);
-  drop.setHours(DROP_HOUR, 0, 0, 0);
+  drop.setHours(data.settings.dropHour ?? DROP_HOUR, data.settings.dropMinute ?? 0, 0, 0);
   return drop;
 }
 
@@ -45,14 +45,37 @@ export function isDropAvailable(data: AppData, seriesId: string): boolean {
   return at == null || Date.now() >= at.getTime();
 }
 
-/** "6:00 PM today" / "6:00 PM tomorrow" label for the locked state. */
+/** "6:00 PM today" / "6:00 PM tomorrow" label — formats the drop's own time. */
 export function dropLabel(at: Date): string {
   const now = new Date();
   const sameDay =
     at.getFullYear() === now.getFullYear() &&
     at.getMonth() === now.getMonth() &&
     at.getDate() === now.getDate();
-  return `6:00 PM ${sameDay ? 'today' : 'tomorrow'}`;
+  return `${formatTime(at.getHours(), at.getMinutes())} ${sameDay ? 'today' : 'tomorrow'}`;
+}
+
+/** 18,0 -> "6:00 PM". */
+export function formatTime(hour: number, minute: number): string {
+  const h12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${h12}:${String(minute).padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
+}
+
+/**
+ * Parse a typed time: "6", "6pm", "6:30 pm", "18:00" -> {hour, minute}.
+ * Bare hours 1-7 assume PM (evening practice); returns null if unparseable.
+ */
+export function parseTimeInput(raw: string): { hour: number; minute: number } | null {
+  const m = raw.trim().toLowerCase().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm|a|p)?$/);
+  if (!m) return null;
+  let hour = parseInt(m[1], 10);
+  const minute = m[2] ? parseInt(m[2], 10) : 0;
+  const mer = m[3];
+  if (hour > 23 || minute > 59) return null;
+  if (mer?.startsWith('p') && hour < 12) hour += 12;
+  if (mer?.startsWith('a') && hour === 12) hour = 0;
+  if (!mer && hour >= 1 && hour <= 7) hour += 12; // bare "6" means evening
+  return { hour, minute };
 }
 
 export function isSeriesCompleted(data: AppData, s: Series): boolean {

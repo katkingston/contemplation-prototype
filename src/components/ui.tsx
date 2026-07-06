@@ -180,6 +180,62 @@ export function Eyebrow({ children, dark = false }: { children: string; dark?: b
   );
 }
 
+// ---------- Select (dropdown) ----------
+
+/** Dropdown: a field that opens an option sheet. Works on web + native. */
+export function Select<T extends string | number>({
+  label,
+  value,
+  options,
+  labels,
+  onChange,
+  testID,
+}: {
+  label: string;
+  value: T;
+  options: readonly T[];
+  labels?: (v: T) => string;
+  onChange: (v: T) => void;
+  testID?: string;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const show = (v: T) => (labels ? labels(v) : String(v));
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${label}: ${show(value)}`}
+        onPress={() => setOpen(true)}
+        style={({ pressed }) => [styles.selectField, pressed && { opacity: 0.7 }]}
+        testID={testID}>
+        <AppText variant="body">{show(value)}</AppText>
+        <AppText variant="small" muted>
+          {'\u25be'}
+        </AppText>
+      </Pressable>
+      <Sheet visible={open} onClose={() => setOpen(false)} title={label}>
+        {options.map((opt) => {
+          const sel = opt === value;
+          return (
+            <Pressable
+              key={String(opt)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: sel }}
+              onPress={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
+              style={({ pressed }) => [styles.selectOption, pressed && { opacity: 0.6 }]}>
+              <AppText variant={sel ? 'bodyBold' : 'body'}>{show(opt)}</AppText>
+              {sel ? <AppText variant="body">{'\u2713'}</AppText> : null}
+            </Pressable>
+          );
+        })}
+      </Sheet>
+    </>
+  );
+}
+
 // ---------- Chips ----------
 
 export function ChipGroup<T extends string | number>({
@@ -457,5 +513,26 @@ const styles = StyleSheet.create({
     backgroundColor: color.paper,
     borderRadius: radius.lg,
     maxHeight: '85%',
+  },
+  selectField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: color.line,
+    borderRadius: radius.md,
+    paddingVertical: 12,
+    paddingHorizontal: space.md,
+    backgroundColor: color.faint,
+    minHeight: 44,
+  },
+  selectOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 13,
+    minHeight: 44,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: color.line,
   },
 });

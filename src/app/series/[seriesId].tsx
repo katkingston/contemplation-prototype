@@ -15,8 +15,10 @@ import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Button, Gap, Row } from '@/components/ui';
 import { getSeries, seriesLength } from '@/content/series';
 import {
+  dropLabel,
   hasActiveAccess,
   isDropAvailable,
+  nextDropAt,
   isSeriesAtWrap,
   isSeriesCompleted,
   isSeriesUnlocked,
@@ -46,6 +48,7 @@ export default function SeriesDetail() {
   const unlocked = isSeriesUnlocked(data, series);
   const accessOk = hasActiveAccess(data, series.id);
   const dropReady = isDropAvailable(data, series.id);
+  const dropAt = nextDropAt(data, series.id);
   const started = p.currentIndex > 0;
 
   const cta = completed
@@ -74,7 +77,11 @@ export default function SeriesDetail() {
       return;
     }
     if (!dropReady) {
-      notify('Today’s contemplation is done. A new one arrives at 6:00 PM.');
+      notify(
+        `Today’s contemplation is done. A new one arrives at ${
+          dropAt ? dropLabel(dropAt) : 'the next drop'
+        }.`,
+      );
       return;
     }
     if (p.currentIndex === 0) {

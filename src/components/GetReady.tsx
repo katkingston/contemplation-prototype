@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Button, ChipGroup, Eyebrow, Gap, Row, Screen, Sheet, Spacer } from '@/components/ui';
+import { AppText, Button, Eyebrow, Gap, Row, Screen, Select, Sheet, Spacer } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { useApp } from '@/services/provider';
 import { space, timing } from '@/theme/tokens';
@@ -91,18 +91,22 @@ export function GetReadyScreen({
           <SeriesDashes total={seriesContext.total} done={seriesContext.done} active />
         </>
       ) : null}
-      <Eyebrow>Choose your time</Eyebrow>
-      <ChipGroup
+      <Eyebrow>Time</Eyebrow>
+      <Select
+        label="Time"
         options={timing.timerChoicesMin}
         value={minutes}
         onChange={setMinutes}
-        labels={(m) => `${m} min`}
+        labels={(m) => `${m} minute${m === 1 ? '' : 's'}`}
+        testID="select-time"
       />
       <Eyebrow>Music</Eyebrow>
-      <ChipGroup
+      <Select
+        label="Music"
         options={['Music on', 'Music off'] as const}
         value={musicOn ? 'Music on' : 'Music off'}
         onChange={(v) => setMusicOn(v === 'Music on')}
+        testID="select-music"
       />
       <Spacer />
       <Button

@@ -201,3 +201,25 @@ export const dayExit = {
 
 export const splashTagline =
   'Cultivate acceptance of impermanence and inspire you into a fuller engagement with life itself.';
+
+/** Rotates daily. Death-awareness voices across traditions. */
+export const QUOTES: { text: string; by: string }[] = [
+  {
+    text: 'You could leave life right now. Let that determine what you do and say and think.',
+    by: 'Marcus Aurelius',
+  },
+  { text: 'Death is not the opposite of life, but a part of it.', by: 'Haruki Murakami' },
+  { text: 'Let me not die while I am still alive.', by: 'Jewish proverb' },
+  { text: 'The trouble is, you think you have time.', by: 'attributed to Buddhist teaching' },
+  {
+    text: 'To begin depriving death of its greatest advantage over us, let us deprive death of its strangeness.',
+    by: 'Michel de Montaigne',
+  },
+];
+
+export function dailyQuote(): { text: string; by: string } {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400_000,
+  );
+  return QUOTES[dayOfYear % QUOTES.length];
+}

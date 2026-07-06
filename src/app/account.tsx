@@ -11,6 +11,7 @@ import { TabScreen } from '@/components/BottomNav';
 import { lifetimeStats, MILESTONES } from '@/services/logic';
 import { shareMessage } from '@/services/share';
 import { AppText, Button, Eyebrow, Gap, ListRow, Row } from '@/components/ui';
+import { dailyQuote } from '@/content/copy';
 import { useApp } from '@/services/provider';
 import { APP_NAME, color, font, radius, space } from '@/theme/tokens';
 
@@ -204,6 +205,14 @@ export default function Account() {
                 day: 'numeric',
               })
             : '·'}
+        </AppText>
+        <Gap size="md" />
+        <AppText variant="small" muted center style={{ fontStyle: 'italic', maxWidth: 300 }}>
+          “{dailyQuote().text}”
+        </AppText>
+        <Gap size="xs" />
+        <AppText variant="caption" muted center>
+          {dailyQuote().by}
         </AppText>
       </Pressable>
       <Gap size="lg" />
