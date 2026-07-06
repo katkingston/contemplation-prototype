@@ -51,7 +51,7 @@ export default function Account() {
 
   const shareGuestPass = () =>
     shareMessage(
-      `${firstName} sent you a week on ${APP_NAME}, a daily contemplation practice. ${SHARE_URL}`,
+      `${firstName} sent you two weeks on ${APP_NAME}, a daily contemplation practice. ${SHARE_URL}`,
     );
 
   // Current plan, from the newest active grant (mock until RevenueCat).
@@ -144,22 +144,35 @@ export default function Account() {
         ))}
       </Row>
 
-      {/* Guest pass */}
+      {/* Guest pass: a subscriber benefit only */}
       <Eyebrow>{`Share ${APP_NAME}`}</Eyebrow>
-      <View style={styles.passCard}>
+      <View style={[styles.passCard, !activeGrant && { opacity: 0.5 }]}>
         <AppText variant="heading" style={{ color: color.onDark }}>
           {firstName}’s guest pass
         </AppText>
         <Gap size="xs" />
         <AppText variant="label" style={{ color: color.onDarkMuted }}>
-          One week of access
+          Two weeks of access
         </AppText>
         <Gap size="lg" />
         <Row between>
           <AppText variant="caption" style={{ color: color.onDarkMuted, flex: 1 }}>
-            Prototype: shares a link to the app. Real passes arrive with payments.
+            {activeGrant
+              ? 'Prototype: shares a link to the app. Real passes arrive with payments.'
+              : 'Guest passes are a subscriber benefit. Choose a plan to share one.'}
           </AppText>
-          <Button label="Share" kind="secondary" dark small onPress={shareGuestPass} testID="guest-pass-share" />
+          {activeGrant ? (
+            <Button label="Share" kind="secondary" dark small onPress={shareGuestPass} testID="guest-pass-share" />
+          ) : (
+            <Button
+              label="See plans"
+              kind="secondary"
+              dark
+              small
+              onPress={() => router.push('/subscription')}
+              testID="guest-pass-plans"
+            />
+          )}
         </Row>
       </View>
 

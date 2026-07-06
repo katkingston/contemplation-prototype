@@ -40,7 +40,7 @@ export default function Splash() {
         } else {
           router.replace({
             pathname: '/get-ready',
-            params: { seriesId: series.id, index: String(p.currentIndex) },
+            params: { seriesId: series.id, index: String(p.currentIndex), entry: 'open' },
           });
         }
       } else if (data.disclaimerAcceptedAt == null) {

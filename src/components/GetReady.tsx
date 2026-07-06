@@ -1,13 +1,17 @@
 /**
  * Get Ready to Contemplate — precedes EVERY contemplation (free taste included).
- * Main focus: choose time + music. Secondary, small: Crisis (top-right) and
- * Instructions hidden behind a button → pop-up.
+ * Two versions (per Kat, July 2026):
+ *  - App-open (start of a session): shows series context so the user knows
+ *    what they are starting (tag, title, number, hint, progress dashes).
+ *  - In-flow (reached from Home/series): minimal, context already seen.
+ * Main focus: choose time + music. Instructions behind a pop-up. No crisis
+ * button here (it remains on the contemplation player and journal).
  * The Begin tap IS the required timer confirmation (default 1 min).
  */
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { CrisisButton } from '@/components/CrisisButton';
+import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Button, ChipGroup, Eyebrow, Gap, Row, Screen, Sheet, Spacer } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { useApp } from '@/services/provider';
@@ -31,11 +35,23 @@ export function InstructionsContent() {
   );
 }
 
+export interface GetReadySeriesContext {
+  tag: string;
+  title: string;
+  number: number;
+  hint: string;
+  done: number;
+  total: number;
+}
+
 export function GetReadyScreen({
   onBegin,
+  seriesContext,
   testID,
 }: {
   onBegin: (minutes: number, musicOn: boolean) => void;
+  /** App-open version: series info so the user knows what they're starting. */
+  seriesContext?: GetReadySeriesContext;
   testID?: string;
 }) {
   const { data } = useApp();
@@ -58,10 +74,23 @@ export function GetReadyScreen({
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
           testID="get-ready-exit"
         />
-        <CrisisButton />
       </Row>
       <Gap size="xl" />
       <AppText variant="title">Get ready to contemplate</AppText>
+      {seriesContext ? (
+        <>
+          <Gap size="md" />
+          <AppText variant="label" muted>
+            {seriesContext.tag} · {seriesContext.title}
+          </AppText>
+          <Gap size="xs" />
+          <AppText variant="bodyBold">
+            No. {seriesContext.number} · {seriesContext.hint}
+          </AppText>
+          <Gap size="sm" />
+          <SeriesDashes total={seriesContext.total} done={seriesContext.done} active />
+        </>
+      ) : null}
       <Eyebrow>Choose your time</Eyebrow>
       <ChipGroup
         options={timing.timerChoicesMin}
