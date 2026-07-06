@@ -34,7 +34,7 @@ import { color, font, space, timing, type } from '@/theme/tokens';
 export type FinishReason = 'time' | 'end';
 
 /** Placeholder media for ALL contemplations until per-contemplation assets exist. */
-const PLACEHOLDER_VIDEO: VideoSource = require('../../assets/media/contemplation-loop.mp4');
+export const PLACEHOLDER_VIDEO: VideoSource = require('../../assets/media/contemplation-loop.mp4');
 const AMBIENT_MUSIC = require('../../assets/media/ambient-music.mp3');
 
 const SCRIM_RGB = '24,28,12'; // dark olive

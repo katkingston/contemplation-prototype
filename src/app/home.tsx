@@ -180,7 +180,7 @@ export default function Home() {
             </AppText>
             <Gap size="sm" />
             <AppText variant="display" style={{ color: '#efe9db' }}>
-              {atWrap ? 'Complete' : `No. ${shownIdx + 1} · ${shown?.hint ?? ''}`}
+              {atWrap ? 'Complete' : (shown?.hint ?? '')}
             </AppText>
             <Gap size="xl" />
             {doneToday ? (

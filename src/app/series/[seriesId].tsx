@@ -51,13 +51,21 @@ export default function SeriesDetail() {
   const dropAt = nextDropAt(data, series.id);
   const started = p.currentIndex > 0;
 
+  // Button states per Kat: Continue / Series locked (grayed) / Come back ...
+  const locked = !unlocked && !completed && !atWrap;
+  const waiting = unlocked && !completed && !atWrap && !dropReady && accessOk;
   const cta = completed
     ? 'Revisit'
     : atWrap
       ? 'See your wrap-up'
-      : started
-        ? 'Continue'
-        : 'Start';
+      : locked
+        ? 'Series locked'
+        : waiting
+          ? `Come back at ${dropAt ? dropLabel(dropAt) : 'the next drop'}`
+          : started
+            ? 'Continue'
+            : 'Start';
+  const ctaDisabled = locked || waiting;
 
   const onStart = () => {
     if (atWrap) {
@@ -180,7 +188,13 @@ export default function SeriesDetail() {
           <AppText variant="heading">⌃</AppText>
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Button label={cta} arrow onPress={onStart} testID="series-start" />
+          <Button
+            label={cta}
+            arrow={!ctaDisabled}
+            disabled={ctaDisabled}
+            onPress={onStart}
+            testID="series-start"
+          />
         </View>
       </View>
     </SafeAreaView>

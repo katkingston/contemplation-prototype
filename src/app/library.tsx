@@ -56,6 +56,13 @@ export default function Library() {
             <View style={{ flex: 1 }}>
               <AppText variant="label" muted>
                 {s.tag}
+                {done
+                  ? ' · Complete'
+                  : !unlocked
+                    ? ' · Locked'
+                    : p.currentIndex > 0
+                      ? ' · In progress'
+                      : ''}
               </AppText>
               <AppText variant="bodyBold">{s.title}</AppText>
               <Gap size="xs" />

@@ -8,9 +8,11 @@
  * button here (it remains on the contemplation player and journal).
  * The Begin tap IS the required timer confirmation (default 1 min).
  */
+import { Asset } from 'expo-asset';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { PLACEHOLDER_VIDEO } from '@/components/Player';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Button, Eyebrow, Gap, Row, Screen, Select, Sheet, Spacer } from '@/components/ui';
 import { instructions } from '@/content/copy';
@@ -62,6 +64,14 @@ export function GetReadyScreen({
   );
   const [musicOn, setMusicOn] = useState<boolean>(data.settings.musicDefaultOn);
   const [showInstructions, setShowInstructions] = useState(false);
+
+  // Pre-warm the contemplation footage while the user chooses their time so
+  // the player opens without a loading lag (browser/OS cache does the rest).
+  useEffect(() => {
+    Asset.fromModule(PLACEHOLDER_VIDEO as number)
+      .downloadAsync()
+      .catch(() => {}); // prefetch is best-effort, never block the flow
+  }, []);
 
   return (
     <Screen scroll={false} testID={testID}>
