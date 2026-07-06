@@ -73,3 +73,17 @@ production system. This file lists what remains, in order, split by who does it.
 - Handwritten contemplation images (Daniel font is the stand-in).
 - Terms of Service + Privacy Policy documents (Termly, per your research doc).
 - Real intro-offer configuration in App Store Connect (3-day trial on annual).
+
+## Design backlog — Phase 2 (from the Open reference round, July 2026)
+
+Approved-for-later by Kat; do NOT build in V1:
+1. Gentle social proof on series pages ("N people are sitting with this series").
+2. Offline mode / downloads (needs native build + per-contemplation media).
+3. Followers / following (revisit carefully against the privacy ethos).
+4. Discover / trending / category-tab surface (revisit once catalog grows).
+5. Playlists / user-curated sequencing.
+Declined: Apple Health integration (Kat said no, July 2026).
+
+Push notifications needed by Phase D (native): 6pm drop, streak reminder,
+TRIAL-ENDING reminders (promised in pricing copy — required), series
+complete / reflections revealed.

@@ -9,7 +9,7 @@
  * print-like corners. Generous whitespace, letterspaced caps labels.
  */
 
-export const APP_NAME = 'Contemplation'; // placeholder — candidates: Atma, Lila, Rasa, Mujo, Ephemera
+export const APP_NAME = 'Contemplate'; // chosen July 2026 (domain: contemplate.day)
 
 /**
  * Brand fonts (owner-provided, all SIL OFL):

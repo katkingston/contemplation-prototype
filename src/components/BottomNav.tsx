@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { activeSeries, dropLabel, isDropAvailable, nextDropAt } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, space, type } from '@/theme/tokens';
 
@@ -23,9 +24,15 @@ export function BottomNav({ active }: { active: TabKey }) {
   const insets = useSafeAreaInsets();
   const { data } = useApp();
   const initial = (data.profile?.username?.[0] ?? '•').toUpperCase();
+  // Ambient footer, per the Open reference ("Sunset 7:35 PM"): the daily drop.
+  const s = activeSeries(data);
+  const dropAt = nextDropAt(data, s.id);
+  const ready = isDropAvailable(data, s.id);
+  const ambient = ready ? 'A contemplation awaits' : dropAt ? `New contemplation ${dropLabel(dropAt)}` : '';
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.md) }]}>
+      <View style={styles.tabsRow}>
       {TABS.map((t) => {
         const isActive = t.key === active;
         return (
@@ -44,6 +51,8 @@ export function BottomNav({ active }: { active: TabKey }) {
           </Pressable>
         );
       })}
+      </View>
+      {ambient ? <Text style={styles.ambient}>{ambient}</Text> : null}
     </View>
   );
 }
@@ -53,13 +62,17 @@ export function TabScreen({
   active,
   children,
   padded = true,
+  dark = false,
 }: {
   active: TabKey;
   children: React.ReactNode;
   padded?: boolean;
+  dark?: boolean;
 }) {
   return (
-    <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      style={[styles.shell, dark && { backgroundColor: color.dark }]}
+      edges={['top', 'left', 'right']}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[
@@ -77,12 +90,18 @@ export function TabScreen({
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
   bar: {
-    flexDirection: 'row',
     backgroundColor: color.dark,
     paddingTop: space.md,
     paddingHorizontal: space.lg,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
+  },
+  tabsRow: { flexDirection: 'row' },
+  ambient: {
+    ...type.label,
+    color: color.onDarkMuted,
+    textAlign: 'center',
+    marginTop: space.sm,
   },
   item: { flex: 1, alignItems: 'center', gap: 6, minHeight: 44 },
   glyph: { fontSize: 20, color: color.onDark, fontFamily: type.body.fontFamily },

@@ -168,3 +168,43 @@ export function formatMinutes(totalSeconds: number): string {
   const m = Math.round(totalSeconds / 60);
   return m < 1 ? '<1m' : `${m}m`;
 }
+
+// ---------- lifetime stats (Account page, per Open reference) ----------
+
+export interface LifetimeStats {
+  contemplations: number;
+  minutes: number;
+  currentStreak: number;
+  bestStreak: number;
+}
+
+export function lifetimeStats(data: AppData): LifetimeStats {
+  const secs = data.sessions.reduce((a, b) => a + b.seconds, 0);
+  return {
+    contemplations: data.sessions.length,
+    minutes: Math.round(secs / 60),
+    currentStreak: computeStreak(data),
+    bestStreak: bestStreak(data),
+  };
+}
+
+/** Longest consecutive-day run across all session dates. */
+export function bestStreak(data: AppData): number {
+  const days = [...new Set(data.sessions.map((s) => s.date))].sort();
+  let best = 0;
+  let run = 0;
+  let prev: number | null = null;
+  for (const d of days) {
+    const t = new Date(d + 'T00:00:00Z').getTime();
+    run = prev != null && t - prev === 86400_000 ? run + 1 : 1;
+    prev = t;
+    best = Math.max(best, run);
+  }
+  return best;
+}
+
+/** Milestones for the accomplishments wall. */
+export const MILESTONES = {
+  contemplations: [1, 5, 10, 20] as readonly number[],
+  streaks: [2, 5, 10] as readonly number[],
+};

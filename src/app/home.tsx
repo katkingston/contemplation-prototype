@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '@/components/BottomNav';
+import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Button, Eyebrow, Gap, ListRow, Row, StatusPill } from '@/components/ui';
 import { orderedSeries, seriesLength } from '@/content/series';
 import {
@@ -155,16 +156,27 @@ export default function Home() {
           const completed = isSeriesCompleted(data, s);
           const unlocked = isSeriesUnlocked(data, s);
           const isActive = s.id === series.id;
+          const sp = progressFor(data, s.id);
           return (
             <ListRow
               key={s.id}
               label={`${s.displayOrder} · ${s.title}`}
               sub={s.theme}
+              onPress={() =>
+                router.push({ pathname: '/series/[seriesId]', params: { seriesId: s.id } })
+              }
               right={
-                <StatusPill
-                  label={completed ? '✓ Done' : isActive ? 'In progress' : unlocked ? 'Available' : 'Locked'}
-                  kind={completed ? 'done' : isActive ? 'progress' : unlocked ? 'neutral' : 'locked'}
-                />
+                <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                  <StatusPill
+                    label={completed ? '✓ Done' : isActive ? 'In progress' : unlocked ? 'Available' : 'Locked'}
+                    kind={completed ? 'done' : isActive ? 'progress' : unlocked ? 'neutral' : 'locked'}
+                  />
+                  <SeriesDashes
+                    total={seriesLength(s)}
+                    done={Math.min(sp.currentIndex, seriesLength(s))}
+                    active={isActive && !completed}
+                  />
+                </View>
               }
             />
           );
