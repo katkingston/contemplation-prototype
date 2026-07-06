@@ -50,11 +50,26 @@ on first sign-in, sign-out, and true account deletion via the
 is deployed — the app never claims a deletion that didn't happen.
 
 **To activate (~10 min):** create a supabase.com project → SQL editor: run
-`supabase/schema.sql` then `supabase/setup-extras.sql` → confirm Email auth
-enabled → copy URL + anon key into `.env` and set
-`EXPO_PUBLIC_DATA_PROVIDER=supabase`. Deploy deletion:
+`supabase/schema.sql`, then `supabase/setup-extras.sql`, then
+`supabase/seed-content.sql` (content rows the diary/session FKs require) →
+confirm Email auth enabled → **Auth → set up custom SMTP** (Resend or similar;
+the built-in mailer can't edit templates and is rate-limited) and edit the
+Confirm-signup + Magic-Link templates to contain `{{ .Token }}` → copy URL +
+anon key into `.env` and set `EXPO_PUBLIC_DATA_PROVIDER=supabase`. Deploy deletion:
 `npx supabase login && npx supabase link --project-ref <ref> && npx supabase functions deploy delete-account`.
 The public share-URL build intentionally stays on the local provider.
+
+**Live-verified July 6, 2026** against a real project (`bpggszxccznsyymllbcq`)
+via the web build: OTP sign-up (Resend SMTP, from `hello@contemplate.day`) →
+intake saved → Annual grant → contemplation + text reflection → rows confirmed
+in `diary_entries`/`user_progress`/`contemplation_sessions`/`access_grants` →
+storage upload scoped to own folder (cross-folder + non-audio MIME both
+rejected 400) → signed-URL playback OK → **cross-account RLS: a second user
+read ZERO of user A's diary/progress/grants and could not sign user A's memo
+URL, while shared content stayed readable** → **fail-closed deletion: with the
+Edge Function not yet deployed, "Delete everything" surfaced an error and left
+data intact** (the silent-success bug from the adversarial review stays fixed).
+Remaining to verify once the Edge Function is deployed: the actual data wipe.
 
 ## Architecture seams (for the real build-out)
 
