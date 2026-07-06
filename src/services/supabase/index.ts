@@ -56,11 +56,11 @@ export class SupabaseServices implements AppServices {
     if (!uid_) return this.pre.loadAll(); // onboarding before login
 
     const [profile, progress, diary, sessions, grants] = await Promise.all([
-      sb.from('profiles').select('*').eq('user_id', uid_).maybeSingle(),
-      sb.from('user_progress').select('*').eq('user_id', uid_),
-      sb.from('diary_entries').select('*').eq('user_id', uid_).order('created_at'),
-      sb.from('contemplation_sessions').select('*').eq('user_id', uid_),
-      sb.from('access_grants').select('*').eq('user_id', uid_),
+      sb.from('profiles').select('*').eq('user_id', uid_).maybeSingle().throwOnError(),
+      sb.from('user_progress').select('*').eq('user_id', uid_).throwOnError(),
+      sb.from('diary_entries').select('*').eq('user_id', uid_).order('created_at').throwOnError(),
+      sb.from('contemplation_sessions').select('*').eq('user_id', uid_).throwOnError(),
+      sb.from('access_grants').select('*').eq('user_id', uid_).throwOnError(),
     ]);
 
     const p = profile.data;
@@ -158,7 +158,8 @@ export class SupabaseServices implements AppServices {
     if (!uid_) throw new Error('Sign-in did not produce a session.');
     await sb
       .from('profiles')
-      .upsert({ user_id: uid_, email, username, onboarding_step: 'intake' });
+      .upsert({ user_id: uid_, email, username, onboarding_step: 'intake' })
+      .throwOnError();
     await this.importLocalOnFirstSignIn(uid_);
   }
 
@@ -192,7 +193,7 @@ export class SupabaseServices implements AppServices {
       if (local.disclaimerAcceptedAt) updates.disclaimer_accepted_at = local.disclaimerAcceptedAt;
       if (Object.keys(local.settings).length) updates.settings = local.settings;
       if (Object.keys(updates).length) {
-        await sb.from('profiles').update(updates).eq('user_id', uid_);
+        await sb.from('profiles').update(updates).eq('user_id', uid_).throwOnError();
       }
       for (const g of local.grants) {
         await sb.from('access_grants').insert({
@@ -255,13 +256,14 @@ export class SupabaseServices implements AppServices {
     await getSupabase()
       .from('profiles')
       .update({ disclaimer_accepted_at: new Date().toISOString(), onboarding_step: 'free' })
-      .eq('user_id', uid_);
+      .eq('user_id', uid_)
+      .throwOnError();
   }
 
   async setOnboardingStep(step: AppData['onboardingStep']): Promise<void> {
     const uid_ = await this.userId();
     if (!uid_) return this.pre.setOnboardingStep(step);
-    await getSupabase().from('profiles').update({ onboarding_step: step }).eq('user_id', uid_);
+    await getSupabase().from('profiles').update({ onboarding_step: step }).eq('user_id', uid_).throwOnError();
   }
 
   async deleteAccount(): Promise<void> {
@@ -296,8 +298,8 @@ export class SupabaseServices implements AppServices {
     const uid_ = await this.userId();
     if (!uid_) return this.pre.saveIntake(answers);
     const sb = getSupabase();
-    await sb.from('intake_answers').insert({ user_id: uid_, answers });
-    await sb.from('profiles').update({ onboarding_step: 'done' }).eq('user_id', uid_);
+    await sb.from('intake_answers').insert({ user_id: uid_, answers }).throwOnError();
+    await sb.from('profiles').update({ onboarding_step: 'done' }).eq('user_id', uid_).throwOnError();
   }
 
   async saveSurvey(seriesId: string, answers: Record<string, AnswerValue>): Promise<void> {
@@ -305,7 +307,8 @@ export class SupabaseServices implements AppServices {
     if (!uid_) return this.pre.saveSurvey(seriesId, answers);
     await getSupabase()
       .from('survey_answers')
-      .insert({ user_id: uid_, series_id: seriesId, answers });
+      .insert({ user_id: uid_, series_id: seriesId, answers })
+      .throwOnError();
   }
 
   // ---------- progress ----------
@@ -337,14 +340,14 @@ export class SupabaseServices implements AppServices {
       last_completed_at: completedAt,
       replay_count: row?.replay_count ?? 0,
       use_alt_questions: row?.use_alt_questions ?? false,
-    });
+    }).throwOnError();
     await sb.from('contemplation_sessions').insert({
       user_id: uid_,
       series_id: seriesId,
       contemplation_id: contemplationId,
       seconds,
       session_date: localDate(),
-    });
+    }).throwOnError();
   }
 
   async markSeriesComplete(seriesId: string): Promise<void> {
@@ -356,13 +359,15 @@ export class SupabaseServices implements AppServices {
       .update({ completed_at: new Date().toISOString() })
       .eq('user_id', uid_)
       .eq('series_id', seriesId)
-      .is('completed_at', null);
+      .is('completed_at', null)
+      .throwOnError();
     // Reveal is a flag flip — the write happened at save time (hard rule).
     await sb
       .from('diary_entries')
       .update({ is_revealed: true })
       .eq('user_id', uid_)
-      .like('contemplation_id', `${seriesId}-%`);
+      .like('contemplation_id', `${seriesId}-%`)
+      .throwOnError();
   }
 
   async startReplay(seriesId: string, useAltQuestions: boolean): Promise<void> {
@@ -384,7 +389,8 @@ export class SupabaseServices implements AppServices {
         use_alt_questions: useAltQuestions,
       })
       .eq('user_id', uid_)
-      .eq('series_id', seriesId);
+      .eq('series_id', seriesId)
+      .throwOnError();
   }
 
   // ---------- diary ----------
@@ -427,7 +433,7 @@ export class SupabaseServices implements AppServices {
       audio_path: audioPath,
       audio_duration_sec: e.audioDurationSec,
       is_revealed: false, // saved immediately, hidden until series completion
-    });
+    }).throwOnError();
   }
 
   // ---------- access ----------
@@ -446,7 +452,7 @@ export class SupabaseServices implements AppServices {
       series_id: productType === 'series_pack' ? seriesId : null,
       starts_at: now.toISOString(),
       expires_at: expiresAt,
-    });
+    }).throwOnError();
   }
 
   async cancelAccess(): Promise<void> {
@@ -456,7 +462,8 @@ export class SupabaseServices implements AppServices {
       .from('access_grants')
       .update({ expires_at: new Date().toISOString() })
       .eq('user_id', uid_)
-      .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString());
+      .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString())
+      .throwOnError();
   }
 
   // ---------- settings ----------
@@ -469,6 +476,7 @@ export class SupabaseServices implements AppServices {
     await sb
       .from('profiles')
       .update({ settings: { ...((p?.settings as object) ?? {}), ...s } })
-      .eq('user_id', uid_);
+      .eq('user_id', uid_)
+      .throwOnError();
   }
 }
