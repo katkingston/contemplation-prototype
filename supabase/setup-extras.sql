@@ -1,4 +1,5 @@
 -- Contemplation — setup extras. Run AFTER schema.sql in the Supabase SQL editor.
+-- Idempotent: safe to re-run in full at any time.
 
 -- 1. Profile extras: settings + onboarding checkpoint + email mirror,
 --    and the daily-drop timestamp on progress.
@@ -23,6 +24,7 @@ create trigger on_auth_user_created
 -- 3. PROTOTYPE ONLY: allow the client to insert mock grants (paywall simulation).
 --    REMOVE this policy in Phase C — production grants are written exclusively
 --    by the RevenueCat webhook Edge Function (service role bypasses RLS).
+drop policy if exists "own grants insert (PROTOTYPE ONLY)" on access_grants;
 create policy "own grants insert (PROTOTYPE ONLY)" on access_grants
   for insert to authenticated with check (user_id = auth.uid());
 
@@ -72,12 +74,26 @@ on conflict (id) do update
   set file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
+drop policy if exists "own memos read" on storage.objects;
 create policy "own memos read" on storage.objects
   for select to authenticated
   using (bucket_id = 'memos' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "own memos write" on storage.objects;
 create policy "own memos write" on storage.objects
   for insert to authenticated
   with check (bucket_id = 'memos' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "own memos delete" on storage.objects;
 create policy "own memos delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'memos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- 6. Migration for projects created before July 2026 hardening: re-gate the
+--    content policies on publication state (schema.sql now creates them this
+--    way; this fixes databases that ran the earlier version).
+drop policy if exists "series readable" on series;
+create policy "series readable" on series
+  for select to authenticated using (is_published);
+drop policy if exists "contemplations readable" on contemplations;
+create policy "contemplations readable" on contemplations
+  for select to authenticated
+  using (exists (select 1 from series s where s.id = series_id and s.is_published));
