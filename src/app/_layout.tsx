@@ -2,7 +2,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { NoticeHost } from '@/components/Notice';
 import { ServicesProvider } from '@/services/provider';
 import { color } from '@/theme/tokens';
@@ -31,8 +31,9 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            animation: 'fade',
-            animationDuration: 260,
+            // Native gets the stack fade; on web it lets the screen beneath
+            // (and Home's video) show through during transitions.
+            ...(Platform.OS !== 'web' ? { animation: 'fade' as const, animationDuration: 260 } : {}),
             contentStyle: { backgroundColor: color.paper },
           }}
         />

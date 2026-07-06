@@ -4,6 +4,7 @@
  * contemplation). Below: a horizontal artwork rail for the active series and
  * image-led rows for all series. Section headers carry SEE ALL links.
  */
+import { useIsFocused } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect } from 'react';
@@ -100,6 +101,9 @@ function SectionHeader({ label, onSeeAll }: { label: string; onSeeAll?: () => vo
 export default function Home() {
   const { data } = useApp();
   const reducedMotion = useReducedMotion();
+  // Home stays mounted beneath other routes (web keeps stack screens alive);
+  // the video must unmount when unfocused or it bleeds through page changes.
+  const isFocused = useIsFocused();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const series = activeSeries(data);
   const palette = seriesPalettes[series.id] ?? ['#232619', '#4c5232', '#6f7036'];
@@ -168,8 +172,9 @@ export default function Home() {
               seed={shownIdx}
               style={StyleSheet.absoluteFill as never}
             />
-            {/* Day's footage, 5s loop. Reduce Motion gets the still artwork. */}
-            {!reducedMotion && <HeroVideo />}
+            {/* Day's footage, 5s loop. Reduce Motion gets the still artwork.
+                Rendered only while Home is focused — never during transitions. */}
+            {!reducedMotion && isFocused && <HeroVideo />}
             <View style={styles.heroScrim} />
             <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
               {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
