@@ -62,8 +62,10 @@ export default function Login() {
     setError(null);
     try {
       await services.verifyEmailCode!(email.trim(), code.trim(), username.trim());
+      const fresh = await services.loadAll();
       await refresh();
-      router.replace('/baseline-intro');
+      // Returning users land on Home with their data; only new users take intake.
+      router.replace(fresh.onboardingStep === 'done' ? '/home' : '/baseline-intro');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'That code didn’t work — try again.');
     } finally {

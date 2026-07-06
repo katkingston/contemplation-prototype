@@ -156,9 +156,22 @@ export class SupabaseServices implements AppServices {
     if (error) throw error;
     const uid_ = await this.userId();
     if (!uid_) throw new Error('Sign-in did not produce a session.');
+    // Preserve a returning user's checkpoint — only a fresh profile (trigger
+    // default 'disclaimer') advances to 'intake'. Clobbering this sent
+    // returning users back through onboarding (caught in live verification).
+    const { data: existing } = await sb
+      .from('profiles')
+      .select('onboarding_step')
+      .eq('user_id', uid_)
+      .maybeSingle()
+      .throwOnError();
+    const step =
+      existing?.onboarding_step && existing.onboarding_step !== 'disclaimer'
+        ? existing.onboarding_step
+        : 'intake';
     await sb
       .from('profiles')
-      .upsert({ user_id: uid_, email, username, onboarding_step: 'intake' })
+      .upsert({ user_id: uid_, email, username, onboarding_step: step })
       .throwOnError();
     await this.importLocalOnFirstSignIn(uid_);
   }
