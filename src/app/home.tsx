@@ -245,7 +245,11 @@ export default function Home() {
           contentContainerStyle={{ paddingHorizontal: space.lg, gap: space.md }}>
           {series.contemplations.map((c, i) => {
             const done = i < p.currentIndex;
-            const today = i === p.currentIndex && !atWrap;
+            const isNext = i === p.currentIndex && !atWrap;
+            // 'Today' only while the drop is actually available — after
+            // completing, the next one is tomorrow and reads (and dims) so.
+            const today = isNext && dropReady;
+            const tomorrow = isNext && !dropReady;
             return (
               <Pressable
                 key={c.id}
@@ -277,7 +281,7 @@ export default function Home() {
                 <Gap size="sm" />
                 <AppText variant="label" muted>
                   No. {i + 1}
-                  {today ? ' · Today' : ''}
+                  {today ? ' · Today' : tomorrow ? ' · Tomorrow' : ''}
                 </AppText>
                 <AppText variant="bodyBold" numberOfLines={1}>
                   {c.hint}

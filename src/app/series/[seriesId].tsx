@@ -145,7 +145,8 @@ export default function SeriesDetail() {
           <Gap size="xl" />
           {series.contemplations.map((c, i) => {
             const done = i < p.currentIndex;
-            const today = i === p.currentIndex && !atWrap && !completed;
+            const isNext = i === p.currentIndex && !atWrap && !completed;
+            const today = isNext && dropReady;
             return (
               <View key={c.id} style={styles.row}>
                 <View style={{ flex: 1 }}>
@@ -169,7 +170,7 @@ export default function SeriesDetail() {
                   ) : null}
                 </View>
                 <AppText variant="small" muted>
-                  {done ? '✓' : today ? '·' : ''}
+                  {done ? '✓' : isNext ? '·' : ''}
                 </AppText>
               </View>
             );
