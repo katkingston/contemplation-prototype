@@ -65,6 +65,9 @@ function HeroVideo({ focused }: { focused: boolean }) {
         // paints over everything. Clip the element itself.
         v.style.borderRadius = '12px';
         v.style.clipPath = 'inset(0 round 12px)';
+        v.style.objectFit = 'cover';
+        v.style.width = '100%';
+        v.style.height = '100%';
         (v.style as CSSStyleDeclaration & { webkitClipPath?: string }).webkitClipPath =
           'inset(0 round 12px)';
       });

@@ -19,7 +19,7 @@ function useWebVideoGuard() {
     const style = document.createElement('style');
     style.textContent = `
       [aria-hidden="true"] video, [inert] video { display: none !important; }
-      video { max-width: 100%; max-height: 100%; }
+      video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
     `;
     document.head.appendChild(style);
     return () => {
