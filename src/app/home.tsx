@@ -34,13 +34,18 @@ const HERO_VIDEO = require('../../assets/media/contemplation-loop.mp4');
 /** The hero loops only the FIRST 5 seconds of the day's footage. */
 const HERO_LOOP_SECONDS = 5;
 
-function HeroVideo() {
+function HeroVideo({ focused }: { focused: boolean }) {
   const player = useVideoPlayer(HERO_VIDEO, (p) => {
     p.loop = true;
     p.muted = true;
     p.timeUpdateEventInterval = 0.25;
     p.play();
   });
+  // Belt and braces with the focus unmount: never let a blurred screen play.
+  useEffect(() => {
+    if (focused) player.play();
+    else player.pause();
+  }, [focused, player]);
   useEffect(() => {
     player.play(); // setup callback can fire before the element is ready (web)
     const sub = player.addListener('timeUpdate', (e) => {
@@ -56,6 +61,12 @@ function HeroVideo() {
         v.setAttribute('playsinline', 'true');
         v.setAttribute('webkit-playsinline', 'true');
         v.muted = true;
+        // Safari won't clip <video> to a rounded overflow-hidden parent; it
+        // paints over everything. Clip the element itself.
+        v.style.borderRadius = '12px';
+        v.style.clipPath = 'inset(0 round 12px)';
+        (v.style as CSSStyleDeclaration & { webkitClipPath?: string }).webkitClipPath =
+          'inset(0 round 12px)';
       });
     };
     const id = setInterval(force, 500);
@@ -174,7 +185,7 @@ export default function Home() {
             />
             {/* Day's footage, 5s loop. Reduce Motion gets the still artwork.
                 Rendered only while Home is focused — never during transitions. */}
-            {!reducedMotion && isFocused && <HeroVideo />}
+            {!reducedMotion && isFocused && <HeroVideo focused={isFocused} />}
             <View style={styles.heroScrim} />
             <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
               {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}

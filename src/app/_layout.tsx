@@ -7,7 +7,29 @@ import { NoticeHost } from '@/components/Notice';
 import { ServicesProvider } from '@/services/provider';
 import { color } from '@/theme/tokens';
 
+/**
+ * Web guard: react-navigation keeps lower stack screens mounted; if a browser
+ * mispaints during transitions, a stray <video> must never surface. Hide any
+ * video inside a hidden/inert/offscreen layer, and clip all videos to their
+ * containers (Safari ignores parent overflow clipping for video).
+ */
+function useWebVideoGuard() {
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const style = document.createElement('style');
+    style.textContent = `
+      [aria-hidden="true"] video, [inert] video { display: none !important; }
+      video { max-width: 100%; max-height: 100%; }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+}
+
 export default function RootLayout() {
+  useWebVideoGuard();
   // Brand fonts (all SIL OFL): BIZ UD Mincho (body voice), Karrik (display),
   // Miedinger (caps labels / alternative sans).
   const [fontsLoaded] = useFonts({
