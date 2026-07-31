@@ -1,7 +1,8 @@
 /**
- * SeriesDashes — the small per-series progress indicator from the Open
- * reference: one short dash per contemplation. Filled = done, accent = today,
- * faint = still locked. Reveals rhythm without revealing content.
+ * SeriesDashes — the small per-series progress indicator. Jul 30 designs:
+ * round dots, filled = done, solid "today" marker, outlined ring = still to
+ * come. Reveals rhythm without revealing content. (Name kept from the dash
+ * era so call sites stay stable.)
  */
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -15,7 +16,7 @@ export function SeriesDashes({
 }: {
   total: number;
   done: number;
-  /** Highlight the next dash as "today". */
+  /** Highlight the next dot as "today". */
   active?: boolean;
   dark?: boolean;
 }) {
@@ -24,24 +25,26 @@ export function SeriesDashes({
       {Array.from({ length: total }, (_, i) => {
         const isDone = i < done;
         const isToday = active && i === done;
+        const fill = isDone
+          ? dark
+            ? color.onDark
+            : color.accent
+          : isToday
+            ? dark
+              ? color.accentBright
+              : color.ink
+            : 'transparent';
         return (
           <View
             key={i}
             style={[
-              styles.dash,
-              {
-                backgroundColor: isDone
-                  ? dark
-                    ? color.accentBright
-                    : color.accent
-                  : isToday
-                    ? dark
-                      ? color.onDark
-                      : color.ink
-                    : dark
-                      ? 'rgba(239,233,219,0.25)'
-                      : color.line,
-              },
+              styles.dot,
+              fill === 'transparent'
+                ? {
+                    borderWidth: 1,
+                    borderColor: dark ? 'rgba(239,233,219,0.4)' : color.accentBright,
+                  }
+                : { backgroundColor: fill },
             ]}
           />
         );
@@ -51,6 +54,6 @@ export function SeriesDashes({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 4, alignItems: 'center' },
-  dash: { width: 14, height: 3, borderRadius: 2 },
+  row: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  dot: { width: 7, height: 7, borderRadius: 4 },
 });

@@ -46,6 +46,10 @@ export const color = {
   danger: '#7d332b',
   success: '#4a5a2e',
   successBg: '#e4e6d2',
+  // Taupe overlay surfaces (paused / rating dialog / signed-out — Jul 30 designs)
+  overlay: '#847c6c',
+  overlayElevated: '#6f6858',
+  onOverlay: '#efe9db',
   progress: '#6a6b33', // AA on progressBg
   progressBg: '#eae8d2',
   locked: '#696559', // AA on faint pills (was #b0a996 @ 1.8 — unreadable)
@@ -99,7 +103,13 @@ export const type = {
     letterSpacing: -0.44, // -4% (mono)
     textTransform: 'uppercase' as const,
   },
-  contemplation: { fontFamily: font.grotesk, fontSize: 26, lineHeight: 38, letterSpacing: -0.26 }, // -1%
+  /** Jul 30 designs: the contemplation question speaks in the typewriter mono. */
+  contemplation: { fontFamily: font.mono, fontSize: 22, lineHeight: 36, letterSpacing: -0.88 }, // -4% (mono)
+  /** Jul 30 designs: lowercase bold grotesk display (wordmark, screen titles, series names). */
+  displayLower: { fontFamily: font.groteskBold, fontSize: 38, lineHeight: 42, letterSpacing: -0.76 },
+  titleLower: { fontFamily: font.groteskBold, fontSize: 27, lineHeight: 32, letterSpacing: -0.54 },
+  /** Jul 30 designs: mono body voice for brand statements, quotes, prompts outside the player. */
+  monoBody: { fontFamily: font.mono, fontSize: 15, lineHeight: 24, letterSpacing: -0.6 },
 } as const;
 
 export const space = {

@@ -14,6 +14,8 @@ export default function Contemplation() {
     minutes?: string;
     music?: string;
     carrySeconds?: string;
+    /** '1' = replaying an already-completed contemplation; progress is NOT re-recorded. */
+    redo?: string;
   }>();
   const series = getSeries(params.seriesId ?? '');
   const index = Number(params.index ?? '0') || 0;
@@ -39,7 +41,12 @@ export default function Contemplation() {
           // Deliberate exit → straight to the journal, no Add Time detour.
           router.replace({
             pathname: '/journal',
-            params: { seriesId: series.id, index: String(index), totalSeconds },
+            params: {
+              seriesId: series.id,
+              index: String(index),
+              totalSeconds,
+              redo: params.redo ?? '0',
+            },
           });
         } else {
           // Timer ran out → offer to add time or move on.
@@ -50,6 +57,7 @@ export default function Contemplation() {
               index: String(index),
               music: params.music ?? '1',
               totalSeconds,
+              redo: params.redo ?? '0',
             },
           });
         }

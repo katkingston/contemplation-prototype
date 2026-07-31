@@ -9,20 +9,24 @@ import { mentalHealthResources, resourcesFootnote } from '@/content/copy';
 import { color, radius, space, type } from '@/theme/tokens';
 import { AppText, Sheet } from './ui';
 
-export function ResourcesList() {
+export function ResourcesList({ dark = false }: { dark?: boolean }) {
   return (
     <View>
-      <AppText variant="body" style={{ marginBottom: space.md }}>
+      <AppText variant={dark ? 'monoBody' : 'body'} dark={dark} style={{ marginBottom: space.md }}>
         If this content brings up difficult feelings, support is available.
       </AppText>
       {mentalHealthResources.map((r) => (
-        <View key={r.label} style={styles.resourceRow}>
+        <View
+          key={r.label}
+          style={[styles.resourceRow, dark && { borderBottomColor: 'rgba(239,233,219,0.3)' }]}>
           <Pressable
             accessibilityRole={r.url ? 'link' : undefined}
             onPress={r.url ? () => Linking.openURL(r.url!) : undefined}
             style={{ flex: 1 }}>
-            <AppText variant="bodyBold">{r.label}</AppText>
-            <AppText variant="small" muted>
+            <AppText variant="bodyBold" dark={dark}>
+              {r.label}
+            </AppText>
+            <AppText variant="small" muted dark={dark}>
               {r.detail}
             </AppText>
           </Pressable>
@@ -39,7 +43,7 @@ export function ResourcesList() {
           ) : null}
         </View>
       ))}
-      <AppText variant="caption" muted style={{ marginTop: space.md }}>
+      <AppText variant="caption" muted dark={dark} style={{ marginTop: space.md }}>
         {resourcesFootnote}
       </AppText>
     </View>

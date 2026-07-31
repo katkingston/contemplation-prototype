@@ -1,37 +1,78 @@
 /**
- * Library — all series as a collection (Open's Favorites/Library reference):
- * gradient thumbnails, per-series progress dashes, completed check. Over time
- * this page grows as more series open up.
+ * Library — the series browser (Jul 30 designs): lowercase "series" title,
+ * a paged carousel (art + right-aligned series title + pagination dots),
+ * then every series as a hairline row with its dot progress, the
+ * coming-soon list, and a Back link. Grows as more series open up.
  */
 import { router } from 'expo-router';
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Gap } from '@/components/ui';
+import { AppText, Dots, Gap, TextLink } from '@/components/ui';
 import { COMING_SOON, orderedSeries, seriesLength } from '@/content/series';
-import {
-  isSeriesCompleted,
-  isSeriesUnlocked,
-  progressFor,
-} from '@/services/logic';
+import { isSeriesCompleted, isSeriesUnlocked, progressFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, radius, seriesPalettes, space } from '@/theme/tokens';
 
 export default function Library() {
   const { data } = useApp();
+  const { width } = useWindowDimensions();
+  const [page, setPage] = useState(0);
+  const all = orderedSeries();
+  const pageW = width - space.lg * 2;
+
+  const open = (id: string) =>
+    router.push({ pathname: '/series/[seriesId]', params: { seriesId: id } });
 
   return (
     <TabScreen active="journey">
       <Gap size="xl" />
-      <AppText variant="title">Series</AppText>
-      <Gap size="sm" />
-      <AppText variant="small" muted>
-        Your practice, one series at a time. More open as you complete them.
-      </AppText>
+      <AppText variant="titleLower">series</AppText>
       <Gap size="lg" />
-      {orderedSeries().map((s) => {
+      {/* Carousel — one card per series, pagination dots below. */}
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={pageW}
+        decelerationRate="fast"
+        onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / pageW))}
+        scrollEventThrottle={64}
+        style={{ marginHorizontal: -space.lg }}
+        contentContainerStyle={{ paddingHorizontal: space.lg }}>
+        {all.map((s) => (
+          <Pressable
+            key={s.id}
+            accessibilityRole="button"
+            accessibilityLabel={s.title}
+            onPress={() => open(s.id)}
+            style={({ pressed }) => [
+              styles.carouselCard,
+              { width: pageW },
+              pressed && { opacity: 0.7 },
+            ]}
+            testID={`library-card-${s.id}`}>
+            <View style={styles.carouselThumb}>
+              <SeriesArt
+                gradient={s.contemplations[0].gradient}
+                accent={(seriesPalettes[s.id] ?? ['#232619', '#4c5232', '#6f7036'])[2]}
+                seed={s.displayOrder}
+                style={StyleSheet.absoluteFill as never}
+              />
+            </View>
+            <AppText variant="titleLower" style={styles.carouselTitle as never}>
+              {s.title}
+            </AppText>
+          </Pressable>
+        ))}
+      </ScrollView>
+      <Gap size="md" />
+      <Dots count={all.length} active={Math.min(page, all.length - 1)} />
+      <Gap size="xl" />
+      {/* Every series with its dot progress. */}
+      {all.map((s) => {
         const p = progressFor(data, s.id);
         const done = isSeriesCompleted(data, s);
         const unlocked = isSeriesUnlocked(data, s);
@@ -41,78 +82,69 @@ export default function Library() {
             key={s.id}
             accessibilityRole="button"
             accessibilityLabel={s.title}
-            onPress={() => router.push({ pathname: '/series/[seriesId]', params: { seriesId: s.id } })}
+            onPress={() => open(s.id)}
             style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}
             testID={`library-${s.id}`}>
-            <View style={styles.thumb}>
-              <SeriesArt
-                gradient={s.contemplations[0].gradient}
-                accent={(seriesPalettes[s.id] ?? ['#232619', '#4c5232', '#6f7036'])[2]}
-                seed={s.displayOrder}
-                style={StyleSheet.absoluteFill as never}
-              />
-              {!unlocked && !done ? <View style={styles.thumbVeil} /> : null}
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppText variant="label" muted>
-                {s.tag}
-                {done
-                  ? ' · Complete'
-                  : !unlocked
-                    ? ' · Locked'
-                    : p.currentIndex > 0
-                      ? ' · In progress'
-                      : ''}
+            <View style={{ flex: 1, opacity: unlocked || done ? 1 : 0.5 }}>
+              <AppText variant="bodyBold" numberOfLines={2}>
+                {s.title}
               </AppText>
-              <AppText variant="bodyBold">{s.title}</AppText>
-              <Gap size="xs" />
-              <SeriesDashes total={len} done={Math.min(p.currentIndex, len)} active={!done && unlocked} />
             </View>
-            <AppText variant="body" muted>
-              {done ? '✓' : unlocked ? '›' : '·'}
-            </AppText>
+            <SeriesDashes total={len} done={Math.min(p.currentIndex, len)} active={!done && unlocked} />
           </Pressable>
         );
       })}
+      <View style={styles.endRule} />
       <Gap size="xl" />
-      <AppText variant="label" muted>
-        Coming soon
+      <AppText variant="monoBody" muted>
+        coming soon
       </AppText>
       {COMING_SOON.map((c) => (
-        <View key={c.title} style={[styles.row, { opacity: 0.5 }]}>
-          <View style={[styles.thumb, { backgroundColor: color.faint }]} />
-          <View style={{ flex: 1 }}>
-            <AppText variant="label" muted>
-              {c.tag}
-            </AppText>
-            <AppText variant="bodyBold" muted>
-              {c.title}
-            </AppText>
-          </View>
-          <AppText variant="label" muted>
-            Soon
+        <View key={c.title} style={styles.comingRow}>
+          <AppText variant="bodyBold" style={{ color: color.locked }}>
+            {c.title}
           </AppText>
         </View>
       ))}
+      <Gap size="xl" />
+      <TextLink
+        label="Back"
+        muted
+        onPress={() => (router.canGoBack() ? router.back() : router.replace('/menu' as never))}
+        testID="library-back"
+      />
       <Gap size="lg" />
     </TabScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  carouselCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: space.md,
+    paddingRight: space.lg,
+  },
+  carouselThumb: {
+    width: 88,
+    height: 116,
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+  },
+  carouselTitle: { flex: 1, textAlign: 'right' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
     paddingVertical: space.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.muted,
+  },
+  endRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.muted },
+  comingRow: {
+    paddingVertical: space.md,
+    borderBottomWidth: 1,
     borderBottomColor: color.line,
+    borderStyle: 'dotted',
   },
-  thumb: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.sm,
-    overflow: 'hidden',
-  },
-  thumbVeil: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(240,236,225,0.55)' },
 });

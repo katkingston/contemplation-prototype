@@ -63,13 +63,13 @@ function HeroVideo({ focused }: { focused: boolean }) {
         v.muted = true;
         // Safari won't clip <video> to a rounded overflow-hidden parent; it
         // paints over everything. Clip the element itself.
-        v.style.borderRadius = '12px';
-        v.style.clipPath = 'inset(0 round 12px)';
+        v.style.borderRadius = '3px';
+        v.style.clipPath = 'inset(0 round 3px)';
         v.style.objectFit = 'cover';
         v.style.width = '100%';
         v.style.height = '100%';
         (v.style as CSSStyleDeclaration & { webkitClipPath?: string }).webkitClipPath =
-          'inset(0 round 12px)';
+          'inset(0 round 3px)';
       });
     };
     const id = setInterval(force, 500);
@@ -157,6 +157,14 @@ export default function Home() {
     }
   };
 
+  // Jul 30 designs: done-today offers "Redo Contemplation" — replays the
+  // completed item without re-recording progress (redo flag).
+  const onRedo = () =>
+    router.push({
+      pathname: '/get-ready',
+      params: { seriesId: series.id, index: String(shownIdx), redo: '1' },
+    });
+
   const openSeries = (id: string) =>
     router.push({ pathname: '/series/[seriesId]', params: { seriesId: id } });
 
@@ -169,17 +177,7 @@ export default function Home() {
         {/* Today hero — artwork-led. Done-today shows the completed item;
             otherwise the whole card is the Start link. */}
         <View style={{ paddingHorizontal: space.lg }}>
-          <Pressable
-            accessibilityRole={doneToday ? undefined : 'button'}
-            accessibilityLabel={doneToday ? undefined : 'Start today’s contemplation'}
-            disabled={doneToday}
-            onPress={onPlay}
-            style={({ pressed }) => [
-              styles.hero,
-              { height: heroHeight },
-              pressed && !doneToday && { opacity: 0.85 },
-            ]}
-            testID="hero-play">
+          <View style={[styles.hero, { height: heroHeight }]} testID="hero-play">
             <SeriesArt
               gradient={shown ? shown.gradient : ['#333', '#555']}
               accent={palette[2]}
@@ -190,37 +188,65 @@ export default function Home() {
                 Rendered only while Home is focused — never during transitions. */}
             {!reducedMotion && isFocused && <HeroVideo focused={isFocused} />}
             <View style={styles.heroScrim} />
-            <AppText variant="label" style={{ color: 'rgba(239,233,219,0.8)' }}>
-              {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
-            </AppText>
+            {/* Jul 30 designs: "1/7"-style counter left (computed), series
+                name caps right; done-today gets a small marker dot. */}
+            <View style={styles.heroTop}>
+              <AppText variant="label" style={{ color: 'rgba(239,233,219,0.85)' }}>
+                {`${Math.min(shownIdx + 1, len)}/${len}`}
+              </AppText>
+              <View style={{ flex: 1 }} />
+              <View style={{ alignItems: 'flex-end', maxWidth: '70%' }}>
+                <AppText
+                  variant="label"
+                  style={{ color: 'rgba(239,233,219,0.85)', textAlign: 'right' }}>
+                  {series.title}
+                </AppText>
+                {doneToday ? <View style={styles.doneDot} /> : null}
+              </View>
+            </View>
             <View style={{ flex: 1 }} />
-            <AppText variant="small" style={{ color: 'rgba(239,233,219,0.85)' }}>
-              {series.title}
+            <AppText variant="displayLower" style={{ color: color.onDark }}>
+              {atWrap ? 'complete' : (shown?.hint ?? '').toLowerCase()}
             </AppText>
-            <Gap size="sm" />
-            <AppText variant="display" style={{ color: '#efe9db' }}>
-              {atWrap ? 'Complete' : (shown?.hint ?? '')}
-            </AppText>
-            <Gap size="xl" />
+            <Gap size="lg" />
+            {doneToday ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Redo today’s contemplation"
+                onPress={onRedo}
+                style={({ pressed }) => [
+                  styles.heroButton,
+                  styles.heroButtonMuted,
+                  pressed && { opacity: 0.7 },
+                ]}
+                testID="hero-redo">
+                <AppText variant="body" style={{ color: 'rgba(239,233,219,0.75)' }}>
+                  Redo Contemplation
+                </AppText>
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  atWrap ? 'See your wrap-up' : 'Begin today’s contemplation'
+                }
+                onPress={onPlay}
+                style={({ pressed }) => [styles.heroButton, pressed && { opacity: 0.7 }]}
+                testID="hero-begin">
+                <AppText variant="body" style={{ color: color.onDark }}>
+                  {atWrap ? 'See your wrap-up' : 'Begin'}
+                </AppText>
+              </Pressable>
+            )}
             {doneToday ? (
               <>
-                <AppText variant="bodyBold" style={{ color: '#efe9db' }}>
-                  ✓ Completed today
-                </AppText>
-                <Gap size="xs" />
-                <AppText variant="label" style={{ color: 'rgba(239,233,219,0.9)' }}>
+                <Gap size="sm" />
+                <AppText variant="label" center style={{ color: 'rgba(239,233,219,0.7)', alignSelf: 'center' }}>
                   New contemplation at {dropLabel(dropAt!)}
                 </AppText>
               </>
-            ) : (
-              <View style={styles.startPill}>
-                <AppText variant="bodyBold" style={{ color: '#efe9db' }}>
-                  {atWrap ? 'See your wrap-up →' : 'Start →'}
-                </AppText>
-              </View>
-            )}
-            <View style={{ flex: 1 }} />
-          </Pressable>
+            ) : null}
+          </View>
           {!accessOk && (
             <>
               <Gap size="sm" />
@@ -235,7 +261,7 @@ export default function Home() {
         <Gap size="xl" />
         <View style={{ paddingHorizontal: space.lg }}>
           <SectionHeader
-            label={`This series · ${p.currentIndex} of ${len}`}
+            label={`${series.title} · ${Math.min(p.currentIndex, len)}/${len}`}
             onSeeAll={() => openSeries(series.id)}
           />
         </View>
@@ -270,13 +296,7 @@ export default function Home() {
                     seed={i}
                     style={StyleSheet.absoluteFill as never}
                   />
-                  {done ? (
-                    <View style={styles.cardCheck}>
-                      <AppText variant="caption" style={{ color: color.onDark }}>
-                        ✓
-                      </AppText>
-                    </View>
-                  ) : null}
+                  {done ? <View style={styles.cardDoneDot} /> : null}
                 </View>
                 <Gap size="sm" />
                 <AppText variant="label" muted>
@@ -352,21 +372,30 @@ export default function Home() {
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
   hero: {
-    borderRadius: radius.lg,
+    borderRadius: radius.sm,
     overflow: 'hidden',
     paddingVertical: space.lg,
     paddingHorizontal: space.lg,
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
   },
   heroScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.30)' },
-  startPill: {
-    borderWidth: 1.5,
+  heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
+  doneDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: color.onDark,
+    marginTop: space.sm,
+  },
+  heroButton: {
+    borderWidth: 1,
     borderColor: 'rgba(239,233,219,0.9)',
     borderRadius: radius.sm,
-    paddingVertical: 12,
-    paddingHorizontal: 26,
-    alignSelf: 'flex-start',
+    paddingVertical: 13,
+    alignItems: 'center',
+    alignSelf: 'stretch',
   },
+  heroButtonMuted: { borderColor: 'rgba(239,233,219,0.45)' },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -380,16 +409,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     overflow: 'hidden',
   },
-  cardCheck: {
+  cardDoneDot: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: 'rgba(24,28,12,0.65)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    top: 10,
+    right: 10,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: color.onDark,
   },
   seriesRow: {
     flexDirection: 'row',

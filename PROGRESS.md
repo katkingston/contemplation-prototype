@@ -1,5 +1,45 @@
 # PROGRESS
 
+## Jul 31, 2026 — Restyled to the Jul 30 Figma designs
+
+Full visual alignment pass against Figma `atH0pGLnQRyHk2gPOxAaw9` page
+"JUL 30 DESIGNS" (node 166:3060). Flows unchanged; visuals, IA tweaks, and a
+few new screens:
+
+- **Design language:** lowercase olive `contemplate` wordmark (`Wordmark`),
+  typewriter mono as the contemplation voice (player question is now BIZ UD
+  Mincho, not the handwriting face), underlined `TextLink` actions
+  ("Resume, End" / "Skip, Submit"), mono caps flow headers via `MonoHeader`
+  (`seriesCode()` in series.ts — computed "01.6"-style, never hardcoded),
+  dot progress (SeriesDashes now renders dots), full-width sharp buttons,
+  hairline `ListRow`s with right values, taupe overlay surfaces
+  (`color.overlay*`) for paused/rating/signed-out.
+- **IA:** tab bar = Today / Journey / Account with always-visible labels +
+  "Next session …" line. Journey tab lands on the new dark `/menu` (daily
+  quote + series/journey/learn); `/journey` is now the light stats +
+  reflections record. Account simplified per design (badges + guest pass
+  REMOVED; stats live on Journey). Send feedback moved to Account.
+- **Contemplation loop:** Get Ready redesigned (gradient, "Add time",
+  "Select music: none/floating/studio/nature" — named tracks all map to the
+  one placeholder mp3, registry in GetReady.tsx). Player: centered mono
+  question, tap-anywhere pauses → taupe paused screen ("Resume, End"),
+  "Crisis Support" link bottom-left on BOTH states (hard rule). Add-time is
+  now "want to keep contemplating?" with time+music. Day exit shows
+  "NEXT — 6:00 PM TOMORROW". Home hero: computed `n/len` counter + lowercase
+  hint + Begin / **Redo Contemplation** (redo replays via a `redo=1` param —
+  journal skips `recordContemplationComplete` so progress can't double-advance).
+- **New screens:** `/menu`, `/signed-out`. Paywall rebuilt light per the new
+  design (plans copy updated in copy.ts: Single Series Pack / Monthly /
+  Annual + "Save 66%" badge). Login: mono-caps labels, underline inputs,
+  6-box OTP input. Intake/survey: "01 — BASELINE 01/04" headers (counts
+  computed), boxed scales, hairline multi-select rows.
+- Rating prompt restyled (taupe card, "Not now / Rate →"); timing confirmed
+  at 3 completions (`review.minCompletions = 3`).
+- Verified: tsc clean, `expo export --platform web` builds, full web
+  walkthrough (disclaimer → free contemplation → paywall → login → intake →
+  drop-time → home → menu/journey/library/learn/account) matches the Figma
+  crops; no console errors.
+
 ## Status: V1 prototype complete & verified (local-first)
 
 Working end-to-end app prototype per the approved plan. All 22 screens from the

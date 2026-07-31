@@ -41,35 +41,35 @@ export function WordCapInput({
   const atCap = words >= limits.diaryMaxWords;
   return (
     <View>
-      <AppText variant="small" muted>
-        Write your thoughts
-      </AppText>
-      <Gap size="xs" />
       <TextInput
         multiline
         accessibilityLabel="Write your thoughts"
         value={value}
         onChangeText={(t) => onChange(capWords(t, limits.diaryMaxWords))}
-        placeholder="There are no right answers…"
+        placeholder="write here…"
         placeholderTextColor={color.muted}
         style={{
-          ...type.body,
-          minHeight: 140,
-          borderWidth: 1,
-          borderColor: atCap ? color.danger : color.line,
-          borderRadius: radius.md,
-          padding: space.md,
-          backgroundColor: color.faint,
+          // Jul 30 designs: open mono writing surface over a dotted rule.
+          ...type.monoBody,
+          minHeight: 120,
           textAlignVertical: 'top',
           color: color.ink,
         }}
         testID="diary-text"
       />
-      <Gap size="xs" />
+      <View
+        style={{
+          borderTopWidth: 1,
+          borderTopColor: atCap ? color.danger : color.muted,
+          borderStyle: 'dotted',
+          marginTop: space.sm,
+        }}
+      />
+      <Gap size="sm" />
       <AppText
-        variant="caption"
+        variant="label"
         muted
-        style={{ textAlign: 'right', color: atCap ? color.danger : color.muted }}>
+        style={atCap ? { color: color.danger } : undefined}>
         {words} / {limits.diaryMaxWords} words{atCap ? ' · limit reached' : ''}
       </AppText>
     </View>
@@ -272,28 +272,19 @@ export function VoiceRecorder({
   }
 
   return (
-    <View
-      style={{
-        borderWidth: 1,
-        borderColor: color.line,
-        borderRadius: radius.md,
-        padding: space.md,
-        backgroundColor: color.faint,
-        gap: space.sm,
-      }}>
+    // Jul 30 designs: an open row — ringed olive record dot + mono caption.
+    <View style={{ gap: space.sm }}>
       {phase === 'idle' && (
         <Row between>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Record a voice memo"
             onPress={start}
-            style={recordBtn(color.danger)}
+            style={recordRing}
             testID="voice-record">
-            <AppText variant="small" style={{ color: '#fff' }}>
-              ●
-            </AppText>
+            <View style={recordDot} />
           </Pressable>
-          <AppText variant="small" muted style={{ flex: 1 }}>
+          <AppText variant="monoBody" muted style={{ flex: 1, fontSize: 13 }}>
             {permission === 'denied'
               ? 'Microphone unavailable'
               : `Record a voice memo · up to ${limits.voiceMaxSeconds}s`}
@@ -349,3 +340,20 @@ function recordBtn(bg: string) {
     justifyContent: 'center' as const,
   };
 }
+
+/** Idle record affordance: thin ring with a solid olive core (Jul 30 designs). */
+const recordRing = {
+  width: 34,
+  height: 34,
+  borderRadius: 17,
+  borderWidth: 1.5,
+  borderColor: color.accent,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+};
+const recordDot = {
+  width: 14,
+  height: 14,
+  borderRadius: 7,
+  backgroundColor: color.accent,
+};

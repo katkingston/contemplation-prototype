@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import React, { useState } from 'react';
-import { Alert, Linking, Platform, Share, Switch } from 'react-native';
+import { Alert, Platform, Share, Switch } from 'react-native';
 import { DropTimeInput } from '@/components/DropTimeInput';
 import { AppText, Button, Gap, ListRow, Screen, Select, Sheet } from '@/components/ui';
 import { activeSeries, progressFor } from '@/services/logic';
@@ -71,8 +71,8 @@ export default function Settings() {
   return (
     <Screen testID="settings-screen">
       <Gap size="xl" />
-      <AppText variant="title">Settings</AppText>
-      <Gap size="md" />
+      <AppText variant="titleLower">Settings</AppText>
+      <Gap size="xl" />
       <ListRow
         label="Push notifications"
         sub="streak reminders (prototype: preference only)"
@@ -124,16 +124,10 @@ export default function Settings() {
         onPress={exportData}
         testID="export-data"
       />
-      <ListRow
-        label="Send feedback"
-        sub="tell us what to improve"
-        onPress={() =>
-          Linking.openURL('mailto:hey@katkingston.design?subject=Contemplate%20feedback')
-        }
-        testID="settings-feedback"
-      />
+      {/* Send feedback moved to Account (Jul 30 designs). */}
       <ListRow
         label="Delete account"
+        rightLabel="Permanent"
         sub="permanently removes thoughts & voice memos"
         danger
         onPress={() => setConfirmDelete(true)}
@@ -160,7 +154,7 @@ export default function Settings() {
         </>
       )}
       <Gap size="xl" />
-      <Button label="Back" kind="ghost" onPress={() => router.back()} />
+      <Button label="Back" kind="secondary" onPress={() => router.back()} />
       <Sheet visible={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete account?">
         <AppText variant="body">
           This permanently deletes your account and all data: progress, reflections, and voice

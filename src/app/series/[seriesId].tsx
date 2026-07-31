@@ -6,14 +6,14 @@
  */
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { notify } from '@/components/Notice';
 import { shareMessage } from '@/services/share';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Button, Gap, Row } from '@/components/ui';
-import { getSeries, seriesLength } from '@/content/series';
+import { AppText, Gap, Row, TextLink } from '@/components/ui';
+import { getSeries, seriesCode, seriesLength } from '@/content/series';
 import {
   dropLabel,
   hasActiveAccess,
@@ -109,7 +109,18 @@ export default function SeriesDetail() {
     <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="series-detail">
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 140 }}>
+        contentContainerStyle={{ paddingBottom: 140, paddingHorizontal: space.lg }}>
+        <Gap size="md" />
+        {/* Jul 30 designs: dot progress top-left, computed n/len top-right. */}
+        <Row between>
+          <SeriesDashes total={len} done={Math.min(p.currentIndex, len)} active={!completed && !atWrap} />
+          <AppText variant="label" muted>
+            {`${Math.min(p.currentIndex, len)}/${len}`}
+          </AppText>
+        </Row>
+        <Gap size="md" />
+        <AppText variant="titleLower">{series.title}</AppText>
+        <Gap size="md" />
         <View style={styles.hero}>
           <SeriesArt
             gradient={series.contemplations[0].gradient}
@@ -117,86 +128,73 @@ export default function SeriesDetail() {
             seed={series.displayOrder}
             style={StyleSheet.absoluteFill as never}
           />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Back"
-            hitSlop={12}
-            onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
-            style={styles.back}
-            testID="series-back">
-            <AppText variant="heading" style={{ color: color.onDark }}>
-              ←
-            </AppText>
-          </Pressable>
         </View>
-        <View style={{ paddingHorizontal: space.lg }}>
-          <Gap size="lg" />
+        <Gap size="sm" />
+        <Row between>
           <AppText variant="label" muted>
-            {series.tag} · {len} contemplations
+            {`Series ${seriesCode(series, 0).split('.')[0]}`}
           </AppText>
-          <Gap size="sm" />
-          <AppText variant="title">{series.title}</AppText>
-          <Gap size="md" />
-          <SeriesDashes total={len} done={p.currentIndex} active={!completed && !atWrap} />
-          <Gap size="md" />
-          <AppText variant="body" muted>
-            {series.theme}
+          <AppText variant="label" muted>
+            {series.tag}
           </AppText>
-          <Gap size="xl" />
-          {series.contemplations.map((c, i) => {
-            const done = i < p.currentIndex;
-            const isNext = i === p.currentIndex && !atWrap && !completed;
-            const today = isNext && dropReady;
-            return (
-              <View key={c.id} style={styles.row}>
-                <View style={{ flex: 1 }}>
-                  <Row>
-                    <AppText variant="bodyBold" muted={!done && !today}>
-                      No. {i + 1}
+        </Row>
+        <Gap size="sm" />
+        <AppText variant="small" muted>
+          {series.theme}
+        </AppText>
+        <Gap size="xl" />
+        {series.contemplations.map((c, i) => {
+          const done = i < p.currentIndex;
+          const isNext = i === p.currentIndex && !atWrap && !completed;
+          const today = isNext && dropReady;
+          const future = !done && !isNext;
+          return (
+            <View key={c.id} style={styles.row}>
+              <View style={{ flex: 1, opacity: future ? 0.45 : 1 }}>
+                <Row>
+                  <AppText variant="label" muted style={styles.rowCode as never}>
+                    {seriesCode(series, i)}
+                  </AppText>
+                  <AppText variant="bodyBold" muted={future}>
+                    {c.hint}
+                  </AppText>
+                </Row>
+                {done ? (
+                  <>
+                    <Gap size="xs" />
+                    <AppText variant="small" muted>
+                      {questionFor(data, series, i)}
                     </AppText>
-                    <View style={[styles.chip, today && { borderColor: color.accent }]}>
-                      <AppText variant="label" muted={!today} style={today ? { color: color.accent } : undefined}>
-                        {c.hint}
-                      </AppText>
-                    </View>
-                  </Row>
-                  {done ? (
-                    <>
-                      <Gap size="xs" />
-                      <AppText variant="small" muted>
-                        {questionFor(data, series, i)}
-                      </AppText>
-                    </>
-                  ) : null}
-                </View>
-                <AppText variant="small" muted>
-                  {done ? '✓' : isNext ? '·' : ''}
-                </AppText>
+                  </>
+                ) : null}
               </View>
-            );
-          })}
-        </View>
+              {done ? (
+                <View style={styles.rowDotDone} />
+              ) : isNext ? (
+                <View style={styles.rowDotNext} />
+              ) : null}
+            </View>
+          );
+        })}
+        <View style={styles.endRule} />
       </ScrollView>
-      {/* Start + Share pinned low, per reference */}
+      {/* Back / Share / Contemplate pinned low (Jul 30 designs). */}
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, space.md) }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Share this series"
-          hitSlop={8}
-          onPress={onShare}
-          style={styles.shareCircle}
-          testID="series-share">
-          <AppText variant="heading">⌃</AppText>
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Button
-            label={cta}
-            arrow={!ctaDisabled}
-            disabled={ctaDisabled}
-            onPress={onStart}
-            testID="series-start"
-          />
-        </View>
+        <TextLink
+          label="Back"
+          muted
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
+          testID="series-back"
+        />
+        <TextLink label="Share" muted onPress={onShare} testID="series-share" />
+        <View style={{ flex: 1 }} />
+        <TextLink
+          label={cta}
+          arrow={!ctaDisabled}
+          disabled={ctaDisabled}
+          onPress={onStart}
+          testID="series-start"
+        />
       </View>
     </SafeAreaView>
   );
@@ -204,30 +202,25 @@ export default function SeriesDetail() {
 
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
-  hero: { height: 300 },
-  back: {
-    position: 'absolute',
-    top: space.md,
-    left: space.lg,
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-  },
+  hero: { height: 220, borderRadius: radius.sm, overflow: 'hidden' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
     paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.line,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.muted,
   },
-  chip: {
+  rowCode: { minWidth: 44 },
+  rowDotDone: { width: 7, height: 7, borderRadius: 4, backgroundColor: color.ink },
+  rowDotNext: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: color.line,
-    borderRadius: radius.pill,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+    borderColor: color.ink,
   },
+  endRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.muted },
   actions: {
     position: 'absolute',
     left: 0,
@@ -241,14 +234,5 @@ const styles = StyleSheet.create({
     backgroundColor: color.paper,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.line,
-  },
-  shareCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: color.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

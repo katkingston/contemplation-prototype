@@ -4,23 +4,62 @@
  * - Supabase: passwordless email code — enter email → 6-digit code → session.
  *   (No password handling by design, per the approved copy.)
  * Apple/Google arrive with the native build (entitlements/OAuth) — Phase C/D.
+ * Jul 30 designs: wordmark header, mono caps field labels over underline
+ * inputs, outlined SSO pair, "Email Code →" CTA, and a 6-box code screen.
  */
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { TextInput } from 'react-native';
-import { AppText, Button, Gap, Row, Screen } from '@/components/ui';
+import React, { useRef, useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { AppText, Button, Gap, Row, Screen, Wordmark } from '@/components/ui';
 import { useApp } from '@/services/provider';
-import { color, radius, space, type } from '@/theme/tokens';
+import { color, font, space, type } from '@/theme/tokens';
 
 const inputStyle = {
   ...type.body,
-  borderWidth: 1,
-  borderColor: color.line,
-  borderRadius: radius.sm,
-  padding: space.md,
-  backgroundColor: color.faint,
+  borderBottomWidth: 1,
+  borderBottomColor: color.muted,
+  paddingVertical: space.sm,
   color: color.ink,
 } as const;
+
+const CODE_LENGTH = 6;
+
+/** Six visible digit boxes fed by one invisible input (Jul 30 designs). */
+function CodeBoxes({
+  value,
+  onChange,
+  testID,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  testID?: string;
+}) {
+  const inputRef = useRef<TextInput>(null);
+  return (
+    <Pressable
+      accessibilityLabel="Six digit code"
+      onPress={() => inputRef.current?.focus()}
+      style={styles.codeRow}>
+      {Array.from({ length: CODE_LENGTH }, (_, i) => (
+        <View key={i} style={[styles.codeBox, i === value.length && styles.codeBoxActive]}>
+          <AppText variant="bodyBold" style={{ fontFamily: font.mono } as never}>
+            {value[i] ?? ''}
+          </AppText>
+        </View>
+      ))}
+      <TextInput
+        ref={inputRef}
+        value={value}
+        onChangeText={(t) => onChange(t.replace(/\D/g, '').slice(0, CODE_LENGTH))}
+        keyboardType="number-pad"
+        maxLength={CODE_LENGTH}
+        autoFocus
+        style={styles.codeInput}
+        testID={testID}
+      />
+    </Pressable>
+  );
+}
 
 export default function Login() {
   const { services, act, refresh } = useApp();
@@ -76,28 +115,17 @@ export default function Login() {
   if (cloud && stage === 'code') {
     return (
       <Screen testID="login-code-screen">
-        <Gap size="xl" />
-        <AppText variant="title">Check your email</AppText>
-        <Gap size="sm" />
-        <AppText variant="body" muted>
-          We sent a 6-digit code to {email.trim()}. Enter it below to finish signing in.
-        </AppText>
         <Gap size="lg" />
-        <AppText variant="small" muted>
-          Code
+        <Wordmark />
+        <Gap size="xxl" />
+        <Gap size="xl" />
+        <AppText variant="titleLower">Check your email</AppText>
+        <Gap size="md" />
+        <AppText variant="body" muted>
+          We sent a 6-digit code to {email.trim()}.
         </AppText>
-        <Gap size="xs" />
-        <TextInput
-          value={code}
-          onChangeText={setCode}
-          placeholder="123456"
-          accessibilityLabel="Six digit code"
-          placeholderTextColor={color.muted}
-          keyboardType="number-pad"
-          maxLength={6}
-          style={inputStyle}
-          testID="code-input"
-        />
+        <Gap size="xl" />
+        <CodeBoxes value={code} onChange={setCode} testID="code-input" />
         {error ? (
           <>
             <Gap size="sm" />
@@ -106,56 +134,61 @@ export default function Login() {
             </AppText>
           </>
         ) : null}
-        <Gap size="lg" />
+        <Gap size="xxl" />
+        <Button
+          label="Use a different email"
+          kind="secondary"
+          onPress={() => setStage('form')}
+        />
+        <Gap size="sm" />
         <Button
           label={busy ? 'Verifying…' : 'Verify'}
           arrow
           onPress={verify}
-          disabled={busy || code.trim().length < 6}
+          disabled={busy || code.trim().length < CODE_LENGTH}
           testID="verify-code"
         />
-        <Gap size="sm" />
-        <Button label="Use a different email" kind="ghost" small onPress={() => setStage('form')} />
+        <Gap size="lg" />
       </Screen>
     );
   }
 
   return (
     <Screen testID="login-screen">
-      <Gap size="xl" />
-      <AppText variant="title">Log in or sign up</AppText>
       <Gap size="lg" />
-      <AppText variant="small" muted>
+      <Wordmark />
+      <Gap size="xxl" />
+      <AppText variant="titleLower">Log in or sign up</AppText>
+      <Gap size="xl" />
+      <AppText variant="label" muted>
         Email
       </AppText>
-      <Gap size="xs" />
       <TextInput
         value={email}
         onChangeText={setEmail}
         placeholder="name@example.com"
-          accessibilityLabel="Email address"
+        accessibilityLabel="Email address"
         placeholderTextColor={color.muted}
         autoCapitalize="none"
         keyboardType="email-address"
         style={inputStyle}
         testID="email-input"
       />
-      <Gap size="md" />
-      <AppText variant="small" muted>
+      <Gap size="lg" />
+      <AppText variant="label" muted>
         Username
       </AppText>
-      <Gap size="xs" />
       <TextInput
         value={username}
         onChangeText={setUsername}
-        placeholder="username"
-          accessibilityLabel="Username"
+        placeholder="How should we address you?"
+        accessibilityLabel="Username"
         placeholderTextColor={color.muted}
         autoCapitalize="none"
         style={inputStyle}
         testID="username-input"
       />
-      <Gap size="lg" />
+      <Gap size="xl" />
       <Row>
         <Button
           label="Apple"
@@ -171,16 +204,19 @@ export default function Login() {
         />
       </Row>
       {cloud ? (
-        <AppText variant="caption" muted>
-          Apple & Google sign-in arrive with the native app build.
-        </AppText>
+        <>
+          <Gap size="sm" />
+          <AppText variant="caption" muted>
+            Apple & Google sign-in arrive with the native app build.
+          </AppText>
+        </>
       ) : null}
-      <Gap size="lg" />
+      <Gap size="xl" />
       <AppText variant="small" muted>
         We never sell or share your data.
       </AppText>
       <AppText variant="small" style={{ color: color.accent, textDecorationLine: 'underline' }}>
-        Privacy Policy & Terms ›
+        Privacy Policy + Terms ›
       </AppText>
       {error ? (
         <>
@@ -192,12 +228,29 @@ export default function Login() {
       ) : null}
       <Gap size="xl" />
       <Button
-        label={busy ? 'Sending code…' : cloud ? 'Email me a code' : 'Continue'}
+        label={busy ? 'Sending code…' : cloud ? 'Email Code' : 'Continue'}
         arrow
         onPress={cloud ? sendCode : () => proceedLocal()}
         disabled={!validForm || busy}
         testID="login-continue"
       />
+      <Gap size="lg" />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  codeRow: { flexDirection: 'row', gap: space.sm },
+  codeBox: {
+    width: 44,
+    height: 52,
+    borderWidth: 1,
+    borderColor: color.muted,
+    borderRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: color.paper,
+  },
+  codeBoxActive: { borderColor: color.ink, borderWidth: 1.5 },
+  codeInput: { ...StyleSheet.absoluteFillObject, opacity: 0.01 },
+});

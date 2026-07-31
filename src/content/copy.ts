@@ -96,8 +96,9 @@ export const paywall = {
   subhead:
     'A daily practice that turns mortality from a source of fear into one of clarity, gratitude, and presence.',
   trialTitle: 'Start with 3 days free',
+  // Verbatim from the Jul 30 paywall design.
   trialNote:
-    'No charge today · payment confirmed now, billed only after trial. We’ll send reminders before your free trial ends. Cancel anytime in Subscription.',
+    'No charge today · payment confirmed now, billed only after trial. Cancel anytime in Subscription.',
   cta: 'Start free trial',
 } as const;
 
@@ -108,6 +109,8 @@ export interface Plan {
   title: string;
   price: string;
   detail: string;
+  /** Small boxed tag next to the title ("Save 66%"), Jul 30 designs. */
+  badge?: string;
 }
 
 /**
@@ -116,10 +119,11 @@ export interface Plan {
  * subscription; trials outconvert discounts in wellness). The $7.99 series
  * pack is the low-commitment entry, so no extra discounting at launch.
  */
+// Plan copy per the Jul 30 paywall design.
 export const plans: Plan[] = [
-  { productType: 'series_pack', title: 'Series Pack', price: '$7.99', detail: 'Unlocks one series · try without committing' },
+  { productType: 'series_pack', title: 'Single Series Pack', price: '$7.99', detail: 'Try without committing' },
   { productType: 'monthly', title: 'Monthly', price: '$21.99 / month', detail: '30 days of all-access' },
-  { productType: 'annual', title: 'Annual (best value)', price: '$89.99 / year', detail: '3 days free, then $7.50 / mo equivalent · save 66%' },
+  { productType: 'annual', title: 'Annual', price: '$89.99 / year', detail: '$7.50 / mo equivalent', badge: 'Save 66%' },
 ];
 
 export const intakeQuestions = [

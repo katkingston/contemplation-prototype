@@ -38,7 +38,7 @@ export default function NextStep() {
   return (
     <Screen testID="next-step">
       <Gap size="xl" />
-      <AppText variant="title">What’s next?</AppText>
+      <AppText variant="titleLower">What’s next?</AppText>
       <Gap size="sm" />
       <AppText variant="body" muted>
         You completed {series.title}. Choose where your practice goes from here.

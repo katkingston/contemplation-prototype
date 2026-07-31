@@ -1,93 +1,69 @@
-/** C7 — Day Exit. Close the day; next open resumes where left off. */
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import React, { useEffect } from 'react';
+/**
+ * C7 — Day Exit (Jul 30 designs). Close the day: mono header, centered
+ * closing line in the typewriter voice, "See you tomorrow" with the next
+ * session time, and a quiet Exit link. Next open resumes where left off.
+ */
+import { router, useLocalSearchParams } from 'expo-router';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  ReduceMotion,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RatingPrompt } from '@/components/RatingPrompt';
 import { Fade, ScreenFade } from '@/components/Transitions';
-import { AppText, Button, Gap } from '@/components/ui';
+import { AppText, Gap, MonoHeader, TextLink } from '@/components/ui';
 import { dayExit } from '@/content/copy';
-import { color } from '@/theme/tokens';
+import { getSeries, seriesCode } from '@/content/series';
+import { dropLabel, nextDropAt } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { space } from '@/theme/tokens';
-
-/** A slowly breathing mark — the day settling. Honors Reduce Motion. */
-function BreathingMark() {
-  const breathe = useSharedValue(0);
-  useEffect(() => {
-    breathe.value = withRepeat(
-      withTiming(1, { duration: 3200, easing: Easing.inOut(Easing.quad), reduceMotion: ReduceMotion.System }),
-      -1,
-      true,
-    );
-  }, [breathe]);
-  const style = useAnimatedStyle(() => ({
-    opacity: 0.35 + breathe.value * 0.45,
-    transform: [{ scale: 0.92 + breathe.value * 0.16 }],
-  }));
-  return (
-    <Animated.Text
-      accessible={false}
-      style={[{ fontSize: 34, color: color.onDarkMuted, textAlign: 'left' }, style]}>
-      ❋
-    </Animated.Text>
-  );
-}
+import { color, space } from '@/theme/tokens';
 
 export default function DayExit() {
   const { data } = useApp();
+  const params = useLocalSearchParams<{ seriesId?: string; index?: string }>();
+  const series = getSeries(params.seriesId ?? '');
+  const index = Number(params.index ?? '0') || 0;
+  const hint = series?.contemplations[index]?.hint ?? '';
   // Rotate the closing line by days practiced so it changes across the series.
   const daysPracticed = new Set(data.sessions.map((s) => s.date)).size;
   const closer = dayExit.closers[daysPracticed % dayExit.closers.length];
+  const dropAt = series ? nextDropAt(data, series.id) : null;
 
   return (
     <View style={styles.root}>
-      <LinearGradient colors={[color.dark, '#4a5233']} style={StyleSheet.absoluteFill} />
       <SafeAreaView style={styles.content}>
-        <View style={{ flex: 1 }} />
-        <BreathingMark />
         <Gap size="md" />
+        {series ? <MonoHeader code={seriesCode(series, index)} title={hint} dark /> : null}
+        <View style={{ flex: 1 }} />
         <ScreenFade>
-          <AppText variant="title" dark>
-            {dayExit.title}
+          <AppText variant="monoBody" dark center style={{ fontSize: 17 }}>
+            {closer}
           </AppText>
         </ScreenFade>
-        <Gap size="md" />
-        <Fade delay={250}>
-          <AppText variant="body" dark muted>
+        <Gap size="lg" />
+        <Fade delay={400}>
+          <AppText variant="caption" dark muted center>
             {dayExit.body}
           </AppText>
-        </Fade>
-        <Gap size="sm" />
-        <Fade delay={500}>
-          <AppText variant="body" dark muted>
+          <AppText variant="caption" dark muted center>
             {dayExit.body2}
           </AppText>
         </Fade>
-        <Gap size="sm" />
-        <Fade delay={750}>
-          <AppText variant="body" dark muted>
-            {dayExit.body3}
-          </AppText>
-        </Fade>
-        <Gap size="lg" />
-        <Fade delay={1050}>
-          <AppText variant="body" dark style={{ fontStyle: 'italic' }}>
-            {closer}
-          </AppText>
-        </Fade>
         <View style={{ flex: 1 }} />
-        <Fade delay={600}>
-          <Button label="Done" dark onPress={() => router.replace('/home')} testID="day-exit-done" />
+        <Fade delay={700}>
+          <AppText variant="body" dark>
+            {dayExit.title}
+          </AppText>
+          {dropAt ? (
+            <>
+              <Gap size="xs" />
+              <AppText variant="label" dark muted>
+                {`Next — ${dropLabel(dropAt)}`}
+              </AppText>
+            </>
+          ) : null}
+        </Fade>
+        <Gap size="xl" />
+        <Fade delay={900}>
+          <TextLink label="Exit" dark onPress={() => router.replace('/home')} testID="day-exit-done" />
         </Fade>
         <Gap size="lg" />
         <RatingPrompt />

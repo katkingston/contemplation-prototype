@@ -1,10 +1,12 @@
 /**
- * C2 — Series Introduction. Cannot be skipped: Continue unlocks only after
- * the user has stepped through every slide. Replayable from the menu.
+ * C2 — Series Introduction (Jul 30 designs): dark surface, mono caps header
+ * ("SERIES 1 — INTRODUCTION"), centered mono slide text, underlined Next.
+ * Cannot be skipped: Continue unlocks only after the user has stepped through
+ * every slide. Replayable from the menu.
  */
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { AppText, Button, Dots, Gap, Screen, Spacer } from '@/components/ui';
+import { AppText, Gap, Screen, Spacer, TextLink } from '@/components/ui';
 import { getSeries } from '@/content/series';
 import { useApp } from '@/services/provider';
 import { progressFor } from '@/services/logic';
@@ -40,26 +42,25 @@ export default function SeriesIntro() {
   };
 
   return (
-    <Screen scroll={false} testID="series-intro">
-      <Gap size="lg" />
-      <Dots count={slides.length} active={slide} />
-      <Gap size="lg" />
-      <AppText variant="label" muted>
-        Series {series.displayOrder} — {series.title}
+    <Screen dark scroll={false} testID="series-intro">
+      <Gap size="md" />
+      <AppText variant="label" dark muted>
+        Series {series.displayOrder} — Introduction
       </AppText>
       <Spacer />
-      <AppText variant="contemplation">
+      <AppText variant="contemplation" dark center>
         {slides[slide]}
       </AppText>
       <Spacer />
       {!last && (
-        <AppText variant="caption" muted>
+        <AppText variant="caption" dark muted>
           No skip — the introduction completes before the first contemplation
         </AppText>
       )}
-      <Gap size="sm" />
-      <Button
+      <Gap size="md" />
+      <TextLink
         label={last ? (isReplayView ? 'Close' : 'Continue') : 'Next'}
+        dark
         arrow={!isReplayView}
         onPress={onNext}
         testID="intro-next"

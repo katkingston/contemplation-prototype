@@ -1,8 +1,9 @@
 /**
- * Bottom navigation — emulates the Open reference: a dark horizon bar with
- * quiet glyphs, and a small caps label under the active item only.
- * Used by the hub screens (Today / Menu / Account); flow screens
- * (contemplation, journal…) intentionally have no bar.
+ * Bottom navigation — Jul 30 designs: three always-visible text labels
+ * (Today / Journey / Account), a small dot above the active one, and a
+ * "Next session …" ambient line underneath. The bar matches the screen's
+ * surface tone (light on paper screens, dark on dark screens); square
+ * corners. Flow screens (contemplation, journal…) intentionally have no bar.
  */
 import { router } from 'expo-router';
 import React from 'react';
@@ -15,51 +16,59 @@ import { color, space, type } from '@/theme/tokens';
 
 export type TabKey = 'today' | 'journey' | 'account';
 
-const TABS: { key: TabKey; glyph: (initial: string) => string; label: string; route: string }[] = [
-  { key: 'today', glyph: () => '❋', label: 'Today', route: '/home' },
-  { key: 'journey', glyph: () => '꩜', label: 'Journey', route: '/journey' },
-  { key: 'account', glyph: (initial) => initial, label: 'Account', route: '/account' },
+const TABS: { key: TabKey; label: string; route: string }[] = [
+  { key: 'today', label: 'Today', route: '/home' },
+  // Journey tab lands on the menu screen (quote + series/journey/learn).
+  { key: 'journey', label: 'Journey', route: '/menu' },
+  { key: 'account', label: 'Account', route: '/account' },
 ];
 
-export function BottomNav({ active }: { active: TabKey }) {
+export function BottomNav({ active, dark = false }: { active: TabKey; dark?: boolean }) {
   const insets = useSafeAreaInsets();
   const { data } = useApp();
-  const initial = (data.profile?.username?.[0] ?? '•').toUpperCase();
-  // Ambient footer, per the Open reference ("Sunset 7:35 PM"): the daily drop.
   const s = activeSeries(data);
   const dropAt = nextDropAt(data, s.id);
   const ready = isDropAvailable(data, s.id);
-  const ambient = ready ? 'A contemplation awaits' : dropAt ? `New contemplation ${dropLabel(dropAt)}` : '';
+  const ambient = ready
+    ? 'A contemplation awaits'
+    : dropAt
+      ? `Next session ${dropLabel(dropAt)}`
+      : '';
+  const fg = dark ? color.onDark : color.ink;
+  const fgMuted = dark ? color.onDarkMuted : color.muted;
 
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.md) }]}>
+    <View
+      style={[
+        styles.bar,
+        { backgroundColor: dark ? color.dark : color.paper },
+        { paddingBottom: Math.max(insets.bottom, space.md) },
+      ]}>
       <View style={styles.tabsRow}>
-      {TABS.map((t) => {
-        const isActive = t.key === active;
-        return (
-          <Pressable
-            key={t.key}
-            accessibilityRole="button"
-            accessibilityLabel={t.label}
-            accessibilityState={{ selected: isActive }}
-            onPress={() => !isActive && router.replace(t.route as never)}
-            style={styles.item}
-            testID={`tab-${t.key}`}>
-            {t.key === 'account' ? (
-              <View style={[styles.avatarCircle, { opacity: isActive ? 1 : 0.45 }]}>
-                <Text style={styles.avatarInitial}>{initial}</Text>
-              </View>
-            ) : (
-              <Text style={[styles.glyph, { opacity: isActive ? 1 : 0.45 }]}>
-                {t.glyph(initial)}
+        {TABS.map((t) => {
+          const isActive = t.key === active;
+          return (
+            <Pressable
+              key={t.key}
+              accessibilityRole="button"
+              accessibilityLabel={t.label}
+              accessibilityState={{ selected: isActive }}
+              onPress={() => !isActive && router.replace(t.route as never)}
+              style={styles.item}
+              testID={`tab-${t.key}`}>
+              <View style={[styles.activeDot, { backgroundColor: isActive ? fg : 'transparent' }]} />
+              <Text
+                style={[
+                  isActive ? type.bodyBold : type.body,
+                  { color: isActive ? fg : fgMuted },
+                ]}>
+                {t.label}
               </Text>
-            )}
-            {isActive && <Text style={styles.label}>{t.label}</Text>}
-          </Pressable>
-        );
-      })}
+            </Pressable>
+          );
+        })}
       </View>
-      {ambient ? <Text style={styles.ambient}>{ambient}</Text> : null}
+      {ambient ? <Text style={[styles.ambient, { color: fgMuted }]}>{ambient}</Text> : null}
     </View>
   );
 }
@@ -89,7 +98,7 @@ export function TabScreen({
         keyboardShouldPersistTaps="handled">
         <Fade style={{ flex: 1 }}>{children}</Fade>
       </ScrollView>
-      <BottomNav active={active} />
+      <BottomNav active={active} dark={dark} />
     </SafeAreaView>
   );
 }
@@ -97,39 +106,15 @@ export function TabScreen({
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
   bar: {
-    backgroundColor: color.dark,
-    paddingTop: space.md,
+    paddingTop: space.sm,
     paddingHorizontal: space.lg,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
   },
-  tabsRow: { flexDirection: 'row' },
+  tabsRow: { flexDirection: 'row', justifyContent: 'center', gap: space.xl },
   ambient: {
-    ...type.label,
-    color: color.onDarkMuted,
-    textAlign: 'center',
-    marginTop: space.sm,
-  },
-  item: { flex: 1, alignItems: 'center', gap: 6, minHeight: 44 },
-  glyph: { fontSize: 20, color: color.onDark, fontFamily: type.body.fontFamily },
-  avatarCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: color.onDark,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInitial: {
-    fontSize: 9,
-    color: color.onDark,
-    fontFamily: type.bodyBold.fontFamily,
-  },
-  label: {
     ...type.caption,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    color: color.onDark,
+    textAlign: 'center',
+    marginTop: space.xs,
   },
+  item: { alignItems: 'center', gap: 3, minHeight: 44, justifyContent: 'flex-start' },
+  activeDot: { width: 4, height: 4, borderRadius: 2 },
 });

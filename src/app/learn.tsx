@@ -1,89 +1,96 @@
 /**
- * Learnings — editorial index (Open Studio/Experiences reference): full-bleed
- * artwork card, big title, description, per post. First post is featured.
+ * Learn — editorial index (Jul 30 designs): dark gradient hero band with the
+ * lowercase "learn" title, then the featured article (title, excerpt, mono
+ * meta) and the remaining articles as hairline title rows.
  */
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
-import { SeriesArt } from '@/components/SeriesArt';
 import { AppText, Gap } from '@/components/ui';
 import { POSTS } from '@/content/posts';
-import { color, radius, space } from '@/theme/tokens';
+import { color, seriesPalettes, space } from '@/theme/tokens';
 
 export default function Learn() {
   const [featured, ...rest] = POSTS;
+  const palette = seriesPalettes['s1-impermanence'];
+  const open = (postId: string) =>
+    router.push({ pathname: '/post/[postId]', params: { postId } });
 
   return (
-    <TabScreen active="journey">
-      <Gap size="xl" />
-      <AppText variant="label" muted>
-        Learnings
-      </AppText>
-      <Gap size="md" />
-
-      {/* Featured post: Experiences-style card */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={featured.title}
-        onPress={() => router.push({ pathname: '/post/[postId]', params: { postId: featured.id } })}
-        style={({ pressed }) => [pressed && { opacity: 0.8 }]}
-        testID={`post-${featured.id}`}>
-        <View style={styles.featuredArt}>
-          <SeriesArt gradient={featured.gradient} accent={featured.accent} seed={2} style={StyleSheet.absoluteFill as never} />
-        </View>
-        <Gap size="md" />
-        <AppText variant="title">{featured.title}</AppText>
-        <Gap size="sm" />
-        <AppText variant="body" muted>
-          {featured.excerpt}
+    <TabScreen active="journey" padded={false}>
+      {/* Dark hero band bleeding to the screen edges. */}
+      <View style={styles.heroBand}>
+        <LinearGradient
+          colors={[palette[0], palette[1]]}
+          start={{ x: 0.1, y: 0 }}
+          end={{ x: 0.9, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <AppText variant="displayLower" dark>
+          learn
         </AppText>
-        <Gap size="xs" />
-        <AppText variant="label" muted>
-          {featured.tag} · {featured.minutes} min read
-        </AppText>
-      </Pressable>
-
-      <Gap size="xl" />
-      {rest.map((p, i) => (
+      </View>
+      <View style={{ paddingHorizontal: space.lg }}>
+        <Gap size="xl" />
         <Pressable
-          key={p.id}
           accessibilityRole="button"
-          accessibilityLabel={p.title}
-          onPress={() => router.push({ pathname: '/post/[postId]', params: { postId: p.id } })}
-          style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}
-          testID={`post-${p.id}`}>
-          <View style={styles.thumb}>
-            <SeriesArt gradient={p.gradient} accent={p.accent} seed={i + 4} style={StyleSheet.absoluteFill as never} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <AppText variant="label" muted>
-              {p.tag} · {p.minutes} min read
-            </AppText>
-            <AppText variant="bodyBold">{p.title}</AppText>
-          </View>
+          accessibilityLabel={featured.title}
+          onPress={() => open(featured.id)}
+          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+          testID={`post-${featured.id}`}>
+          <AppText variant="bodyBold">{featured.title}</AppText>
+          <Gap size="sm" />
           <AppText variant="body" muted>
-            {'›'}
+            {featured.excerpt}
+          </AppText>
+          <Gap size="sm" />
+          <AppText variant="label" muted>
+            {featured.tag} · {featured.minutes} min read
           </AppText>
         </Pressable>
-      ))}
-      <Gap size="md" />
-      <AppText variant="caption" muted>
-        More learnings coming with each new series.
-      </AppText>
+        <Gap size="xl" />
+        {rest.map((p) => (
+          <Pressable
+            key={p.id}
+            accessibilityRole="button"
+            accessibilityLabel={p.title}
+            onPress={() => open(p.id)}
+            style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}
+            testID={`post-${p.id}`}>
+            <AppText variant="bodyBold" style={{ flex: 1 }}>
+              {p.title}
+            </AppText>
+            <AppText variant="body" muted>
+              →
+            </AppText>
+          </Pressable>
+        ))}
+        <View style={styles.endRule} />
+        <Gap size="md" />
+        <AppText variant="caption" muted>
+          More learnings coming with each new series.
+        </AppText>
+      </View>
     </TabScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  featuredArt: { height: 300, borderRadius: radius.sm, overflow: 'hidden' },
+  heroBand: {
+    height: 220,
+    justifyContent: 'flex-start',
+    paddingTop: space.xl,
+    paddingHorizontal: space.lg,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
     paddingVertical: space.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.line,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.muted,
   },
-  thumb: { width: 64, height: 64, borderRadius: radius.sm, overflow: 'hidden' },
+  endRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.muted },
 });

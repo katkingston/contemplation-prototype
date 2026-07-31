@@ -10,7 +10,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { notify } from '@/components/Notice';
-import { AppText, Button, Gap, Sheet } from '@/components/ui';
+import { AppText, Gap, Row, Sheet, TextLink } from '@/components/ui';
 import { useApp } from '@/services/provider';
 import { APP_NAME, review } from '@/theme/tokens';
 
@@ -50,15 +50,21 @@ export function RatingPrompt() {
   };
 
   return (
-    <Sheet visible={visible} onClose={later} title={`Enjoying ${APP_NAME}?`}>
-      <AppText variant="body">
-        A rating helps this practice reach people who need it. It takes one tap and
-        never interrupts a contemplation.
+    // Jul 30 designs: taupe dialog card, mono title, underlined link pair.
+    <Sheet
+      visible={visible}
+      onClose={later}
+      tone="overlay"
+      showClose={false}
+      title={`enjoying ${APP_NAME.toLowerCase()}?`}>
+      <AppText variant="body" dark>
+        A rating helps this practice reach people who need it.
       </AppText>
-      <Gap size="lg" />
-      <Button label={`Rate ${APP_NAME}`} onPress={rate} testID="rate-now" />
-      <Gap size="sm" />
-      <Button label="Not now" kind="ghost" onPress={later} testID="rate-later" />
+      <Gap size="xl" />
+      <Row between>
+        <TextLink label="Not now" dark muted onPress={later} testID="rate-later" />
+        <TextLink label="Rate" dark arrow onPress={rate} testID="rate-now" />
+      </Row>
     </Sheet>
   );
 }

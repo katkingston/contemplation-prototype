@@ -47,7 +47,7 @@ export default function SeriesWrap() {
         </AppText>
       ) : (
         <View>
-          <AppText variant="title">
+          <AppText variant="titleLower">
             {qualityOfLifeQuestion.prompt}
           </AppText>
           <Gap size="lg" />

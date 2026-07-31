@@ -2,7 +2,7 @@
 import { router, useRootNavigationState } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { AppText, Button, Gap, Screen } from '@/components/ui';
+import { AppText, Button, Gap, Screen, Wordmark } from '@/components/ui';
 import { splashTagline } from '@/content/copy';
 import { seriesLength } from '@/content/series';
 import {
@@ -13,7 +13,7 @@ import {
   progressFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { APP_NAME, color, radius, space } from '@/theme/tokens';
+import { color } from '@/theme/tokens';
 
 export default function Splash() {
   const { hydrated, hydrationFailed, data, retryHydration } = useApp();
@@ -80,24 +80,20 @@ export default function Splash() {
     );
   }
 
+  // Jul 30 designs: dark brand moment — spiral, lowercase wordmark, mono tagline.
   return (
-    <Screen scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <View
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: radius.lg,
-          backgroundColor: color.line,
-          marginBottom: space.md,
-        }}
-      />
-      <AppText variant="title">{APP_NAME}</AppText>
-      <Gap size="sm" />
-      <AppText variant="small" muted center style={{ maxWidth: 280, fontStyle: 'italic' }}>
+    <Screen dark scroll={false} style={{ justifyContent: 'center' }}>
+      <View style={{ alignItems: 'center' }}>
+        <AppText style={{ fontSize: 40, color: color.onDarkMuted } as never}>꩜</AppText>
+      </View>
+      <Gap size="xl" />
+      <Wordmark dark size={34} />
+      <Gap size="md" />
+      <AppText variant="monoBody" dark muted style={{ maxWidth: 300 }}>
         {splashTagline}
       </AppText>
       <Gap size="lg" />
-      <ActivityIndicator color={color.muted} />
+      <ActivityIndicator color={color.onDarkMuted} />
     </Screen>
   );
 }

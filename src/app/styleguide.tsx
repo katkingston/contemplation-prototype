@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CrisisButton } from '@/components/CrisisButton';
+import { SeriesDashes } from '@/components/SeriesDashes';
 import {
   AppText,
   Button,
@@ -15,10 +16,13 @@ import {
   Dots,
   Gap,
   ListRow,
+  MonoHeader,
   MultiChipGroup,
   Row,
   Screen,
   StatusPill,
+  TextLink,
+  Wordmark,
 } from '@/components/ui';
 import { SERIES } from '@/content/series';
 import { color, radius, seriesPalettes, space, type } from '@/theme/tokens';
@@ -171,6 +175,23 @@ export default function StyleGuide() {
 
       <SectionTitle>Step indicator</SectionTitle>
       <Dots count={4} active={1} />
+
+      <SectionTitle>Jul 30 design language</SectionTitle>
+      <Wordmark />
+      <Gap size="md" />
+      <MonoHeader code="01.6" title={SERIES[0].title} />
+      <Gap size="md" />
+      <SeriesDashes total={SERIES[0].contemplations.length} done={2} active />
+      <Gap size="md" />
+      <Row>
+        <TextLink label="Resume," onPress={() => {}} />
+        <TextLink label="End" muted onPress={() => {}} />
+      </Row>
+      <Gap size="sm" />
+      <TextLink label="Contemplate" arrow onPress={() => {}} />
+      <Gap size="md" />
+      <ListRow label="Push notifications" rightLabel="Off" right={<View />} onPress={() => {}} />
+      <ListRow label="Daily contemplation time" rightLabel="6:00 PM" right={<View />} onPress={() => {}} />
 
       <SectionTitle>Contemplation surface</SectionTitle>
       <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>

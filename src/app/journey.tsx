@@ -1,179 +1,119 @@
 /**
- * Journey (was Menu) — full-screen dark surface. The record of the practice:
- * big-caps index (Series first, per Kat), recent journal entries (grayed
- * until revealed), completed series, and quiet utility rows.
- * Subscription lives on Account, not here.
+ * Journey — the practice record (Jul 30 designs): light surface, lowercase
+ * title, 2×2 stats, then dated reflections with dotted separators. Reached
+ * from the Journey-tab menu. Entries stay held back until series completion.
  */
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
-import { AppText, Gap } from '@/components/ui';
-import { dailyQuote } from '@/content/copy';
-import { getSeries, orderedSeries } from '@/content/series';
-import { isSeriesCompleted } from '@/services/logic';
+import { AppText, Gap, Row, TextLink } from '@/components/ui';
+import { activeSeries, lifetimeStats, progressFor } from '@/services/logic';
+import { seriesLength } from '@/content/series';
 import { useApp } from '@/services/provider';
-import { space } from '@/theme/tokens';
+import { color, font, space } from '@/theme/tokens';
 
-const INDEX: { label: string; route: string; testID: string }[] = [
-  { label: 'Series', route: '/library', testID: 'journey-series' },
-  { label: 'Your Journal', route: '/reflections', testID: 'journey-journal' },
-  { label: 'Learn', route: '/learn', testID: 'journey-learn' },
-];
+const RECENT_COUNT = 5;
 
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <View style={styles.statCell}>
+      <AppText style={styles.statValue as never}>{value}</AppText>
+      <AppText variant="small" muted>
+        {label}
+      </AppText>
+    </View>
+  );
+}
 
 export default function Journey() {
   const { data } = useApp();
-  const quote = dailyQuote();
-  const recent = [...data.diary]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 3);
-  const completed = orderedSeries().filter((s) => isSeriesCompleted(data, s));
+  const life = lifetimeStats(data);
+  const s = activeSeries(data);
+  const p = progressFor(data, s.id);
+  const len = seriesLength(s);
+  const entries = [...data.diary].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const recent = entries.slice(0, RECENT_COUNT);
 
   return (
-    <TabScreen active="journey" dark>
+    <TabScreen active="journey">
       <Gap size="xl" />
-      <AppText variant="body" dark style={{ fontStyle: 'italic' }}>
-        “{quote.text}”
-      </AppText>
-      <Gap size="xs" />
-      <AppText variant="label" dark muted>
-        {quote.by}
-      </AppText>
-      <Gap size="xl" />
-      {INDEX.map((item) => (
-        <Pressable
-          key={item.route}
-          accessibilityRole="button"
-          accessibilityLabel={item.label}
-          onPress={() => router.push(item.route as never)}
-          style={({ pressed }) => [styles.indexItem, pressed && { opacity: 0.6 }]}
-          testID={item.testID}>
-          <AppText variant="title" dark>
-            {item.label}
-          </AppText>
-        </Pressable>
-      ))}
-
-      {/* Recent journal entries: registered by date + series, grayed until revealed */}
-      <Gap size="xl" />
-      <AppText variant="label" dark muted>
-        Recent entries
-      </AppText>
-      <Gap size="sm" />
+      <AppText variant="titleLower">journey</AppText>
+      <Gap size="lg" />
+      <View style={styles.statsGrid}>
+        <Stat value={String(life.minutes)} label="Minutes contemplating" />
+        <Stat value={String(data.diary.length)} label="Thoughts shared" />
+        <Stat value={`${Math.min(p.currentIndex, len)}/${len}`} label="Days complete" />
+        <Stat value={String(life.currentStreak)} label="Day streak" />
+      </View>
+      <Gap size="lg" />
       {recent.length === 0 ? (
-        <AppText variant="small" dark muted>
-          Your reflections will gather here as you practice.
-        </AppText>
+        <>
+          <View style={styles.dotted} />
+          <Gap size="md" />
+          <AppText variant="small" muted>
+            Your reflections will gather here as you practice.
+          </AppText>
+        </>
       ) : (
-        recent.map((e) => {
-          const seriesTitle = getSeries(e.seriesId)?.title ?? '';
-          return (
-            <Pressable
-              key={e.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Journal entry, ${seriesTitle}`}
-              onPress={() => router.push('/reflections')}
-              style={({ pressed }) => [
-                styles.entryRow,
-                pressed && { opacity: 0.6 },
-                !e.isRevealed && { opacity: 0.45 },
-              ]}>
-              <View style={{ flex: 1 }}>
-                <AppText variant="label" dark muted>
-                  {new Date(e.createdAt).toLocaleDateString(undefined, {
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                  {' · '}
-                  {seriesTitle}
-                </AppText>
-                <AppText variant="small" dark muted={!e.isRevealed}>
-                  {e.isRevealed
-                    ? (e.text ?? 'Voice memo')
-                    : 'Reveals when the series completes'}
-                </AppText>
-              </View>
-              <AppText variant="small" dark muted>
-                {e.isRevealed ? '›' : '·'}
+        recent.map((e) => (
+          <View key={e.id}>
+            <View style={styles.dotted} />
+            <Gap size="md" />
+            <Row between>
+              <AppText variant="label" muted>
+                Reflection
               </AppText>
-            </Pressable>
-          );
-        })
-      )}
-
-      {/* Completed series */}
-      <Gap size="xl" />
-      <AppText variant="label" dark muted>
-        Series completed
-      </AppText>
-      <Gap size="sm" />
-      {completed.length === 0 ? (
-        <AppText variant="small" dark muted>
-          None yet. The first one is underway.
-        </AppText>
-      ) : (
-        completed.map((s) => (
-          <Pressable
-            key={s.id}
-            accessibilityRole="button"
-            accessibilityLabel={s.title}
-            onPress={() =>
-              router.push({ pathname: '/series/[seriesId]', params: { seriesId: s.id } })
-            }
-            style={({ pressed }) => [styles.entryRow, pressed && { opacity: 0.6 }]}>
-            <AppText variant="small" dark style={{ flex: 1 }}>
-              {s.title}
-            </AppText>
-            <AppText variant="small" dark>
-              ✓
-            </AppText>
-          </Pressable>
+              <AppText variant="label" muted>
+                {new Date(e.createdAt).toLocaleDateString(undefined, {
+                  year: '2-digit',
+                  month: '2-digit',
+                  day: '2-digit',
+                })}
+              </AppText>
+            </Row>
+            <Gap size="md" />
+            {e.isRevealed ? (
+              <>
+                <AppText variant="bodyBold">{e.prompt}</AppText>
+                <Gap size="xs" />
+                <AppText variant="body" muted>
+                  {e.text ?? 'Voice memo'}
+                </AppText>
+              </>
+            ) : (
+              <AppText variant="body" muted style={{ opacity: 0.6 }}>
+                A reflection is held here. It reveals when the series completes.
+              </AppText>
+            )}
+            <Gap size="md" />
+          </View>
         ))
       )}
-
-      {/* Push resources toward the bottom of the screen */}
-      <View style={{ flexGrow: 1, minHeight: space.xxl }} />
-      <View style={styles.rule} />
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Mental Health Resources"
-        onPress={() => router.push('/resources')}
-        style={({ pressed }) => [styles.utilityRow, pressed && { opacity: 0.6 }]}
-        testID="journey-resources">
-        <AppText variant="bodyBold" dark>
-          Mental Health Resources
-        </AppText>
-        <AppText variant="body" dark muted>
-          {'\u203a'}
-        </AppText>
-      </Pressable>
+      {entries.length > 0 ? (
+        <>
+          <View style={styles.dotted} />
+          <Gap size="lg" />
+          <TextLink label="Your Journal" arrow onPress={() => router.push('/reflections')} testID="journey-journal" />
+        </>
+      ) : null}
+      <Gap size="xl" />
     </TabScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  indexItem: { paddingVertical: space.md, minHeight: 44 },
-  entryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(239,233,219,0.15)',
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space.lg },
+  statCell: { width: '50%', paddingRight: space.md },
+  statValue: {
+    fontFamily: font.mono,
+    fontSize: 36,
+    lineHeight: 44,
+    color: color.ink,
   },
-  rule: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(239,233,219,0.3)',
-    marginBottom: space.md,
-  },
-  utilityRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    minHeight: 44,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(239,233,219,0.15)',
+  dotted: {
+    borderTopWidth: 1,
+    borderTopColor: color.line,
+    borderStyle: 'dotted',
   },
 });

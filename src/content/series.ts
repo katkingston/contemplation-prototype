@@ -306,6 +306,16 @@ export function seriesLength(s: Series): number {
 }
 
 /**
+ * Editorial sequence code for the Jul 30 design headers: "01.6" = series
+ * position (in display order, 2 digits) . contemplation number (1-based).
+ * Fully computed — series count and length are never assumed.
+ */
+export function seriesCode(s: Series, index: number): string {
+  const pos = orderedSeries().findIndex((o) => o.id === s.id) + 1;
+  return `${String(pos > 0 ? pos : 1).padStart(2, '0')}.${index + 1}`;
+}
+
+/**
  * Coming-soon series (titles approved July 2026). Source frameworks kept for
  * the content team: Yalom's four concerns; anticipatory grief & ambiguous
  * loss; Erikson & TMT; Neimeyer & Janoff-Bulman; Stroebe & Schut's dual

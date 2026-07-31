@@ -17,7 +17,7 @@ export default function Reflections() {
   return (
     <TabScreen active="journey">
       <Gap size="xl" />
-      <AppText variant="title">Your Journal</AppText>
+      <AppText variant="titleLower">Your Journal</AppText>
       <Gap size="sm" />
       <AppText variant="small" muted>
         Every reflection is registered the day you write it. The words themselves are

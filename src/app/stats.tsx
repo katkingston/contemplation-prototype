@@ -7,22 +7,16 @@ import { AppText, Button, Gap, Screen } from '@/components/ui';
 import { getSeries } from '@/content/series';
 import { formatMinutes, statsFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { color, font, space } from '@/theme/tokens';
 
 function Stat({ value, label }: { value: string; label: string }) {
+  // Jul 30 designs: open mono numerals over the paper, no boxed tiles.
   return (
-    <View
-      style={{
-        flex: 1,
-        minWidth: 130,
-        padding: space.md,
-        borderRadius: radius.md,
-        backgroundColor: color.faint,
-        borderWidth: 1,
-        borderColor: color.line,
-      }}>
-      <AppText variant="title">{value}</AppText>
-      <AppText variant="caption" muted>
+    <View style={{ flex: 1, minWidth: 130, paddingVertical: space.sm }}>
+      <AppText style={{ fontFamily: font.mono, fontSize: 34, lineHeight: 42, color: color.ink } as never}>
+        {value}
+      </AppText>
+      <AppText variant="small" muted>
         {label}
       </AppText>
     </View>
@@ -44,7 +38,7 @@ export default function Stats() {
   return (
     <Screen testID="stats-screen">
       <Gap size="xl" />
-      <AppText variant="title">Look how far you came</AppText>
+      <AppText variant="titleLower">Look how far you came</AppText>
       <Gap size="lg" />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         <Stat value={formatMinutes(stats.totalSeconds)} label="time contemplating" />
@@ -64,12 +58,10 @@ export default function Stats() {
           <View
             key={i}
             style={{
-              padding: space.md,
-              borderRadius: radius.md,
-              backgroundColor: color.faint,
-              borderWidth: 1,
-              borderColor: color.line,
-              marginBottom: space.sm,
+              paddingVertical: space.md,
+              borderTopWidth: 1,
+              borderTopColor: color.line,
+              borderStyle: 'dotted',
             }}>
             <AppText variant="caption" muted>
               {e.prompt}

@@ -10,7 +10,7 @@ import { AppText, Button, Gap, ListRow, Screen } from '@/components/ui';
 import { plans } from '@/content/copy';
 import { orderedSeries } from '@/content/series';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { space } from '@/theme/tokens';
 
 export default function Subscription() {
   const { data, act } = useApp();
@@ -31,32 +31,34 @@ export default function Subscription() {
   return (
     <Screen testID="subscription-screen">
       <Gap size="xl" />
-      <AppText variant="title">Subscription</AppText>
-      <Gap size="md" />
-      <View
-        style={{
-          padding: space.md,
-          borderRadius: radius.md,
-          backgroundColor: color.faint,
-          borderWidth: 1,
-          borderColor: color.line,
-        }}>
-        <AppText variant="caption" muted>
-          Current plan
+      <AppText variant="titleLower">Subscription</AppText>
+      {data.profile ? (
+        <AppText variant="small" muted>
+          Member since{' '}
+          {new Date(data.profile.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
         </AppText>
-        <AppText variant="bodyBold" testID="current-plan">
-          {planLabel}
+      ) : null}
+      <Gap size="xl" />
+      <ListRow
+        label="Current Plan"
+        rightLabel={
+          current
+            ? `${planLabel}  ${plans.find((p) => p.productType === current.productType)?.price ?? ''}`
+            : 'None'
+        }
+        right={<View />}
+        testID="current-plan"
+      />
+      {current?.expiresAt ? (
+        <AppText variant="small" muted>
+          Access until {new Date(current.expiresAt).toLocaleDateString()}
         </AppText>
-        {current?.expiresAt && (
-          <AppText variant="small" muted>
-            access until {new Date(current.expiresAt).toDateString()}
-          </AppText>
-        )}
-        <AppText variant="caption" muted>
-          Prototype: purchases are simulated, no real charges.
-        </AppText>
-      </View>
-      <Gap size="md" />
+      ) : null}
+      <Gap size="lg" />
       {plans.map((p) => (
         <ListRow
           key={p.productType}
@@ -72,14 +74,18 @@ export default function Subscription() {
         onPress={() => current && buy(current.productType)}
       />
       <ListRow
-        label="Cancel subscription"
-        sub="ends access immediately (mock)"
+        label="Cancel Subscription"
         danger
         onPress={() => act((s) => s.cancelAccess())}
         testID="cancel-subscription"
       />
+      <AppText variant="small" muted style={{ marginTop: space.sm }}>
+        Cancelling keeps access until the period ends. (Prototype: purchases are
+        simulated with no real charges, and cancelling ends access immediately.)
+      </AppText>
       <Gap size="xl" />
-      <Button label="Back" kind="ghost" onPress={() => router.back()} />
+      <Button label="Back" kind="secondary" onPress={() => router.back()} />
+      <Gap size="lg" />
     </Screen>
   );
 }

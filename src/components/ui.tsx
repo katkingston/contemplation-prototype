@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenFade } from '@/components/Transitions';
-import { color, radius, space, type } from '@/theme/tokens';
+import { color, font, radius, space, type } from '@/theme/tokens';
 
 // ---------- Text ----------
 
@@ -119,7 +119,7 @@ export function Button({
         : color.ink
       : 'transparent';
   const border =
-    kind === 'secondary' ? (dark ? color.onDarkMuted : color.ink) : 'transparent';
+    kind === 'secondary' ? (dark ? color.onDarkMuted : color.muted) : 'transparent';
   const fg =
     kind === 'primary'
       ? dark
@@ -145,7 +145,8 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         small && styles.buttonSmall,
-        { backgroundColor: bg, borderColor: border, borderWidth: kind === 'secondary' ? 1.5 : 0 },
+        small && styles.buttonHug,
+        { backgroundColor: bg, borderColor: border, borderWidth: kind === 'secondary' ? 1 : 0 },
         disabled && { opacity: 0.35 },
         pressed && { opacity: 0.7 },
       ]}>
@@ -157,6 +158,116 @@ export function Button({
         {arrow ? `${label} →` : label}
       </Text>
     </Pressable>
+  );
+}
+
+// ---------- Wordmark ----------
+
+/** Lowercase brand wordmark — olive on light surfaces, cream on dark (Jul 30 designs). */
+export function Wordmark({ dark = false, size = 22 }: { dark?: boolean; size?: number }) {
+  return (
+    <Text
+      accessibilityRole="header"
+      style={{
+        fontFamily: font.groteskBold,
+        fontSize: size,
+        lineHeight: Math.round(size * 1.15),
+        letterSpacing: -size * 0.02,
+        color: dark ? color.onDark : color.accent,
+      }}>
+      contemplate
+    </Text>
+  );
+}
+
+// ---------- TextLink (underlined action link) ----------
+
+/**
+ * Underlined text action — the Jul 30 designs use these in place of many
+ * buttons ("Resume, End" · "Skip, Submit" · "Begin"). Primary = bold ink;
+ * muted = quiet secondary action.
+ */
+export function TextLink({
+  label,
+  onPress,
+  dark = false,
+  muted = false,
+  arrow = false,
+  disabled = false,
+  testID,
+}: {
+  label: string;
+  onPress?: () => void;
+  dark?: boolean;
+  muted?: boolean;
+  /** Trailing → for forward-motion actions. */
+  arrow?: boolean;
+  disabled?: boolean;
+  testID?: string;
+}) {
+  const fg = dark
+    ? muted
+      ? color.onDarkMuted
+      : color.onDark
+    : muted
+      ? color.muted
+      : color.ink;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={10}
+      testID={testID}
+      style={({ pressed }) => [{ alignSelf: 'flex-start' }, (pressed || disabled) && { opacity: 0.5 }]}>
+      <Text
+        style={[
+          muted ? type.body : type.bodyBold,
+          { color: fg, textDecorationLine: 'underline', textDecorationColor: fg },
+        ]}>
+        {arrow ? `${label} →` : label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// ---------- MonoHeader (contemplation-flow micro-header) ----------
+
+/**
+ * Mono caps header row for the contemplation flow: "01.6 — PRECIOUS NOW"
+ * left, date right (Jul 30 designs). Pass a precomputed code — never
+ * hardcode series length or index.
+ */
+export function MonoHeader({
+  code,
+  title,
+  date = new Date(),
+  dark = false,
+  children,
+}: {
+  code?: string;
+  title: string;
+  date?: Date;
+  dark?: boolean;
+  /** Optional second row (e.g. ProgressDots). */
+  children?: React.ReactNode;
+}) {
+  const dateLabel = date
+    .toLocaleDateString(undefined, { month: 'long', day: 'numeric' })
+    .toUpperCase();
+  return (
+    <View>
+      <Row between>
+        <AppText variant="label" dark={dark} muted style={{ flexShrink: 1 }}>
+          {code ? `${code} — ${title}` : title}
+        </AppText>
+        <AppText variant="label" dark={dark} muted>
+          {dateLabel}
+        </AppText>
+      </Row>
+      {children ? <View style={{ marginTop: space.sm }}>{children}</View> : null}
+    </View>
   );
 }
 
@@ -349,15 +460,20 @@ export function ListRow({
   label,
   sub,
   right,
+  rightLabel,
   onPress,
   danger = false,
+  dark = false,
   testID,
 }: {
   label: string;
   sub?: string;
   right?: React.ReactNode;
+  /** Right-aligned value text before the arrow ("Off" · "6:00 PM" · "Permanent"). */
+  rightLabel?: string;
   onPress?: () => void;
   danger?: boolean;
+  dark?: boolean;
   testID?: string;
 }) {
   return (
@@ -366,18 +482,27 @@ export function ListRow({
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}
       disabled={!onPress}
-      style={({ pressed }) => [styles.listRow, pressed && { opacity: 0.6 }]}>
+      style={({ pressed }) => [
+        styles.listRow,
+        dark && { borderTopColor: 'rgba(239,233,219,0.25)' },
+        pressed && { opacity: 0.6 },
+      ]}>
       <View style={styles.flex}>
-        <AppText variant="bodyBold" style={danger ? { color: color.danger } : undefined}>
+        <AppText variant="bodyBold" dark={dark} style={danger ? { color: color.danger } : undefined}>
           {label}
         </AppText>
         {sub ? (
-          <AppText variant="small" muted>
+          <AppText variant="small" muted dark={dark}>
             {sub}
           </AppText>
         ) : null}
       </View>
-      {right ?? (onPress ? <AppText variant="body" muted>{'›'}</AppText> : null)}
+      {rightLabel ? (
+        <AppText variant="body" dark={dark} muted>
+          {rightLabel}
+        </AppText>
+      ) : null}
+      {right ?? (onPress ? <AppText variant="body" dark={dark} muted>{'→'}</AppText> : null)}
     </Pressable>
   );
 }
@@ -410,27 +535,47 @@ export function Sheet({
   visible,
   onClose,
   title,
+  tone = 'paper',
+  showClose = true,
   children,
 }: {
   visible: boolean;
   onClose: () => void;
   title?: string;
+  /** 'overlay' = taupe dialog card on a taupe scrim (rating prompt, Jul 30 designs). */
+  tone?: 'paper' | 'overlay';
+  /** Set false when the content renders its own actions. */
+  showClose?: boolean;
   children: React.ReactNode;
 }) {
+  const overlay = tone === 'overlay';
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.sheetBackdrop} onPress={onClose} accessibilityLabel="Close pop-up">
-        <Pressable style={styles.sheetCard} onPress={(e) => e.stopPropagation()}>
+      <Pressable
+        style={[styles.sheetBackdrop, overlay && { backgroundColor: 'rgba(132,124,108,0.92)' }]}
+        onPress={onClose}
+        accessibilityLabel="Close pop-up">
+        <Pressable
+          style={[styles.sheetCard, overlay && styles.sheetCardOverlay]}
+          onPress={(e) => e.stopPropagation()}>
           <ScrollView contentContainerStyle={{ padding: space.lg }}>
             {title ? (
-              <AppText variant="heading" style={{ marginBottom: space.md }}>
-                {title}
-              </AppText>
+              overlay ? (
+                <AppText variant="monoBody" dark style={{ marginBottom: space.md }}>
+                  {title}
+                </AppText>
+              ) : (
+                <AppText variant="heading" style={{ marginBottom: space.md }}>
+                  {title}
+                </AppText>
+              )
             ) : null}
             {children}
-            <View style={{ marginTop: space.lg }}>
-              <Button label="Close" kind="ghost" onPress={onClose} />
-            </View>
+            {showClose ? (
+              <View style={{ marginTop: space.lg }}>
+                <Button label="Close" kind="ghost" dark={overlay} onPress={onClose} />
+              </View>
+            ) : null}
           </ScrollView>
         </Pressable>
       </Pressable>
@@ -472,14 +617,15 @@ export function Row({
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   button: {
-    // Open-style: hug-content, left-aligned; squared corners per Kat.
-    paddingVertical: 12,
+    // Jul 30 designs: full-width rectangular CTAs, squared corners.
+    paddingVertical: 14,
     paddingHorizontal: 26,
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'flex-start',
+    alignSelf: 'stretch',
   },
+  buttonHug: { alignSelf: 'flex-start' },
   buttonSmall: { paddingVertical: 7, paddingHorizontal: space.md },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
@@ -493,12 +639,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   listRow: {
+    // Jul 30 designs: hairline rule above each row, roomy vertical rhythm.
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.line,
+    paddingVertical: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.muted,
   },
   dotsRow: { flexDirection: 'row', gap: 6, alignSelf: 'center', alignItems: 'center' },
   dot: { width: 7, height: 7, borderRadius: 4 },
@@ -511,9 +658,10 @@ const styles = StyleSheet.create({
   },
   sheetCard: {
     backgroundColor: color.paper,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     maxHeight: '85%',
   },
+  sheetCardOverlay: { backgroundColor: color.overlayElevated },
   selectField: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -13,6 +13,7 @@ export default function Survey() {
     <QuestionFlow
       questions={surveyQuestions}
       completeLabel="Complete"
+      headerLabel="02 — Survey"
       onComplete={async (answers) => {
         if (await act((s) => s.saveSurvey(seriesId, answers)))
           router.replace({ pathname: '/next-step', params: { seriesId } });

@@ -1,45 +1,23 @@
 /**
- * A1 — Account (Open profile reference): identity header, practice stats
- * strip, accomplishments wall (soft-glow milestone badges), guest pass card,
- * and a "member since" wordmark footer.
+ * A1 — Account (Jul 30 designs): identity header (name + email), hairline
+ * utility rows — Subscription / Settings / Mental health resources / Sign out
+ * / Send feedback — and a centered wordmark + daily-quote footer.
+ * (Badges and the guest pass were removed with the Jul 30 redesign; practice
+ * stats live on the Journey page now.)
  */
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Linking } from 'react-native';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
-import { lifetimeStats, MILESTONES } from '@/services/logic';
-import { shareMessage } from '@/services/share';
-import { AppText, Button, Eyebrow, Gap, ListRow, Row } from '@/components/ui';
+import { AppText, Gap, ListRow, Wordmark } from '@/components/ui';
 import { dailyQuote } from '@/content/copy';
 import { useApp } from '@/services/provider';
-import { APP_NAME, color, font, radius, space } from '@/theme/tokens';
 
-const SHARE_URL = 'https://katkingston.github.io/contemplation-prototype/';
-
-function Badge({ n, unit, achieved }: { n: number; unit: string; achieved: boolean }) {
-  return (
-    <View style={styles.badgeWrap}>
-      <View style={[styles.badge, achieved && styles.badgeGlow]}>
-        <LinearGradient
-          colors={achieved ? ['#99b955', '#4c5232'] : ['#c8c2b2', '#8a8474']}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0.2, y: 0 }}
-          end={{ x: 0.8, y: 1 }}
-        />
-        <AppText style={[styles.badgeNum, !achieved && { opacity: 0.55 }]}>{n}</AppText>
-      </View>
-      <Gap size="xs" />
-      <AppText variant="caption" muted center>
-        {n} {unit}
-      </AppText>
-    </View>
-  );
-}
+const FEEDBACK_MAILTO = 'mailto:hey@katkingston.design?subject=Contemplate%20feedback';
 
 export default function Account() {
   const { data, services, act } = useApp();
-  const stats = lifetimeStats(data);
   const username = data.profile?.username || 'you';
   const firstName = username.charAt(0).toUpperCase() + username.slice(1);
 
@@ -47,154 +25,51 @@ export default function Account() {
     if (!(await act(async (s) => s.signOut && (await s.signOut()))))
       return; // sign-out failed — stay put, notice explains
     router.dismissAll?.();
-    router.replace('/');
+    router.replace('/signed-out' as never);
   };
-
-  const shareGuestPass = () =>
-    shareMessage(
-      `${firstName} sent you two weeks on ${APP_NAME}, a daily contemplation practice. ${SHARE_URL}`,
-    );
 
   // Current plan, from the newest active grant (mock until RevenueCat).
   const now = Date.now();
   const activeGrant = [...data.grants]
-    .filter((g) => (g.expiresAt == null || new Date(g.expiresAt).getTime() > now))
+    .filter((g) => g.expiresAt == null || new Date(g.expiresAt).getTime() > now)
     .sort((a, b) => b.startsAt.localeCompare(a.startsAt))[0];
-  const planName = activeGrant
-    ? { series_pack: 'Series Pack', monthly: 'Monthly', annual: 'Annual' }[activeGrant.productType]
-    : 'No active plan';
-
-  const statCells = [
-    { n: stats.currentStreak, label: 'Current streak' },
-    { n: stats.bestStreak, label: 'Best streak' },
-    { n: stats.contemplations, label: 'Contemplations' },
-    { n: stats.minutes, label: 'Minutes' },
-  ];
+  const subscriptionRight = activeGrant?.expiresAt
+    ? `Access until ${new Date(activeGrant.expiresAt).toLocaleDateString()}`
+    : activeGrant
+      ? 'Active'
+      : 'Choose a plan';
 
   return (
     <TabScreen active="account">
       <Gap size="xl" />
-      {/* Identity header */}
-      <Row between>
-        <View style={{ flex: 1 }}>
-          <AppText variant="title">{firstName}</AppText>
-          <AppText variant="small" muted>
-            @{username} · {data.profile?.email ?? ''}
-          </AppText>
-        </View>
-        <View style={styles.avatar}>
-          <LinearGradient
-            colors={['#7f8f3d', '#2c2e17']}
-            style={StyleSheet.absoluteFill}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-          <AppText variant="heading" style={{ color: color.onDark }}>
-            {(username[0] ?? '•').toUpperCase()}
-          </AppText>
-        </View>
-      </Row>
-
-      {/* Subscription */}
-      <Eyebrow>Subscription</Eyebrow>
+      <AppText variant="titleLower">{firstName}</AppText>
+      <AppText variant="small" muted>
+        {data.profile?.email ?? `@${username}`}
+      </AppText>
+      <Gap size="xl" />
       <ListRow
-        label={planName}
-        sub={
-          activeGrant?.expiresAt
-            ? `access until ${new Date(activeGrant.expiresAt).toLocaleDateString()}`
-            : activeGrant
-              ? 'active'
-              : 'choose a plan to continue your practice'
-        }
+        label="Subscription"
+        rightLabel={subscriptionRight}
         onPress={() => router.push('/subscription')}
         testID="account-subscription"
       />
-
-      {/* Practice stats */}
-      <Eyebrow>Practice stats</Eyebrow>
-      <View style={styles.statsRow}>
-        {statCells.map((c) => (
-          <View key={c.label} style={styles.statCell}>
-            <AppText style={styles.statNum}>{c.n}</AppText>
-            <AppText variant="caption" muted>
-              {c.label}
-            </AppText>
-          </View>
-        ))}
-      </View>
-
-      {/* Accomplishments */}
-      <Eyebrow>Accomplishments</Eyebrow>
-      <AppText variant="label" muted>
-        Contemplations
-      </AppText>
-      <Gap size="sm" />
-      <Row style={{ gap: space.md }}>
-        {MILESTONES.contemplations.map((m) => (
-          <Badge key={m} n={m} unit={m === 1 ? 'sit' : 'sits'} achieved={stats.contemplations >= m} />
-        ))}
-      </Row>
-      <Gap size="lg" />
-      <AppText variant="label" muted>
-        Streaks
-      </AppText>
-      <Gap size="sm" />
-      <Row style={{ gap: space.md }}>
-        {MILESTONES.streaks.map((m) => (
-          <Badge key={m} n={m} unit="days" achieved={stats.bestStreak >= m} />
-        ))}
-      </Row>
-
-      {/* Guest pass: a subscriber benefit only */}
-      <Eyebrow>{`Share ${APP_NAME}`}</Eyebrow>
-      <View style={[styles.passCard, !activeGrant && { opacity: 0.5 }]}>
-        <AppText variant="heading" style={{ color: color.onDark }}>
-          {firstName}’s guest pass
-        </AppText>
-        <Gap size="xs" />
-        <AppText variant="label" style={{ color: color.onDarkMuted }}>
-          Two weeks of access
-        </AppText>
-        <Gap size="lg" />
-        <Row between>
-          <AppText variant="caption" style={{ color: color.onDarkMuted, flex: 1 }}>
-            {activeGrant
-              ? 'Prototype: shares a link to the app. Real passes arrive with payments.'
-              : 'Guest passes are a subscriber benefit. Choose a plan to share one.'}
-          </AppText>
-          {activeGrant ? (
-            <Button label="Share" kind="secondary" dark small onPress={shareGuestPass} testID="guest-pass-share" />
-          ) : (
-            <Button
-              label="See plans"
-              kind="secondary"
-              dark
-              small
-              onPress={() => router.push('/subscription')}
-              testID="guest-pass-plans"
-            />
-          )}
-        </Row>
-      </View>
-
-      {/* Utility */}
-      <Gap size="xl" />
+      <ListRow label="Settings" onPress={() => router.push('/settings')} testID="account-settings" />
       <ListRow
-        label="Settings"
-        sub="notifications, music, data export, deletion"
-        onPress={() => router.push('/settings')}
-        testID="account-settings"
+        label="Mental health resources"
+        onPress={() => router.push('/resources')}
+        testID="account-resources"
       />
-      {services.signOut ? (
-        <ListRow label="Sign out" sub="your data stays safely in your account" onPress={signOut} />
-      ) : null}
-
-      {/* Member-since wordmark footer */}
+      {services.signOut ? <ListRow label="Sign out" onPress={signOut} testID="account-signout" /> : null}
+      <ListRow
+        label="Send feedback"
+        onPress={() => void Linking.openURL(FEEDBACK_MAILTO)}
+        testID="account-feedback"
+      />
+      <View style={{ flexGrow: 1 }} />
+      {/* Member-since wordmark + quote footer */}
       <Gap size="xxl" />
-      <Pressable accessibilityRole="none" style={{ alignItems: 'center' }}>
-        <AppText variant="title" center>
-          {APP_NAME}
-        </AppText>
+      <View style={{ alignItems: 'center' }}>
+        <Wordmark />
         <Gap size="xs" />
         <AppText variant="caption" muted center>
           Member since{' '}
@@ -207,51 +82,15 @@ export default function Account() {
             : '·'}
         </AppText>
         <Gap size="md" />
-        <AppText variant="small" muted center style={{ fontStyle: 'italic', maxWidth: 300 }}>
+        <AppText variant="monoBody" muted center style={{ maxWidth: 300, fontSize: 13 }}>
           “{dailyQuote().text}”
         </AppText>
         <Gap size="xs" />
         <AppText variant="caption" muted center>
           {dailyQuote().by}
         </AppText>
-      </Pressable>
+      </View>
       <Gap size="lg" />
     </TabScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statsRow: { flexDirection: 'row', flexWrap: 'wrap' },
-  statCell: { width: '50%', marginBottom: space.md, paddingRight: 8 },
-  statNum: { fontFamily: font.display, fontSize: 36, lineHeight: 40 },
-  badgeWrap: { alignItems: 'center', width: 64 },
-  badge: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeGlow: {
-    shadowColor: '#99b955',
-    shadowOpacity: 0.65,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 8,
-  },
-  badgeNum: { fontFamily: font.groteskBold, fontSize: 20, color: color.onDark },
-  passCard: {
-    backgroundColor: color.dark,
-    borderRadius: radius.lg,
-    padding: space.lg,
-  },
-});

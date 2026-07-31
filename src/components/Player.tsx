@@ -28,8 +28,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CrisisButton } from '@/components/CrisisButton';
-import { color, font, space, timing, type } from '@/theme/tokens';
+import { TextLink } from '@/components/ui';
+import { color, space, timing, type } from '@/theme/tokens';
 
 export type FinishReason = 'time' | 'end';
 
@@ -222,37 +222,68 @@ export function ContemplationPlayer({
         pointerEvents="none"
         style={[StyleSheet.absoluteFill, { backgroundColor: `rgb(${SCRIM_RGB})` }, pulseStyle]}
       />
-      {paused && <View style={styles.pausedOverlay} pointerEvents="none" />}
-      <SafeAreaView style={styles.content}>
-        <View style={styles.topRow}>
-          {/* Crisis ENDS the contemplation immediately (media stops on
-              unmount, nothing recorded) and opens full-screen support. */}
-          <CrisisButton dim onPress={() => router.replace('/crisis')} />
-        </View>
-        <View style={styles.center}>
+      {!paused ? (
+        // Jul 30 designs: no visible pause control — tapping the surface
+        // pauses. The overlay sits under the text/links so Crisis stays tappable.
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Pause contemplation"
+          onPress={() => setPaused(true)}
+          style={StyleSheet.absoluteFill}
+          testID="pause-button"
+        />
+      ) : null}
+      <SafeAreaView style={styles.content} pointerEvents="box-none">
+        <View style={styles.center} pointerEvents="none">
           <Animated.Text style={[styles.prompt, textStyle]}>{prompt}</Animated.Text>
         </View>
-        <View style={styles.controls}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={paused ? 'Resume contemplation' : 'Pause contemplation'}
-            hitSlop={12}
-            onPress={() => setPaused((p) => !p)}
-            style={styles.control}
-            testID="pause-button">
-            <Text style={styles.controlText}>{paused ? '▶ Resume' : '❚❚ Pause'}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="End contemplation and go to journal"
-            hitSlop={12}
-            onPress={handleEnd}
-            style={styles.control}
-            testID="end-button">
-            <Text style={styles.controlText}>✕ End</Text>
-          </Pressable>
+        <View style={styles.bottomRow}>
+          {/* Crisis ENDS the contemplation immediately (media stops on
+              unmount, nothing recorded) and opens full-screen support. */}
+          <TextLink
+            label="Crisis Support"
+            dark
+            muted
+            onPress={() => router.replace('/crisis')}
+            testID="crisis-button"
+          />
         </View>
       </SafeAreaView>
+      {paused ? (
+        // Paused state — full taupe surface (Jul 30 designs): dimmed question,
+        // spiral, "contemplation paused", Resume / End links. Crisis stays
+        // reachable (hard rule: every contemplation screen).
+        <View style={[StyleSheet.absoluteFill, styles.pausedScreen]}>
+          <SafeAreaView style={styles.content}>
+            <View style={styles.center}>
+              <Text style={[styles.prompt, styles.pausedPrompt]}>{prompt}</Text>
+              <View style={{ height: space.xl }} />
+              <Text style={styles.pausedSpiral}>꩜</Text>
+              <View style={{ height: space.xl }} />
+              <Text style={styles.pausedLabel}>contemplation paused</Text>
+              <View style={{ height: space.md }} />
+              <View style={styles.pausedLinks}>
+                <TextLink
+                  label="Resume,"
+                  dark
+                  onPress={() => setPaused(false)}
+                  testID="resume-button"
+                />
+                <TextLink label="End" dark muted onPress={handleEnd} testID="end-button" />
+              </View>
+            </View>
+            <View style={styles.bottomRow}>
+              <TextLink
+                label="Crisis Support"
+                dark
+                muted
+                onPress={() => router.replace('/crisis')}
+                testID="crisis-button-paused"
+              />
+            </View>
+          </SafeAreaView>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -260,39 +291,43 @@ export function ContemplationPlayer({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.dark },
   scrimBase: { ...StyleSheet.absoluteFillObject, backgroundColor: `rgba(${SCRIM_RGB},0.30)` },
-  pausedOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
   content: { flex: 1, paddingHorizontal: space.lg },
-  topRow: { alignItems: 'flex-end', paddingTop: space.sm },
   center: { flex: 1, justifyContent: 'center' },
   prompt: {
-    // Handwriting stand-in — contemplation mode only (future: handwritten images).
-    fontFamily: font.hand,
-    fontSize: 34,
-    lineHeight: 48,
-    color: '#efe9db',
-    textAlign: 'left',
+    // Jul 30 designs: the question speaks in the typewriter mono, centered.
+    ...type.contemplation,
+    color: color.onDark,
+    textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 10,
   },
-  controls: {
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingBottom: space.lg,
+  },
+  pausedScreen: { backgroundColor: color.overlay },
+  pausedPrompt: {
+    opacity: 0.55,
+    textShadowColor: 'transparent',
+    color: color.onOverlay,
+  },
+  pausedSpiral: {
+    fontSize: 30,
+    color: color.onOverlay,
+    textAlign: 'center',
+    opacity: 0.8,
+    fontFamily: type.body.fontFamily,
+  },
+  pausedLabel: {
+    ...type.monoBody,
+    color: color.onOverlay,
+    textAlign: 'center',
+  },
+  pausedLinks: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: space.md,
-    paddingBottom: space.lg,
-  },
-  control: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(239,233,219,0.5)',
-    backgroundColor: `rgba(${SCRIM_RGB},0.55)`,
-  },
-  controlText: {
-    ...type.caption,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    color: '#efe9db',
   },
 });
