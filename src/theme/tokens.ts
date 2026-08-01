@@ -1,12 +1,12 @@
 /**
  * Theme tokens — the single restyle point for the whole app.
  *
- * DESIGN DIRECTION (from reference round 1):
- * Literary small-press anthology. Literary mono-serif (BIZ UD Mincho) as the
- * body voice, bold grotesque (Karrik) for headlines, Miedinger for labels. Warm stone paper,
- * espresso ink, olive/moss/chartreuse greens, oxblood accent. Soft
- * airbrushed gradients inside hard shapes (nail-art reference). Sharp,
- * print-like corners. Generous whitespace, letterspaced caps labels.
+ * DESIGN DIRECTION (Figma DESIGN SYSTEM page, Jul 30 canon):
+ * Literary small-press anthology — typography-led, print-like, analog.
+ * Inter as the workhorse sans, HAL Timezone Mono as the typewriter body
+ * voice, WT Garamono for caps micro-labels. Green-gray ground, deep olive
+ * ink, taupe/sage neutrals, olive accent. NO RED anywhere. Soft airbrushed
+ * gradients inside hard shapes; sharp 2px print-like corners.
  */
 
 export const APP_NAME = 'Contemplate'; // chosen July 2026 (domain: contemplate.day)
@@ -14,19 +14,18 @@ export const APP_NAME = 'Contemplate'; // chosen July 2026 (domain: contemplate.
 /**
  * Brand fonts per the Figma DESIGN SYSTEM page (Jul 30 file):
  * - Inter (SIL OFL) — ALL sans roles: display, titles, body, buttons, tab bar.
- * - HAL Timezone Mono — intended mono body voice. UNLICENSED trial in the
- *   design file; BIZ UD Mincho (OFL) stands in until a license + files exist.
- * - WT Garamono — intended caps micro-labels; BIZ UD Mincho stands in.
- * - Necto Mono — intended tiny date labels; BIZ UD Mincho stands in.
- * Swap the three mono role values below when the licensed files arrive.
+ * - HAL Timezone Mono — the mono body voice. TRIAL FONT: Kat purchases the
+ *   license before any public/App Store release (fine for the prototype).
+ * - WT Garamono — caps micro-labels + tiny date labels (Necto Mono retired
+ *   per Kat, Jul 31; BIZ UD Mincho fully retired).
  */
 export const font = {
   /** Handwriting stand-in for the eventual handwritten contemplation images. */
   hand: 'Daniel-Regular',
-  mono: 'BIZUDMincho-Regular', // stand-in for HAL Timezone Mono Book
-  monoBold: 'BIZUDMincho-Bold',
-  monoLabel: 'BIZUDMincho-Regular', // stand-in for WT Garamono Regular
-  monoTiny: 'BIZUDMincho-Regular', // stand-in for Necto Mono Regular
+  mono: 'HALTimezoneMono-Book',
+  monoBold: 'HALTimezoneMono-Bold',
+  monoLabel: 'WTGaramono-Regular',
+  monoTiny: 'WTGaramono-Regular',
   display: 'Inter-Bold',
   displayItalic: 'Inter-Bold',
   grotesk: 'Inter-Regular',
@@ -73,10 +72,10 @@ export const seriesPalettes: Record<string, [string, string, string]> = {
 };
 
 /**
- * Type roles (per Kat, July 2026):
- * - Karrik: ALL CAPS, limited display headlines only (display, title).
- * - Mincho: ONLY certain small labels, all caps (the `label` variant).
- * - Miedinger: everything else (headings, body, small, caption, contemplation).
+ * Type roles (DS canon, Jul 30):
+ * - Inter: all sans roles — display/titles (Bold), body, buttons, tab bar.
+ * - HAL Timezone Mono: the mono voice (contemplation, monoBody statements).
+ * - WT Garamono: caps micro-labels (`label`) + tiny date labels.
  */
 export const type = {
   display: {

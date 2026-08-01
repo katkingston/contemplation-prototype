@@ -30,14 +30,16 @@ function useWebVideoGuard() {
 
 export default function RootLayout() {
   useWebVideoGuard();
-  // Brand fonts per the Figma DESIGN SYSTEM page (Jul 30): Inter (sans, OFL)
-  // + BIZ UD Mincho (OFL) standing in for the mono roles until HAL Timezone
-  // Mono / WT Garamono / Necto Mono are licensed (see tokens.ts font notes).
+  // Brand fonts per the Figma DESIGN SYSTEM page (Jul 30): Inter (sans, OFL),
+  // HAL Timezone Mono (TRIAL — Kat licenses before any public release), and
+  // WT Garamono (caps labels + tiny dates; Necto Mono retired per Kat).
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),
     'Inter-Bold': require('@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
-    'BIZUDMincho-Regular': require('../../assets/fonts/BIZUDMincho-Regular.ttf'),
-    'BIZUDMincho-Bold': require('../../assets/fonts/BIZUDMincho-Bold.ttf'),
+    'HALTimezoneMono-Book': require('../../assets/fonts/HALTimezoneMono-Book.otf'),
+    'HALTimezoneMono-Bold': require('../../assets/fonts/HALTimezoneMono-Bold.otf'),
+    'WTGaramono-Regular': require('../../assets/fonts/WTGaramono-Regular.otf'),
+    'WTGaramono-Italic': require('../../assets/fonts/WTGaramono-Italic.otf'),
     'Daniel-Regular': require('../../assets/fonts/Daniel-Regular.ttf'),
   });
 
