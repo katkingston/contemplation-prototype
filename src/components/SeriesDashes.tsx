@@ -42,7 +42,7 @@ export function SeriesDashes({
               fill === 'transparent'
                 ? {
                     borderWidth: 1,
-                    borderColor: dark ? 'rgba(239,233,219,0.4)' : color.accentBright,
+                    borderColor: dark ? 'rgba(251,251,246,0.4)' : color.accentBright,
                   }
                 : { backgroundColor: fill },
             ]}

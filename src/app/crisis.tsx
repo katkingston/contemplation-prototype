@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.faint,
   },
   action: {
-    backgroundColor: color.danger,
+    backgroundColor: color.muted, // DS canon: no red — Mud fill + words carry urgency
     borderRadius: radius.sm,
     paddingVertical: 14,
     paddingHorizontal: 26,

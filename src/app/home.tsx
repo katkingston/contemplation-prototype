@@ -191,14 +191,14 @@ export default function Home() {
             {/* Jul 30 designs: "1/7"-style counter left (computed), series
                 name caps right; done-today gets a small marker dot. */}
             <View style={styles.heroTop}>
-              <AppText variant="label" style={{ color: 'rgba(239,233,219,0.85)' }}>
+              <AppText variant="label" style={{ color: 'rgba(251,251,246,0.85)' }}>
                 {`${Math.min(shownIdx + 1, len)}/${len}`}
               </AppText>
               <View style={{ flex: 1 }} />
               <View style={{ alignItems: 'flex-end', maxWidth: '70%' }}>
                 <AppText
                   variant="label"
-                  style={{ color: 'rgba(239,233,219,0.85)', textAlign: 'right' }}>
+                  style={{ color: 'rgba(251,251,246,0.85)', textAlign: 'right' }}>
                   {series.title}
                 </AppText>
                 {doneToday ? <View style={styles.doneDot} /> : null}
@@ -220,7 +220,7 @@ export default function Home() {
                   pressed && { opacity: 0.7 },
                 ]}
                 testID="hero-redo">
-                <AppText variant="body" style={{ color: 'rgba(239,233,219,0.75)' }}>
+                <AppText variant="body" style={{ color: 'rgba(251,251,246,0.75)' }}>
                   Redo Contemplation
                 </AppText>
               </Pressable>
@@ -241,7 +241,7 @@ export default function Home() {
             {doneToday ? (
               <>
                 <Gap size="sm" />
-                <AppText variant="label" center style={{ color: 'rgba(239,233,219,0.7)', alignSelf: 'center' }}>
+                <AppText variant="label" center style={{ color: 'rgba(251,251,246,0.7)', alignSelf: 'center' }}>
                   New contemplation at {dropLabel(dropAt!)}
                 </AppText>
               </>
@@ -389,13 +389,13 @@ const styles = StyleSheet.create({
   },
   heroButton: {
     borderWidth: 1,
-    borderColor: 'rgba(239,233,219,0.9)',
+    borderColor: 'rgba(251,251,246,0.9)',
     borderRadius: radius.sm,
     paddingVertical: 13,
     alignItems: 'center',
     alignSelf: 'stretch',
   },
-  heroButtonMuted: { borderColor: 'rgba(239,233,219,0.45)' },
+  heroButtonMuted: { borderColor: 'rgba(251,251,246,0.45)' },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

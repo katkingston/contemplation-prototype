@@ -12,47 +12,56 @@
 export const APP_NAME = 'Contemplate'; // chosen July 2026 (domain: contemplate.day)
 
 /**
- * Brand fonts (owner-provided, all SIL OFL):
- * - BIZ UD Mincho — the body voice: monospaced-feeling literary serif.
- * - Karrik — bold vernacular grotesque, for limited display headlines.
- * - Miedinger — alternative sans, for letterspaced caps labels.
+ * Brand fonts per the Figma DESIGN SYSTEM page (Jul 30 file):
+ * - Inter (SIL OFL) — ALL sans roles: display, titles, body, buttons, tab bar.
+ * - HAL Timezone Mono — intended mono body voice. UNLICENSED trial in the
+ *   design file; BIZ UD Mincho (OFL) stands in until a license + files exist.
+ * - WT Garamono — intended caps micro-labels; BIZ UD Mincho stands in.
+ * - Necto Mono — intended tiny date labels; BIZ UD Mincho stands in.
+ * Swap the three mono role values below when the licensed files arrive.
  */
 export const font = {
   /** Handwriting stand-in for the eventual handwritten contemplation images. */
   hand: 'Daniel-Regular',
-  mono: 'BIZUDMincho-Regular',
+  mono: 'BIZUDMincho-Regular', // stand-in for HAL Timezone Mono Book
   monoBold: 'BIZUDMincho-Bold',
-  display: 'Karrik-Regular',
-  displayItalic: 'Karrik-Italic',
-  grotesk: 'Miedinger-Book',
-  groteskBold: 'Miedinger-Bold',
+  monoLabel: 'BIZUDMincho-Regular', // stand-in for WT Garamono Regular
+  monoTiny: 'BIZUDMincho-Regular', // stand-in for Necto Mono Regular
+  display: 'Inter-Bold',
+  displayItalic: 'Inter-Bold',
+  grotesk: 'Inter-Regular',
+  groteskBold: 'Inter-Bold',
 } as const;
 
+// Palette extracted from the Figma DESIGN SYSTEM + JUL 30 DESIGNS pages.
 export const color = {
-  // Paper & ink (stone card / espresso card references)
-  ink: '#272b18', // deep olive (was espresso near-black)
-  paper: '#f0ece1',
-  muted: '#6b665a', // WCAG AA 4.5:1 on paper & faint (was #8a8474 @ 3.2)
-  faint: '#e9e4d6',
+  // Paper & ink
+  ink: '#272b18', // deep olive ink — also THE dark surface per the Jul 30 screens
+  paper: '#eaeae2', // light screen surface
+  sage: '#dbdbcf', // secondary light surface (menu band, disabled fills)
+  muted: '#726a57', // muted taupe text on light surfaces
+  faint: '#d9d9c7', // input-field fill
   line: '#d8d2c2',
   // Dark surfaces (contemplation spaces)
-  dark: '#20240f', // dark olive green surface
-  darkElevated: '#2e3319',
-  onDark: '#efe9db',
+  dark: '#272b18',
+  darkElevated: '#4b4f3b',
+  onDark: '#fbfbf6', // near-white cream on dark
   onDarkMuted: '#a89f8c',
-  // Accents (Florilegium olive · Petit Merci chartreuse · oxblood)
-  accent: '#6a6b33', // WCAG AA as text on paper/faint (was #6f7036 @ 4.4)
+  // Accents
+  accent: '#6a6c36', // olive
   accentBright: '#99b955',
-  danger: '#7d332b',
+  /** NO RED rule (Kat, Jul 24): destructive/crisis = ink + weight + words. */
+  danger: '#272b18',
   success: '#4a5a2e',
   successBg: '#e4e6d2',
-  // Taupe overlay surfaces (paused / rating dialog / signed-out — Jul 30 designs)
-  overlay: '#847c6c',
-  overlayElevated: '#6f6858',
-  onOverlay: '#efe9db',
-  progress: '#6a6b33', // AA on progressBg
+  // Taupe overlay surfaces (paused / rating dialog / signed-out)
+  overlay: '#726a57',
+  overlayElevated: '#726a57',
+  overlayBackdrop: '#a89f8c',
+  onOverlay: '#fbfbf6',
+  progress: '#6a6c36', // AA on progressBg
   progressBg: '#eae8d2',
-  locked: '#696559', // AA on faint pills (was #b0a996 @ 1.8 — unreadable)
+  locked: '#9c9586', // disabled / locked content (per DS disabled buttons)
 } as const;
 
 /** Per-series ambient color continuum — gradient stops per contemplation drift between these. */
@@ -84,32 +93,32 @@ export const type = {
     letterSpacing: -0.3, // -1%
     textTransform: 'uppercase' as const,
   },
+  /** DS "Heading 03": Inter Bold 20, sentence case. */
   heading: {
-    fontFamily: font.grotesk,
-    fontSize: 15,
-    lineHeight: 20,
-    letterSpacing: -0.15, // -1%
-    textTransform: 'uppercase' as const,
+    fontFamily: font.groteskBold,
+    fontSize: 20,
+    lineHeight: 25,
+    letterSpacing: -0.2, // -1%
   },
   body: { fontFamily: font.grotesk, fontSize: 15, lineHeight: 23, letterSpacing: -0.15 }, // -1%
   bodyBold: { fontFamily: font.groteskBold, fontSize: 15, lineHeight: 23, letterSpacing: -0.15 }, // -1%
   small: { fontFamily: font.grotesk, fontSize: 13, lineHeight: 19, letterSpacing: -0.13 }, // -1%
   caption: { fontFamily: font.grotesk, fontSize: 11, lineHeight: 15, letterSpacing: -0.11 }, // -1%
-  /** Mincho's only role: deliberate small editorial labels, all caps. */
+  /** DS "Mono Label": 12px, all caps, +3% tracking. */
   label: {
-    fontFamily: font.mono,
-    fontSize: 11,
-    lineHeight: 15,
-    letterSpacing: -0.44, // -4% (mono)
+    fontFamily: font.monoLabel,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.36, // +3%
     textTransform: 'uppercase' as const,
   },
   /** Jul 30 designs: the contemplation question speaks in the typewriter mono. */
   contemplation: { fontFamily: font.mono, fontSize: 22, lineHeight: 36, letterSpacing: -0.88 }, // -4% (mono)
-  /** Jul 30 designs: lowercase bold grotesk display (wordmark, screen titles, series names). */
-  displayLower: { fontFamily: font.groteskBold, fontSize: 38, lineHeight: 42, letterSpacing: -0.76 },
-  titleLower: { fontFamily: font.groteskBold, fontSize: 27, lineHeight: 32, letterSpacing: -0.54 },
-  /** Jul 30 designs: mono body voice for brand statements, quotes, prompts outside the player. */
-  monoBody: { fontFamily: font.mono, fontSize: 15, lineHeight: 24, letterSpacing: -0.6 },
+  /** DS "Display heading" / "Title 02": Inter Bold, sentence/lower case. */
+  displayLower: { fontFamily: font.groteskBold, fontSize: 40, lineHeight: 44, letterSpacing: -0.8 },
+  titleLower: { fontFamily: font.groteskBold, fontSize: 26, lineHeight: 31, letterSpacing: -0.52 },
+  /** DS "Mono Medium" (HAL Timezone role): brand statements, quotes, prompts outside the player. */
+  monoBody: { fontFamily: font.mono, fontSize: 16, lineHeight: 25, letterSpacing: -0.64 },
 } as const;
 
 export const space = {
@@ -121,9 +130,9 @@ export const space = {
   xxl: 48,
 } as const;
 
-/** Print-like: sharp corners, stamped shapes. */
+/** Print-like: sharp corners, stamped shapes. DS canon: 2px corners everywhere. */
 export const radius = {
-  sm: 3,
+  sm: 2,
   md: 5,
   lg: 12,
   pill: 999,

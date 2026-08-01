@@ -18,7 +18,7 @@ export function ResourcesList({ dark = false }: { dark?: boolean }) {
       {mentalHealthResources.map((r) => (
         <View
           key={r.label}
-          style={[styles.resourceRow, dark && { borderBottomColor: 'rgba(239,233,219,0.3)' }]}>
+          style={[styles.resourceRow, dark && { borderBottomColor: 'rgba(251,251,246,0.3)' }]}>
           <Pressable
             accessibilityRole={r.url ? 'link' : undefined}
             onPress={r.url ? () => Linking.openURL(r.url!) : undefined}
@@ -67,8 +67,8 @@ export function CrisisButton({
         accessibilityLabel="Crisis resources"
         hitSlop={12}
         onPress={onPress ?? (() => setOpen(true))}
-        style={[styles.pill, dim && { opacity: 0.5, borderColor: 'rgba(239,233,219,0.45)' }]}>
-        <Text style={[type.caption, { textTransform: 'uppercase', letterSpacing: 0.8, color: dim ? '#efe9db' : color.danger }]}>✚ Crisis</Text>
+        style={[styles.pill, dim && { opacity: 0.5, borderColor: 'rgba(251,251,246,0.45)' }]}>
+        <Text style={[type.caption, { textTransform: 'uppercase', letterSpacing: 0.8, color: dim ? color.onDark : color.ink }]}>✚ Crisis</Text>
       </Pressable>
       <Sheet visible={open} onClose={() => setOpen(false)} title="Mental Health Resources">
         <ResourcesList />
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   telChip: {
-    backgroundColor: color.danger,
+    backgroundColor: color.muted, // DS canon: CALL/TEXT chips = Mud fill, no red
     borderRadius: radius.sm,
     paddingVertical: 6,
     paddingHorizontal: 12,

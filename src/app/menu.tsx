@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
   row: {
     paddingVertical: space.xl,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(239,233,219,0.35)',
+    borderTopColor: 'rgba(251,251,246,0.35)',
   },
   rowLabel: { ...type.titleLower, color: color.onDark },
   endRule: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(239,233,219,0.35)',
+    borderTopColor: 'rgba(251,251,246,0.35)',
   },
 });

@@ -118,8 +118,8 @@ export function Button({
         ? color.paper
         : color.ink
       : 'transparent';
-  const border =
-    kind === 'secondary' ? (dark ? color.onDarkMuted : color.muted) : 'transparent';
+  // DS canon: outline buttons stroke in Dark Sage on light AND dark surfaces.
+  const border = kind === 'secondary' ? color.onDarkMuted : 'transparent';
   const fg =
     kind === 'primary'
       ? dark
@@ -152,7 +152,8 @@ export function Button({
       ]}>
       <Text
         style={[
-          small ? type.small : type.bodyBold,
+          // DS canon: button labels are Inter sentence case 14 (12 small), not bold.
+          small ? { ...type.small, fontSize: 12 } : { ...type.body, fontSize: 14 },
           { color: fg, textAlign: 'center' },
         ]}>
         {arrow ? `${label} →` : label}
@@ -484,7 +485,7 @@ export function ListRow({
       disabled={!onPress}
       style={({ pressed }) => [
         styles.listRow,
-        dark && { borderTopColor: 'rgba(239,233,219,0.25)' },
+        dark && { borderTopColor: 'rgba(251,251,246,0.25)' },
         pressed && { opacity: 0.6 },
       ]}>
       <View style={styles.flex}>
@@ -552,7 +553,7 @@ export function Sheet({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable
-        style={[styles.sheetBackdrop, overlay && { backgroundColor: 'rgba(132,124,108,0.92)' }]}
+        style={[styles.sheetBackdrop, overlay && { backgroundColor: 'rgba(168,159,140,0.92)' }]}
         onPress={onClose}
         accessibilityLabel="Close pop-up">
         <Pressable
