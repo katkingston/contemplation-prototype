@@ -5,7 +5,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { AppText, Button, Gap, ListRow, Screen, Spacer } from '@/components/ui';
-import { getSeries } from '@/content/series';
+import { chapterNumber, getSeries, SERIES_ONE } from '@/content/series';
 import { hasActiveAccess, nextSeriesAfter } from '@/services/logic';
 import { useApp } from '@/services/provider';
 
@@ -41,13 +41,13 @@ export default function NextStep() {
       <AppText variant="titleLower">What’s next?</AppText>
       <Gap size="sm" />
       <AppText variant="body" muted>
-        You completed {series.title}. Choose where your practice goes from here.
+        You completed {SERIES_ONE.title}. Choose where your practice goes from here.
       </AppText>
       <Gap size="lg" />
       {next ? (
         <ListRow
-          label={`Start the next series`}
-          sub={`${next.displayOrder} · ${next.title}`}
+          label="Start the next chapter"
+          sub={`Chapter ${chapterNumber(next)} · ${next.title}`}
           onPress={startNext}
           testID="start-next-series"
         />
@@ -57,12 +57,12 @@ export default function NextStep() {
         </AppText>
       )}
       <ListRow
-        label="Replay this series — same questions"
+        label="Replay this chapter — same questions"
         sub="Sit with the original contemplations again"
         onPress={() => replay(false)}
       />
       <ListRow
-        label="Replay this series — new questions"
+        label="Replay this chapter — new questions"
         sub="Alternate contemplations on the same theme"
         onPress={() => replay(true)}
         testID="replay-alt"

@@ -1,6 +1,6 @@
 /**
  * C6 — Journal / Thought Diary.
- * Saved immediately, hidden until series completion. 150-word + 60s caps.
+ * Saved immediately, hidden until the chapter completes. 150-word + 60s caps.
  * Instructions behind a small button (top, next to Crisis). One exit control.
  */
 import { router, useLocalSearchParams } from 'expo-router';
@@ -73,7 +73,7 @@ export default function Journal() {
       });
       return;
     }
-    // Last contemplation of the series → wrap-up; otherwise day exit.
+    // Last contemplation of the chapter → wrap-up; otherwise day exit.
     const willBeIndex = index + 1;
     if (willBeIndex >= seriesLength(series)) {
       router.replace({ pathname: '/series-wrap', params: { seriesId: series.id } });

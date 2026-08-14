@@ -167,6 +167,27 @@ export function statsFor(data: AppData, seriesId: string): SeriesStats {
   };
 }
 
+/**
+ * Totals for the WHOLE series (every chapter), for the end-of-series stats
+ * page. Sums the per-chapter `statsFor` rather than duplicating its rules;
+ * lengths and counts stay computed, never assumed.
+ */
+export function seriesTotals(data: AppData): SeriesStats {
+  const chapters = orderedSeries();
+  const per = chapters.map((c) => statsFor(data, c.id));
+  return {
+    totalSeconds: per.reduce((a, b) => a + b.totalSeconds, 0),
+    thoughtsShared: per.reduce((a, b) => a + b.thoughtsShared, 0),
+    daysComplete: per.reduce((a, b) => a + Math.min(b.daysComplete, b.seriesLength), 0),
+    seriesLength: per.reduce((a, b) => a + b.seriesLength, 0),
+    streak: computeStreak(data),
+    revealedEntries: chapters
+      .flatMap((c) => data.diary.filter((e) => e.seriesId === c.id && e.isRevealed))
+      .slice(-3)
+      .map((e) => ({ prompt: e.prompt, text: e.text, audioUri: e.audioUri })),
+  };
+}
+
 /** Consecutive-day streak ending today or yesterday, from session dates. */
 export function computeStreak(data: AppData): number {
   const days = [...new Set(data.sessions.map((s) => s.date))].sort().reverse();

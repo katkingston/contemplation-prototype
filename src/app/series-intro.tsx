@@ -7,7 +7,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { AppText, Gap, Screen, Spacer, TextLink } from '@/components/ui';
-import { getSeries } from '@/content/series';
+import { chapterNumber, getSeries } from '@/content/series';
 import { useApp } from '@/services/provider';
 import { progressFor } from '@/services/logic';
 
@@ -45,7 +45,7 @@ export default function SeriesIntro() {
     <Screen dark scroll={false} testID="series-intro">
       <Gap size="md" />
       <AppText variant="label" dark muted>
-        Series {series.displayOrder} — Introduction
+        Chapter {chapterNumber(series)} — Introduction
       </AppText>
       <Spacer />
       <AppText variant="contemplation" dark center>

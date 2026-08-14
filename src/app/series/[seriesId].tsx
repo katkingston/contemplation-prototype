@@ -13,7 +13,7 @@ import { shareMessage } from '@/services/share';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap, Row, TextLink } from '@/components/ui';
-import { getSeries, seriesCode, seriesLength } from '@/content/series';
+import { chapterNumber, getSeries, seriesCode, seriesLength, SERIES_ONE } from '@/content/series';
 import {
   dropLabel,
   hasActiveAccess,
@@ -51,7 +51,7 @@ export default function SeriesDetail() {
   const dropAt = nextDropAt(data, series.id);
   const started = p.currentIndex > 0;
 
-  // Button states per Kat: Continue / Series locked (grayed) / Come back ...
+  // Button states per Kat: Continue / Chapter locked (grayed) / Come back ...
   const locked = !unlocked && !completed && !atWrap;
   const waiting = unlocked && !completed && !atWrap && !dropReady && accessOk;
   const cta = completed
@@ -59,7 +59,7 @@ export default function SeriesDetail() {
     : atWrap
       ? 'See your wrap-up'
       : locked
-        ? 'Series locked'
+        ? 'Chapter locked'
         : waiting
           ? `Come back at ${dropAt ? dropLabel(dropAt) : 'the next drop'}`
           : started
@@ -81,7 +81,7 @@ export default function SeriesDetail() {
       return;
     }
     if (!unlocked) {
-      notify('Complete the current series first. This one unlocks after.');
+      notify('Complete the current chapter first. This one unlocks after.');
       return;
     }
     if (!dropReady) {
@@ -103,7 +103,7 @@ export default function SeriesDetail() {
   };
 
   const onShare = () =>
-    shareMessage(`${series.title}, a contemplation series on Contemplate. ${SHARE_URL}`);
+    shareMessage(`${series.title}, a chapter of ${SERIES_ONE.title} on Contemplate. ${SHARE_URL}`);
 
   return (
     <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="series-detail">
@@ -132,7 +132,7 @@ export default function SeriesDetail() {
         <Gap size="sm" />
         <Row between>
           <AppText variant="label" muted>
-            {`Series ${seriesCode(series, 0).split('.')[0]}`}
+            {`${SERIES_ONE.title} · Chapter ${chapterNumber(series)}`}
           </AppText>
           <AppText variant="label" muted>
             {series.tag}

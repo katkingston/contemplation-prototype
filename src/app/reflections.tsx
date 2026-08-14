@@ -1,6 +1,6 @@
 /**
- * Journal — revealed reflections, grouped by series. Entries stay hidden
- * until a series completes (hard rule); this page holds what has been
+ * Journal — revealed reflections, grouped by chapter. Entries stay hidden
+ * until a chapter completes (hard rule); this page holds what has been
  * revealed so far.
  */
 import React from 'react';
@@ -21,7 +21,7 @@ export default function Reflections() {
       <Gap size="sm" />
       <AppText variant="small" muted>
         Every reflection is registered the day you write it. The words themselves are
-        revealed when you complete their series.
+        revealed when you complete their chapter.
       </AppText>
       {data.diary.length === 0 ? (
         <>
@@ -64,7 +64,7 @@ export default function Reflections() {
                     ) : null}
                   </View>
                 ) : (
-                  // Registered but not yet revealed: date and series only, grayed.
+                  // Registered but not yet revealed: date and chapter only, grayed.
                   <View key={e.id} style={{ marginBottom: 20, opacity: 0.45 }}>
                     <AppText variant="label" muted>
                       {new Date(e.createdAt).toLocaleDateString(undefined, {

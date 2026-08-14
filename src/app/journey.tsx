@@ -1,7 +1,7 @@
 /**
  * Journey — the practice record (Jul 30 designs): light surface, lowercase
  * title, 2×2 stats, then dated reflections with dotted separators. Reached
- * from the Journey-tab menu. Entries stay held back until series completion.
+ * from the Journey-tab menu. Entries stay held back until their chapter completes.
  */
 import { router } from 'expo-router';
 import React from 'react';
@@ -83,7 +83,7 @@ export default function Journey() {
               </>
             ) : (
               <AppText variant="body" muted style={{ opacity: 0.6 }}>
-                A reflection is held here. It reveals when the series completes.
+                A reflection is held here. It reveals when the chapter completes.
               </AppText>
             )}
             <Gap size="md" />

@@ -18,9 +18,17 @@ export interface Contemplation {
   gradient: [string, string];
 }
 
+/**
+ * IMPORTANT (Aug 14, 2026): each `Series` object below is a **CHAPTER** of
+ * `SERIES_ONE` ("Series 1"). The type name is legacy — renaming it would mean
+ * migrating the PERSISTED `seriesId` fields on progress, diary entries and
+ * access grants, so the storage shape is deliberately left alone. Read
+ * `seriesId` as "chapter id" everywhere. Prefer the `CHAPTERS` /
+ * `orderedChapters()` aliases in new code.
+ */
 export interface Series {
   id: string;
-  /** 1-based display order; also gating order (a series unlocks when the prior one completes). */
+  /** 1-based display order; also gating order (a chapter unlocks when the prior one completes). */
   displayOrder: number;
   /** Category tag shown in place of series numbers (catalog will keep growing). */
   tag: string;
@@ -291,6 +299,28 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
 
 /** Back-compat alias: the single intro contemplation used by onboarding. */
 export const FREE_CONTEMPLATION: Contemplation = INTRO_CONTEMPLATIONS[0];
+
+/**
+ * The single published series. The four entries in `SERIES` are its chapters;
+ * `COMING_SOON` lists the series that follow this one.
+ */
+export const SERIES_ONE = { id: 'series-1', title: 'Series 1' } as const;
+
+/** Chapter-vocabulary aliases — prefer these in new code (see the note above). */
+export const CHAPTERS = SERIES;
+export const orderedChapters = (): Series[] => orderedSeries();
+/** 1-based chapter number in display order, or 0 if not found. */
+export function chapterNumber(s: Series): number {
+  return orderedSeries().findIndex((c) => c.id === s.id) + 1;
+}
+/** Total published chapters — computed, never hardcoded. */
+export function chapterCount(): number {
+  return orderedSeries().length;
+}
+/** True when this is the last chapter of the series (drives the full wrap). */
+export function isLastChapter(s: Series): boolean {
+  return chapterNumber(s) === chapterCount();
+}
 
 export function getSeries(id: string): Series | undefined {
   return SERIES.find((s) => s.id === id);

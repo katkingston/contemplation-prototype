@@ -1,8 +1,8 @@
 /**
  * Library — the series browser (Jul 30 designs): lowercase "series" title,
- * a paged carousel (art + right-aligned series title + pagination dots),
- * then every series as a hairline row with its dot progress, the
- * coming-soon list, and a Back link. Grows as more series open up.
+ * a paged carousel of its chapters, the "Series 1" heading, then every
+ * CHAPTER as a hairline row with its dot progress, the coming-soon list of
+ * future series, and a Back link. Grows as more series open up.
  */
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -11,7 +11,7 @@ import { TabScreen } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Dots, Gap, TextLink } from '@/components/ui';
-import { COMING_SOON, orderedSeries, seriesLength } from '@/content/series';
+import { COMING_SOON, orderedSeries, seriesLength, SERIES_ONE } from '@/content/series';
 import { isSeriesCompleted, isSeriesUnlocked, progressFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, radius, seriesPalettes, space } from '@/theme/tokens';
@@ -31,7 +31,7 @@ export default function Library() {
       <Gap size="xl" />
       <AppText variant="titleLower">series</AppText>
       <Gap size="lg" />
-      {/* Carousel — one card per series, pagination dots below. */}
+      {/* Carousel — one card per chapter, pagination dots below. */}
       <ScrollView
         horizontal
         pagingEnabled
@@ -71,7 +71,10 @@ export default function Library() {
       <Gap size="md" />
       <Dots count={all.length} active={Math.min(page, all.length - 1)} />
       <Gap size="xl" />
-      {/* Every series with its dot progress. */}
+      {/* The four entries are CHAPTERS of Series 1 — the heading names the
+          series they belong to; COMING_SOON below lists future series. */}
+      <AppText variant="titleLower">{SERIES_ONE.title}</AppText>
+      <Gap size="md" />
       {all.map((s) => {
         const p = progressFor(data, s.id);
         const done = isSeriesCompleted(data, s);

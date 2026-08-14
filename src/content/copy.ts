@@ -119,9 +119,11 @@ export interface Plan {
  * subscription; trials outconvert discounts in wellness). The $7.99 series
  * pack is the low-commitment entry, so no extra discounting at launch.
  */
-// Plan copy per the Jul 30 paywall design.
+// Plan copy per the Jul 30 paywall design. NOTE (Aug 14): a "pack" unlocks ONE
+// CHAPTER of Series 1, per Kat — the label follows that rather than the old
+// four-separate-series framing.
 export const plans: Plan[] = [
-  { productType: 'series_pack', title: 'Single Series Pack', price: '$7.99', detail: 'Try without committing' },
+  { productType: 'series_pack', title: 'Single Chapter Pack', price: '$7.99', detail: 'Try without committing' },
   { productType: 'monthly', title: 'Monthly', price: '$21.99 / month', detail: '30 days of all-access' },
   { productType: 'annual', title: 'Annual', price: '$89.99 / year', detail: '$7.50 / mo equivalent', badge: 'Save 66%' },
 ];

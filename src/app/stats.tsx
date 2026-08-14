@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { MemoPlayer } from '@/components/diary';
 import { AppText, Button, Gap, Screen } from '@/components/ui';
 import { getSeries } from '@/content/series';
-import { formatMinutes, statsFor } from '@/services/logic';
+import { formatMinutes, seriesTotals } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, font, space } from '@/theme/tokens';
 
@@ -28,7 +28,8 @@ export default function Stats() {
   const params = useLocalSearchParams<{ seriesId?: string }>();
   const seriesId = params.seriesId ?? '';
   const series = getSeries(seriesId);
-  const stats = statsFor(data, seriesId);
+  // End-of-series page: totals span every chapter, not just the last one.
+  const stats = seriesTotals(data);
 
   if (!series) {
     router.replace('/home');
