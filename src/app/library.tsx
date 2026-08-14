@@ -1,16 +1,16 @@
 /**
- * Library — the series browser (Jul 30 designs): lowercase "series" title,
- * a paged carousel of its chapters, the "Series 1" heading, then every
- * CHAPTER as a hairline row with its dot progress, the coming-soon list of
- * future series, and a Back link. Grows as more series open up.
+ * Library — the series browser (S3 Library, Jul 30 designs): the series
+ * artwork, the "Series 1" heading, then every CHAPTER as a hairline row whose
+ * right-hand dots are ITS COMPLETION INDICATORS (not pagination — there is no
+ * carousel here), the coming-soon list of future series, and a Back link.
  */
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Dots, Gap, TextLink } from '@/components/ui';
+import { AppText, Gap, TextLink } from '@/components/ui';
 import { COMING_SOON, orderedSeries, seriesLength, SERIES_ONE } from '@/content/series';
 import { isSeriesCompleted, isSeriesUnlocked, progressFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
@@ -18,61 +18,27 @@ import { color, radius, seriesPalettes, space } from '@/theme/tokens';
 
 export default function Library() {
   const { data } = useApp();
-  const { width } = useWindowDimensions();
-  const [page, setPage] = useState(0);
   const all = orderedSeries();
-  const pageW = width - space.lg * 2;
+  const hero = all[0]; // the series' cover artwork
 
   const open = (id: string) =>
     router.push({ pathname: '/series/[seriesId]', params: { seriesId: id } });
 
   return (
     <TabScreen active="journey">
-      <Gap size="xl" />
-      <AppText variant="titleLower">series</AppText>
-      <Gap size="lg" />
-      {/* Carousel — one card per chapter, pagination dots below. */}
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={pageW}
-        decelerationRate="fast"
-        onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / pageW))}
-        scrollEventThrottle={64}
-        style={{ marginHorizontal: -space.lg }}
-        contentContainerStyle={{ paddingHorizontal: space.lg }}>
-        {all.map((s) => (
-          <Pressable
-            key={s.id}
-            accessibilityRole="button"
-            accessibilityLabel={s.title}
-            onPress={() => open(s.id)}
-            style={({ pressed }) => [
-              styles.carouselCard,
-              { width: pageW },
-              pressed && { opacity: 0.7 },
-            ]}
-            testID={`library-card-${s.id}`}>
-            <View style={styles.carouselThumb}>
-              <SeriesArt
-                gradient={s.contemplations[0].gradient}
-                accent={(seriesPalettes[s.id] ?? ['#232619', '#4c5232', '#6f7036'])[2]}
-                seed={s.displayOrder}
-                style={StyleSheet.absoluteFill as never}
-              />
-            </View>
-            <AppText variant="titleLower" style={styles.carouselTitle as never}>
-              {s.title}
-            </AppText>
-          </Pressable>
-        ))}
-      </ScrollView>
       <Gap size="md" />
-      <Dots count={all.length} active={Math.min(page, all.length - 1)} />
-      <Gap size="xl" />
-      {/* The four entries are CHAPTERS of Series 1 — the heading names the
-          series they belong to; COMING_SOON below lists future series. */}
+      {/* S3 Library: ONE series artwork, the series title, then its chapters.
+          (The dots belong to the rows as completion indicators — there is no
+          carousel and no pagination on this screen.) */}
+      <View style={styles.hero}>
+        <SeriesArt
+          gradient={hero.contemplations[0].gradient}
+          accent={(seriesPalettes[hero.id] ?? ['#232619', '#4c5232', '#6f7036'])[2]}
+          seed={hero.displayOrder}
+          style={StyleSheet.absoluteFill as never}
+        />
+      </View>
+      <Gap size="xxl" />
       <AppText variant="titleLower">{SERIES_ONE.title}</AppText>
       <Gap size="md" />
       {all.map((s) => {
@@ -122,19 +88,7 @@ export default function Library() {
 }
 
 const styles = StyleSheet.create({
-  carouselCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: space.md,
-    paddingRight: space.lg,
-  },
-  carouselThumb: {
-    width: 88,
-    height: 116,
-    borderRadius: radius.sm,
-    overflow: 'hidden',
-  },
-  carouselTitle: { flex: 1, textAlign: 'right' },
+  hero: { height: 250, borderRadius: radius.sm, overflow: 'hidden' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

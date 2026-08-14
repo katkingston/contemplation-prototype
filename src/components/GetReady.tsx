@@ -11,15 +11,14 @@
  * contemplation player). The Begin tap IS the required timer confirmation.
  */
 import { Asset } from 'expo-asset';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
+import { MediaWash, PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Gap, MonoHeader, Row, Sheet, Spacer, TextLink } from '@/components/ui';
+import { AppText, Gap, MonoHeader, Row, Sheet, TextLink } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { useApp } from '@/services/provider';
 import { anchor, color, font, seriesPalettes, space, timing } from '@/theme/tokens';
@@ -143,17 +142,10 @@ export function GetReadyScreen({
         style={StyleSheet.absoluteFill}
       />
       {/* The day's footage now lives HERE (the player uses the animated
-          ember gradient). Gradient stays underneath as the loading backdrop.
-          A light blur + color wash keeps the text legible over any footage. */}
+          ember gradient). Gradient stays underneath as the loading backdrop;
+          MediaWash blurs and sinks it into this series' own dark stop. */}
       <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />
-      <BlurView
-        intensity={18}
-        tint="default"
-        experimentalBlurMethod="dimezisBlurView"
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-      <View style={styles.videoScrim} pointerEvents="none" />
+      <MediaWash tint={gradient[0]} />
       {/* Fixed anchors measured off C3 Get Ready (see tokens.ts `anchor`). */}
       <SafeAreaView style={styles.content} edges={['left', 'right', 'bottom']}>
         <View style={{ height: anchor.monoHeader }} />
@@ -206,7 +198,6 @@ export function GetReadyScreen({
             testID="select-music"
           />
         </View>
-        <Spacer />
         <View
           style={{
             position: 'absolute',
@@ -253,7 +244,6 @@ export function GetReadyScreen({
 
 const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
-  videoScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.55)' },
   spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
   optionRow: { flexDirection: 'row', justifyContent: 'space-between' },
   option: {

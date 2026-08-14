@@ -12,6 +12,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View 
 import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '@/components/BottomNav';
+import { MediaWash } from '@/components/Player';
 import { SeriesArt } from '@/components/SeriesArt';
 import { AppText, Gap } from '@/components/ui';
 import { seriesLength } from '@/content/series';
@@ -184,7 +185,8 @@ export default function Home() {
             {/* Day's footage, 5s loop. Reduce Motion gets the still artwork.
                 Rendered only while Home is focused — never during transitions. */}
             {!reducedMotion && isFocused && <HeroVideo focused={isFocused} />}
-            <View style={styles.heroScrim} />
+            {/* Same blur + series-tinted wash as Get Ready (MediaWash). */}
+            <MediaWash tint={palette[0]} />
             {/* Jul 30 designs: "1/7"-style counter left (computed), series
                 name caps right; done-today gets a small marker dot. */}
             <View style={styles.heroTop}>
@@ -325,7 +327,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     alignItems: 'stretch',
   },
-  heroScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.30)' },
   heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
   doneDot: {
     width: 7,

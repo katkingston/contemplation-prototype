@@ -83,7 +83,7 @@ export function VideoBackground({ source, paused }: { source: VideoSource; pause
 }
 
 /** Hex (with or without #) to an rgba() string at the given alpha. */
-function hexToRgba(hex: string, a: number): string {
+export function hexToRgba(hex: string, a: number): string {
   const h = hex.replace('#', '');
   const n = parseInt(h, 16);
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
@@ -102,6 +102,29 @@ function mixHex(a: string, b: string, t: number): string {
       .padStart(2, '0');
   }
   return out;
+}
+
+/**
+ * The shared treatment for real footage (Get Ready + the Home hero): a soft
+ * blur, then a deep wash in THIS series' own darkest stop so the video sits
+ * inside the series colour instead of reading as raw video under grey.
+ */
+export function MediaWash({ tint }: { tint: string }) {
+  return (
+    <>
+      <BlurView
+        intensity={20}
+        tint="default"
+        experimentalBlurMethod="dimezisBlurView"
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+      <View
+        style={[StyleSheet.absoluteFill, { backgroundColor: hexToRgba(tint, 0.78) }]}
+        pointerEvents="none"
+      />
+    </>
+  );
 }
 
 export function ContemplationPlayer({
@@ -225,16 +248,16 @@ export function ContemplationPlayer({
 
   // Ember palette derived from this contemplation's own gradient
   // (Kat's refs: pale field → warm lift → saturated glow → near-black core).
-  const edge = mixHex(gradient[1], 'f4f4ec', 0.9);
-  const lift = mixHex(gradient[1], color.accentBright.slice(1), 0.5);
-  const glow = mixHex(gradient[1], gradient[0], 0.3);
-  const core = mixHex(gradient[0], '000000', 0.5);
+  const edge = mixHex(gradient[1], 'f4f4ec', 0.3);
+  const lift = mixHex(gradient[1], color.accentBright.slice(1), 0.28);
+  const glow = mixHex(gradient[0], gradient[1], 0.25);
+  const core = mixHex(gradient[0], '000000', 0.72);
 
   /** Continuous colour ramp edge → lift → glow → core (no hard bands). */
   function rampAt(t: number): string {
-    if (t < 0.4) return mixHex(edge, lift, t / 0.4);
-    if (t < 0.72) return mixHex(lift, glow, (t - 0.4) / 0.32);
-    return mixHex(glow, core, (t - 0.72) / 0.28);
+    if (t < 0.26) return mixHex(edge, lift, t / 0.26);
+    if (t < 0.58) return mixHex(lift, glow, (t - 0.26) / 0.32);
+    return mixHex(glow, core, (t - 0.58) / 0.42);
   }
 
   // A SINGLE stack of concentric rings carries the whole field — the dark core
@@ -245,10 +268,10 @@ export function ContemplationPlayer({
   const rings = Array.from({ length: RING_COUNT }, (_, i) => {
     const t = i / (RING_COUNT - 1); // 0 = outermost, 1 = innermost
     return {
-      inset: -260 + t * 320, // wider field than before
-      rise: 360 - t * 300,
+      inset: -300 + t * 360, // wider field than before
+      rise: 470 - t * 400,
       hex: rampAt(t),
-      a: 0.05 + Math.pow(t, 1.3) * 0.95, // opaque by the core
+      a: 0.14 + Math.pow(t, 1.15) * 0.86, // opaque by the core
       r: 380 - t * 290,
     };
   });
@@ -382,8 +405,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: anchor.statement - 266,
-    height: 600,
+    top: anchor.statement - 330,
+    height: 800,
   },
   content: { flex: 1, paddingHorizontal: 32 },
   center: { flex: 1 },

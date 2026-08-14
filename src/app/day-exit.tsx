@@ -9,12 +9,12 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RatingPrompt } from '@/components/RatingPrompt';
 import { Fade, ScreenFade } from '@/components/Transitions';
-import { AppText, Gap, MonoHeader, TextLink } from '@/components/ui';
+import { AppText, MonoHeader, Row, TextLink } from '@/components/ui';
 import { dayExit } from '@/content/copy';
 import { getSeries, seriesCode } from '@/content/series';
 import { dropLabel, nextDropAt } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { anchor, color, space } from '@/theme/tokens';
+import { anchor, color, space, type } from '@/theme/tokens';
 
 export default function DayExit() {
   const { data } = useApp();
@@ -33,39 +33,31 @@ export default function DayExit() {
         <View style={{ height: anchor.monoHeader }} />
         {series ? <MonoHeader code={seriesCode(series, index)} title={hint} dark /> : null}
         <View style={{ height: anchor.statement - anchor.monoHeader - 19 }} />
+        {/* The closing line carries the screen on its own — body copy removed
+            (Kat, Aug 14) so the day ends on one thought, not a paragraph. */}
         <ScreenFade>
           <AppText variant="monoStatement" dark center>
             {closer}
           </AppText>
         </ScreenFade>
-        <Gap size="lg" />
-        <Fade delay={400}>
-          <AppText variant="caption" dark muted center>
-            {dayExit.body}
-          </AppText>
-          <AppText variant="caption" dark muted center>
-            {dayExit.body2}
-          </AppText>
-        </Fade>
         <View style={{ flex: 1 }} />
+        {/* Finish and the next-session line share one baseline. */}
         <Fade delay={700}>
-          <AppText variant="body" dark>
-            {dayExit.title}
-          </AppText>
-          {dropAt ? (
-            <>
-              <Gap size="xs" />
-              <AppText variant="label" dark muted>
+          <Row between>
+            <TextLink
+              label="Finish"
+              dark
+              onPress={() => router.replace('/home')}
+              testID="day-exit-done"
+            />
+            {dropAt ? (
+              <AppText variant="label" dark muted style={styles.nextLine}>
                 {`Next — ${dropLabel(dropAt)}`}
               </AppText>
-            </>
-          ) : null}
+            ) : null}
+          </Row>
         </Fade>
-        <Gap size="xl" />
-        <Fade delay={900}>
-          <TextLink label="Finish" dark onPress={() => router.replace('/home')} testID="day-exit-done" />
-        </Fade>
-        <Gap size="lg" />
+        <View style={{ height: space.lg }} />
         <RatingPrompt />
       </SafeAreaView>
     </View>
@@ -75,4 +67,6 @@ export default function DayExit() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.dark },
   content: { flex: 1, paddingHorizontal: space.lg },
+  /** Same line box as the Finish link so the two share a baseline. */
+  nextLine: { lineHeight: type.bodyBold.lineHeight },
 });
