@@ -92,44 +92,39 @@ export default function Journal() {
         <MonoHeader code={seriesCode(series, index)} title={contemplation.hint} />
         <View style={{ height: anchor.screenTitle - anchor.monoHeader - 19 }} />
         <AppText variant="titleLower">Reflect</AppText>
-      <Gap size="xs" />
-      <AppText variant="small" muted>
-        {prompt}
-      </AppText>
-      {prior && (
-        <View
-          style={{
-            marginTop: space.md,
-            padding: space.md,
-            backgroundColor: color.faint,
-            borderRadius: radius.sm,
-          }}>
-          <AppText variant="caption" muted>
-            Your previous reflection
-          </AppText>
-          <AppText variant="small">{prior.text ?? '(voice memo)'}</AppText>
-        </View>
-      )}
-      <Gap size="xl" />
-      <WordCapInput value={text} onChange={setText} />
-      <Gap size="xl" />
-      <VoiceRecorder onRecorded={(uri, sec) => setAudio({ uri, sec })} />
-      <Spacer />
-      <Gap size="xl" />
-      <Row style={{ gap: space.md }}>
-        <TextLink label="Skip," muted onPress={() => finishDay(false)} testID="journal-skip" />
-        <TextLink
-          label="Instructions,"
-          muted
-          onPress={() => setShowHelp(true)}
-          testID="journal-instructions"
-        />
-        <TextLink label="Submit" onPress={() => finishDay(true)} testID="journal-submit" />
-      </Row>
-      <Gap size="md" />
-      <AppText variant="caption" muted>
-        Reflections are saved privately and revealed when you complete the series.
-      </AppText>
+        {/* C6 does NOT repeat the contemplation — the question was just held
+            for the full sitting; reprinting it here crowds the blank page. */}
+        {prior && (
+          <View
+            style={{
+              marginTop: space.md,
+              padding: space.md,
+              backgroundColor: color.faint,
+              borderRadius: radius.sm,
+            }}>
+            <AppText variant="caption" muted>
+              Your previous reflection
+            </AppText>
+            <AppText variant="small">{prior.text ?? '(voice memo)'}</AppText>
+          </View>
+        )}
+        {/* Writing surface sits at the measured C6 anchor (write here… y=473). */}
+        <View style={{ height: 473 - anchor.screenTitle - 32 }} />
+        <WordCapInput value={text} onChange={setText} />
+        <Gap size="xl" />
+        <VoiceRecorder onRecorded={(uri, sec) => setAudio({ uri, sec })} />
+        <Spacer />
+        <Row style={{ gap: space.md }}>
+          <TextLink label="Skip," muted onPress={() => finishDay(false)} testID="journal-skip" />
+          <TextLink
+            label="Instructions,"
+            muted
+            onPress={() => setShowHelp(true)}
+            testID="journal-instructions"
+          />
+          <TextLink label="Submit" onPress={() => finishDay(true)} testID="journal-submit" />
+        </Row>
+        <Gap size="lg" />
       </View>
       <Sheet
         visible={showHelp}

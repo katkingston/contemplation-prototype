@@ -1,8 +1,8 @@
 /**
  * C1 — Home, Open-Discover style: artwork-led. The today hero REVEALS
  * NOTHING (series, number, hint only — the question appears only inside the
- * contemplation). Below: a horizontal artwork rail for the active series and
- * image-led rows for all series. Section headers carry SEE ALL links.
+ * contemplation). Below: a horizontal artwork rail for the active series,
+ * whose SEE ALL header links through to the full library.
  */
 import { useIsFocused } from '@react-navigation/native';
 import { router } from 'expo-router';
@@ -13,17 +13,14 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '@/components/BottomNav';
 import { SeriesArt } from '@/components/SeriesArt';
-import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap } from '@/components/ui';
-import { orderedSeries, seriesLength } from '@/content/series';
+import { seriesLength } from '@/content/series';
 import {
   activeSeries,
   dropLabel,
   hasActiveAccess,
   isDropAvailable,
   isSeriesAtWrap,
-  isSeriesCompleted,
-  isSeriesUnlocked,
   nextDropAt,
   progressFor,
 } from '@/services/logic';
@@ -311,58 +308,8 @@ export default function Home() {
           })}
         </ScrollView>
 
-        {/* All series — image-led rows */}
-        <Gap size="xl" />
-        <View style={{ paddingHorizontal: space.lg }}>
-          <SectionHeader label="All series" onSeeAll={() => router.push('/library')} />
-          {orderedSeries().map((s) => {
-            const completed = isSeriesCompleted(data, s);
-            const unlocked = isSeriesUnlocked(data, s);
-            const sp = progressFor(data, s.id);
-            const sPalette = seriesPalettes[s.id] ?? palette;
-            const sLen = seriesLength(s);
-            return (
-              <Pressable
-                key={s.id}
-                accessibilityRole="button"
-                accessibilityLabel={s.title}
-                onPress={() => openSeries(s.id)}
-                style={({ pressed }) => [styles.seriesRow, pressed && { opacity: 0.6 }]}
-                testID={`home-series-${s.id}`}>
-                <View style={[styles.thumb, !unlocked && !completed && { opacity: 0.45 }]}>
-                  <SeriesArt
-                    gradient={s.contemplations[0].gradient}
-                    accent={sPalette[2]}
-                    seed={s.displayOrder}
-                    style={StyleSheet.absoluteFill as never}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <AppText variant="label" muted>
-                    {s.tag}
-                    {completed ? ' · Complete' : !unlocked ? ' · Locked' : ''}
-                  </AppText>
-                  <AppText variant="bodyBold" numberOfLines={2}>
-                    {s.title}
-                  </AppText>
-                  <Gap size="xs" />
-                  <SeriesDashes
-                    total={sLen}
-                    done={Math.min(sp.currentIndex, sLen)}
-                    active={s.id === series.id && !completed}
-                  />
-                </View>
-                <AppText variant="body" muted>
-                  {completed ? '✓' : '›'}
-                </AppText>
-              </Pressable>
-            );
-          })}
-          <Gap size="md" />
-          <AppText variant="caption" muted>
-            More series coming soon.
-          </AppText>
-        </View>
+        {/* The "All series" block lived here — removed per Kat (Aug 14).
+            Every series is one tap away via the rail's SEE ALL → /library. */}
       </ScrollView>
       <BottomNav active="today" />
     </SafeAreaView>
@@ -418,13 +365,4 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: color.onDark,
   },
-  seriesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-    paddingVertical: space.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.line,
-  },
-  thumb: { width: 64, height: 64, borderRadius: radius.sm, overflow: 'hidden' },
 });
