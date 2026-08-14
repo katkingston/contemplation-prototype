@@ -5,10 +5,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { notify } from '@/components/Notice';
-import { AppText, Button, Gap } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { formatTime, parseTimeInput } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space, type } from '@/theme/tokens';
+import { color, space, type } from '@/theme/tokens';
 
 export function DropTimeInput({ onSaved }: { onSaved?: () => void }) {
   const { data, act } = useApp();
@@ -28,40 +28,33 @@ export function DropTimeInput({ onSaved }: { onSaved?: () => void }) {
     }
   };
 
+  // O9 Drop time (new) / DS canon: borderless underline input + small
+  // outlined Set button, no helper caption.
   return (
-    <View>
-      <View style={styles.row}>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          onSubmitEditing={save}
-          accessibilityLabel="Daily contemplation time"
-          placeholder="6:00 PM"
-          placeholderTextColor={color.muted}
-          style={styles.input}
-          testID="drop-time-input"
-        />
-        <Button label="Set" small kind="secondary" onPress={save} testID="drop-time-save" />
-      </View>
-      <Gap size="xs" />
-      <AppText variant="caption" muted>
-        Each day’s contemplation arrives at this time.
-      </AppText>
+    <View style={styles.row}>
+      <TextInput
+        value={text}
+        onChangeText={setText}
+        onSubmitEditing={save}
+        accessibilityLabel="Daily contemplation time"
+        placeholder="6:00 PM"
+        placeholderTextColor={color.muted}
+        style={styles.input}
+        testID="drop-time-input"
+      />
+      <Button label="Set" small kind="secondary" onPress={save} testID="drop-time-save" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  row: { flexDirection: 'row', alignItems: 'flex-end', gap: space.md },
   input: {
     ...type.body,
     flex: 1,
-    borderWidth: 1,
-    borderColor: color.line,
-    borderRadius: radius.md,
-    paddingVertical: 12,
-    paddingHorizontal: space.md,
-    backgroundColor: color.faint,
+    borderBottomWidth: 1,
+    borderBottomColor: color.line,
+    paddingVertical: space.sm,
     color: color.ink,
     minHeight: 44,
   },

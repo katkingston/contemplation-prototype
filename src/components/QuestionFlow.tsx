@@ -178,10 +178,6 @@ export function QuestionFlow({
         />
       )}
       <Spacer />
-      <AppText variant="caption" muted center>
-        All questions are required · answers are private and never shown back to you
-      </AppText>
-      <Gap size="md" />
       <View style={{ alignItems: 'center' }}>
         <TextLink
           label={step + 1 < questions.length ? 'Next question' : completeLabel}
