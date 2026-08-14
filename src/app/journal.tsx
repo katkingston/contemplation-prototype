@@ -90,10 +90,7 @@ export default function Journal() {
       <Gap size="md" />
       <MonoHeader code={seriesCode(series, index)} title={contemplation.hint} />
       <Gap size="xl" />
-      <Row between>
-        <AppText variant="titleLower">Reflect</AppText>
-        <TextLink label="Instructions" muted onPress={() => setShowHelp(true)} />
-      </Row>
+      <AppText variant="titleLower">Reflect</AppText>
       <Gap size="xs" />
       <AppText variant="small" muted>
         {prompt}
@@ -120,15 +117,25 @@ export default function Journal() {
       <Gap size="xl" />
       <Row style={{ gap: space.md }}>
         <TextLink label="Skip," muted onPress={() => finishDay(false)} testID="journal-skip" />
+        <TextLink
+          label="Instructions,"
+          muted
+          onPress={() => setShowHelp(true)}
+          testID="journal-instructions"
+        />
         <TextLink label="Submit" onPress={() => finishDay(true)} testID="journal-submit" />
       </Row>
       <Gap size="md" />
       <AppText variant="caption" muted>
         Reflections are saved privately and revealed when you complete the series.
       </AppText>
-      <Sheet visible={showHelp} onClose={() => setShowHelp(false)} title={journalHelp.title}>
+      <Sheet
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        tone="overlay"
+        title={journalHelp.title}>
         {journalHelp.paragraphs.map((p, i) => (
-          <AppText key={i} variant="body" style={{ marginBottom: space.sm }}>
+          <AppText key={i} variant="body" dark style={{ marginBottom: space.sm }}>
             {p}
           </AppText>
         ))}
