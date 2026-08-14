@@ -32,7 +32,6 @@ export default function Contemplation() {
     <ContemplationPlayer
       prompt={questionFor(data, series, index)}
       gradient={c.gradient}
-      videoUri={c.videoUri}
       minutes={minutes}
       musicOn={(params.music ?? '1') === '1'}
       onFinish={(reason, seconds) => {

@@ -21,7 +21,6 @@ export default function FreeContemplation() {
     <ContemplationPlayer
       prompt={FREE_CONTEMPLATION.prompt}
       gradient={FREE_CONTEMPLATION.gradient}
-      videoUri={FREE_CONTEMPLATION.videoUri}
       minutes={minutes}
       musicOn={(params.music ?? '1') === '1'}
       onFinish={finish}

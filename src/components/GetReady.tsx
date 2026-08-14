@@ -16,7 +16,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PLACEHOLDER_VIDEO } from '@/components/Player';
+import { PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap, MonoHeader, Row, Sheet, Spacer, TextLink } from '@/components/ui';
 import { instructions } from '@/content/copy';
@@ -141,6 +141,10 @@ export function GetReadyScreen({
         end={{ x: 0.9, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
+      {/* The day's footage now lives HERE (the player uses the animated
+          ember gradient). Gradient stays underneath as the loading backdrop. */}
+      <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />
+      <View style={styles.videoScrim} pointerEvents="none" />
       <SafeAreaView style={styles.content}>
         <Gap size="md" />
         {seriesContext ? (
@@ -221,6 +225,7 @@ export function GetReadyScreen({
 
 const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
+  videoScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.45)' },
   spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
   optionRow: { flexDirection: 'row', gap: space.xl, flexWrap: 'wrap' },
   option: {

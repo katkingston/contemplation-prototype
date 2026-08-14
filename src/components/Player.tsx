@@ -40,7 +40,7 @@ const AMBIENT_MUSIC = require('../../assets/media/ambient-music.mp3');
 
 const SCRIM_RGB = '24,28,12'; // dark olive
 
-function VideoBackground({ source, paused }: { source: VideoSource; paused: boolean }) {
+export function VideoBackground({ source, paused }: { source: VideoSource; paused: boolean }) {
   const player = useVideoPlayer(source, (p) => {
     p.loop = true;
     p.muted = true;
@@ -82,17 +82,30 @@ function VideoBackground({ source, paused }: { source: VideoSource; paused: bool
   );
 }
 
+/** Mix two hex colors (no #) — t=0 returns a, t=1 returns b. */
+function mixHex(a: string, b: string, t: number): string {
+  const ah = a.replace('#', '');
+  const bh = b.replace('#', '');
+  let out = '';
+  for (let i = 0; i < 3; i++) {
+    const av = parseInt(ah.slice(i * 2, i * 2 + 2), 16);
+    const bv = parseInt(bh.slice(i * 2, i * 2 + 2), 16);
+    out += Math.round(av + (bv - av) * t)
+      .toString(16)
+      .padStart(2, '0');
+  }
+  return out;
+}
+
 export function ContemplationPlayer({
   prompt,
   gradient,
-  videoUri,
   minutes,
   musicOn = true,
   onFinish,
 }: {
   prompt: string;
   gradient: [string, string];
-  videoUri: string | null;
   minutes: number;
   musicOn?: boolean;
   onFinish: (reason: FinishReason, secondsElapsed: number) => void;
@@ -183,40 +196,39 @@ export function ContemplationPlayer({
     opacity: textIn.value,
     transform: [{ translateY: (1 - textIn.value) * 14 }],
   }));
-  const driftStyle = useAnimatedStyle(() => ({ opacity: drift.value }));
+  // The glow band slowly breathes: gentle opacity + scale drift, never gone.
+  const driftStyle = useAnimatedStyle(() => ({
+    opacity: 0.7 + drift.value * 0.3,
+    transform: [{ scale: 1 + drift.value * 0.05 }],
+  }));
   const pulseStyle = useAnimatedStyle(() => ({ opacity: scrimPulse.value * 0.3 }));
 
+  // Ember palette derived from this contemplation's gradient stops:
+  // pale outer edge → saturated glow band → near-black core (Kat's refs).
+  const edge = mixHex(gradient[1], 'f4f4ec', 0.85);
+  const core = mixHex(gradient[0], '000000', 0.72);
+
   return (
-    <View style={styles.root} testID="contemplation-player">
-      {/* Gradient stays underneath as the load/fallback backdrop. */}
-      <LinearGradient
-        colors={[gradient[0], gradient[1]]}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 0.9, y: 1 }}
-      />
-      <Animated.View style={[StyleSheet.absoluteFill, driftStyle]}>
+    <View style={[styles.root, { backgroundColor: edge }]} testID="contemplation-player">
+      {/* Animated ember gradient (replaces the video — footage now lives on
+          Get Ready). Bands render hard-edged, then a heavy BlurView melts
+          them together; the drift value slowly breathes the glow. */}
+      <Animated.View style={[styles.glowBand, driftStyle]} pointerEvents="none">
         <LinearGradient
-          colors={[gradient[1], gradient[0]]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0.9, y: 0.1 }}
-          end={{ x: 0.1, y: 0.9 }}
+          colors={[gradient[1], gradient[0], gradient[1]]}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{ flex: 1, borderRadius: 72 }}
         />
       </Animated.View>
-      <VideoBackground source={videoUri ?? PLACEHOLDER_VIDEO} paused={paused} />
-      {/* Layered scrim: flat base guarantees minimum contrast; gradient adds
-          weight at top (crisis) and bottom (controls). Legible over any footage. */}
-      <View style={styles.scrimBase} pointerEvents="none" />
-      <LinearGradient
-        pointerEvents="none"
-        colors={[
-          `rgba(${SCRIM_RGB},0.55)`,
-          `rgba(${SCRIM_RGB},0.18)`,
-          `rgba(${SCRIM_RGB},0.30)`,
-          `rgba(${SCRIM_RGB},0.65)`,
-        ]}
-        locations={[0, 0.3, 0.7, 1]}
+      <View style={[styles.coreBand, { backgroundColor: `#${core}` }]} pointerEvents="none" />
+      <BlurView
+        intensity={55}
+        tint="default"
+        experimentalBlurMethod="dimezisBlurView"
         style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
       {/* Final-5s breathing layer. */}
       <Animated.View
@@ -306,7 +318,22 @@ export function ContemplationPlayer({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.dark },
-  scrimBase: { ...StyleSheet.absoluteFillObject, backgroundColor: `rgba(${SCRIM_RGB},0.30)` },
+  // Ember bands (Kat's gradient refs): glow halo + dark core, melted by blur.
+  glowBand: {
+    position: 'absolute',
+    left: '6%',
+    right: '6%',
+    top: '10%',
+    bottom: '10%',
+  },
+  coreBand: {
+    position: 'absolute',
+    left: '10%',
+    right: '10%',
+    top: '26%',
+    bottom: '28%',
+    borderRadius: 64,
+  },
   content: { flex: 1, paddingHorizontal: space.lg },
   center: { flex: 1, justifyContent: 'center' },
   prompt: {

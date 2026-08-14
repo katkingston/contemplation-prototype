@@ -63,7 +63,7 @@ export default function DayExit() {
         </Fade>
         <Gap size="xl" />
         <Fade delay={900}>
-          <TextLink label="Exit" dark onPress={() => router.replace('/home')} testID="day-exit-done" />
+          <TextLink label="Finish" dark onPress={() => router.replace('/home')} testID="day-exit-done" />
         </Fade>
         <Gap size="lg" />
         <RatingPrompt />
