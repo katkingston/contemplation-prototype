@@ -212,22 +212,14 @@ export function ContemplationPlayer({
     opacity: textIn.value,
     transform: [{ translateY: (1 - textIn.value) * 14 }],
   }));
-  // Three layers breathe on different periods so the field never repeats
-  // visibly: the halo swells, the glow drifts across it, the core pulses.
-  const haloStyle = useAnimatedStyle(() => ({
-    opacity: 0.55 + drift.value * 0.45,
-    transform: [{ scale: 1.02 + drift.value * 0.12 }],
-  }));
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.5 + driftB.value * 0.5,
-    transform: [
-      { scale: 0.96 + driftB.value * 0.14 },
-      { translateY: -18 + driftB.value * 36 },
-    ],
-  }));
-  const coreStyle = useAnimatedStyle(() => ({
+  // ONE field, breathing. Two drivers on co-prime periods are combined into a
+  // single transform so the whole thing swells and drifts as one body.
+  const fieldStyle = useAnimatedStyle(() => ({
     opacity: 0.9 + driftC.value * 0.1,
-    transform: [{ scale: 0.985 + driftC.value * 0.035 }],
+    transform: [
+      { scale: 1 + drift.value * 0.08 },
+      { translateY: -14 + driftB.value * 28 },
+    ],
   }));
   const pulseStyle = useAnimatedStyle(() => ({ opacity: scrimPulse.value * 0.3 }));
 
@@ -238,38 +230,35 @@ export function ContemplationPlayer({
   const glow = mixHex(gradient[1], gradient[0], 0.3);
   const core = mixHex(gradient[0], '000000', 0.5);
 
-  // Concentric rings, widest+faintest first, produce the airbrushed falloff
-  // WITHOUT leaning on a blur pass (BlurView's tint washes the colour out on
-  // web). Many small steps keep it smooth instead of banded. All are centred
-  // on the question block, so the field reads as light radiating from the
-  // words themselves.
-  const RING_COUNT = 22;
+  /** Continuous colour ramp edge → lift → glow → core (no hard bands). */
+  function rampAt(t: number): string {
+    if (t < 0.4) return mixHex(edge, lift, t / 0.4);
+    if (t < 0.72) return mixHex(lift, glow, (t - 0.4) / 0.32);
+    return mixHex(glow, core, (t - 0.72) / 0.28);
+  }
+
+  // A SINGLE stack of concentric rings carries the whole field — the dark core
+  // is just the innermost rings of the same ramp, so it melds into the glow
+  // instead of sitting on top as a separate shape. Colour and alpha both
+  // interpolate continuously; the blur then smooths what's left.
+  const RING_COUNT = 30;
   const rings = Array.from({ length: RING_COUNT }, (_, i) => {
-    const t0 = i / (RING_COUNT - 1); // 0 = outermost, 1 = innermost
-    const ease = t0 * t0; // concentrate opacity near the core
+    const t = i / (RING_COUNT - 1); // 0 = outermost, 1 = innermost
     return {
-      inset: -170 + t0 * 212, // -170 → +42
-      rise: 250 - t0 * 212, // 250 → 38
-      hex: t0 < 0.45 ? lift : t0 < 0.78 ? glow : core,
-      a: 0.05 + ease * 0.72,
-      r: 320 - t0 * 230,
+      inset: -260 + t * 320, // wider field than before
+      rise: 360 - t * 300,
+      hex: rampAt(t),
+      a: 0.05 + Math.pow(t, 1.3) * 0.95, // opaque by the core
+      r: 380 - t * 290,
     };
   });
 
   return (
     <View style={[styles.root, { backgroundColor: edge }]} testID="contemplation-player">
-      {/* Animated ember field, aligned to the question. The halo and glow
-          layers breathe on different periods; the rings give the diffusion. */}
-      <Animated.View style={[styles.halo, haloStyle]} pointerEvents="none">
-        <LinearGradient
-          colors={[edge, lift, edge]}
-          locations={[0, 0.5, 1]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={styles.bandFill}
-        />
-      </Animated.View>
-      <Animated.View style={[styles.glowBand, glowStyle]} pointerEvents="none">
+      {/* One animated ember field, centred on the question: a single ring
+          stack running pale edge → glow → near-black core, then blurred so
+          the whole thing melds. */}
+      <Animated.View style={[styles.field, fieldStyle]} pointerEvents="none">
         {rings.map((ring, i) => (
           <View
             key={i}
@@ -277,21 +266,17 @@ export function ContemplationPlayer({
               position: 'absolute',
               left: ring.inset,
               right: ring.inset,
-              top: 240 - ring.rise,
-              bottom: 240 - ring.rise,
+              top: 300 - ring.rise,
+              bottom: 300 - ring.rise,
               borderRadius: ring.r,
               backgroundColor: hexToRgba(ring.hex, ring.a),
             }}
           />
         ))}
       </Animated.View>
-      <Animated.View
-        style={[styles.coreBand, { backgroundColor: `#${core}` }, coreStyle]}
-        pointerEvents="none"
-      />
-      {/* Light blur only to kill banding — not doing the diffusion work. */}
+      {/* High blur melds the ring stack into one continuous field. */}
       <BlurView
-        intensity={34}
+        intensity={70}
         tint="default"
         experimentalBlurMethod="dimezisBlurView"
         style={StyleSheet.absoluteFill}
@@ -389,31 +374,16 @@ export function ContemplationPlayer({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.dark },
-  // Ember bands (Kat's gradient refs). Geometry is ALIGNED TO THE QUESTION:
-  // the core wraps the text block at `anchor.statement`, and the glow/halo
-  // radiate outward from it. Huge radii keep the edges soft pre-blur.
-  bandFill: { flex: 1, borderRadius: 140 },
-  halo: {
-    position: 'absolute',
-    left: '-14%',
-    right: '-14%',
-    top: anchor.statement - 250,
-    height: 700,
-  },
-  glowBand: {
+  // The ember field (Kat's gradient refs), ALIGNED TO THE QUESTION: one box
+  // centred on the text block at `anchor.statement`, holding the whole ring
+  // stack. Deliberately taller/wider than the screen so the falloff runs off
+  // the edges rather than stopping inside them.
+  field: {
     position: 'absolute',
     left: 0,
     right: 0,
-    top: anchor.statement - 202,
-    height: 480,
-  },
-  coreBand: {
-    position: 'absolute',
-    left: '11%',
-    right: '11%',
-    top: anchor.statement - 68,
-    height: 212,
-    borderRadius: 76,
+    top: anchor.statement - 266,
+    height: 600,
   },
   content: { flex: 1, paddingHorizontal: 32 },
   center: { flex: 1 },
