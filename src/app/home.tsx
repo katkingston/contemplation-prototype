@@ -205,7 +205,7 @@ export default function Home() {
               </View>
             </View>
             <View style={{ flex: 1 }} />
-            <AppText variant="displayLower" style={{ color: color.onDark }}>
+            <AppText variant="heroTitle" style={{ color: color.onDark }}>
               {atWrap ? 'complete' : (shown?.hint ?? '').toLowerCase()}
             </AppText>
             <Gap size="lg" />

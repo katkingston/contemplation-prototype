@@ -77,6 +77,9 @@ export const seriesPalettes: Record<string, [string, string, string]> = {
  * - HAL Timezone Mono: the mono voice (contemplation, monoBody statements).
  * - WT Garamono: caps micro-labels (`label`) + tiny date labels.
  */
+// Measured off the JUL 30 DESIGNS frames (390x844). Figma states line-height
+// as a PERCENT of font size — every value below is that percent resolved to
+// px, and tracking is the Figma percent × size. Do not round these by eye.
 export const type = {
   display: {
     fontFamily: font.display,
@@ -92,32 +95,59 @@ export const type = {
     letterSpacing: -0.3, // -1%
     textTransform: 'uppercase' as const,
   },
-  /** DS "Heading 03": Inter Bold 20, sentence case. */
+  /** Paywall "Start with 3 days free": Inter Bold 20 / 120%. */
   heading: {
     fontFamily: font.groteskBold,
     fontSize: 20,
-    lineHeight: 25,
-    letterSpacing: -0.2, // -1%
+    lineHeight: 24,
+    letterSpacing: -0.6, // -3%
   },
-  body: { fontFamily: font.grotesk, fontSize: 15, lineHeight: 23, letterSpacing: -0.15 }, // -1%
-  bodyBold: { fontFamily: font.groteskBold, fontSize: 15, lineHeight: 23, letterSpacing: -0.15 }, // -1%
-  small: { fontFamily: font.grotesk, fontSize: 13, lineHeight: 19, letterSpacing: -0.13 }, // -1%
-  caption: { fontFamily: font.grotesk, fontSize: 11, lineHeight: 15, letterSpacing: -0.11 }, // -1%
-  /** DS "Mono Label": 12px, all caps, +3% tracking. */
+  /** Body: Inter Regular 15 / 140%, no tracking. */
+  body: { fontFamily: font.grotesk, fontSize: 15, lineHeight: 21, letterSpacing: 0 },
+  bodyBold: { fontFamily: font.groteskBold, fontSize: 15, lineHeight: 21, letterSpacing: -0.45 }, // -3%
+  /** Quiet/secondary link text: 15 / 130%. */
+  bodyLink: { fontFamily: font.grotesk, fontSize: 15, lineHeight: 19.5, letterSpacing: 0 },
+  small: { fontFamily: font.grotesk, fontSize: 13, lineHeight: 19, letterSpacing: 0 },
+  /** Field labels ("Add time", "Select music"): Inter Regular 11 / 140%. */
+  caption: { fontFamily: font.grotesk, fontSize: 11, lineHeight: 15.4, letterSpacing: 0 },
+  /** Mono caps micro-label (WT Garamono): 12 / 160%, +5% tracking. */
   label: {
     fontFamily: font.monoLabel,
     fontSize: 12,
-    lineHeight: 16,
-    letterSpacing: 0.36, // +3%
+    lineHeight: 19.2,
+    letterSpacing: 0.6, // +5%
     textTransform: 'uppercase' as const,
   },
-  /** Jul 30 designs: the contemplation question speaks in the typewriter mono. */
-  contemplation: { fontFamily: font.mono, fontSize: 22, lineHeight: 36, letterSpacing: -0.88 }, // -4% (mono)
-  /** DS "Display heading" / "Title 02": Inter Bold, sentence/lower case. */
-  displayLower: { fontFamily: font.groteskBold, fontSize: 40, lineHeight: 44, letterSpacing: -0.8 },
-  titleLower: { fontFamily: font.groteskBold, fontSize: 26, lineHeight: 31, letterSpacing: -0.52 },
-  /** DS "Mono Medium" (HAL Timezone role): brand statements, quotes, prompts outside the player. */
-  monoBody: { fontFamily: font.mono, fontSize: 16, lineHeight: 25, letterSpacing: -0.64 },
+  /** The contemplation question (C4 Player): HAL 16 / 160%. */
+  contemplation: { fontFamily: font.mono, fontSize: 16, lineHeight: 25.6, letterSpacing: -0.32 }, // -2%
+  /** Get Ready / Add Time title: Inter Bold 40 / 120%, -3%. */
+  displayLower: { fontFamily: font.groteskBold, fontSize: 40, lineHeight: 48, letterSpacing: -1.2 },
+  /** Screen titles ("Reflect", "Settings"): Inter Bold 26 / 120%, -3%. */
+  titleLower: { fontFamily: font.groteskBold, fontSize: 26, lineHeight: 31.2, letterSpacing: -0.78 },
+  /** Home hero title: Inter Bold 34 / 115%, -3% (smaller than Get Ready). */
+  heroTitle: { fontFamily: font.groteskBold, fontSize: 34, lineHeight: 39.1, letterSpacing: -1.02 },
+  /** Mono voice — "get ready to contemplate", "write here…", options: HAL 14 / 160%, -2%. */
+  monoBody: { fontFamily: font.mono, fontSize: 14, lineHeight: 22.4, letterSpacing: -0.28 },
+  /** Day-exit closing line: HAL 16 / 160%. */
+  monoStatement: { fontFamily: font.mono, fontSize: 16, lineHeight: 25.6, letterSpacing: -0.32 },
+} as const;
+
+/**
+ * Vertical anchors measured off the JUL 30 flow frames, in px from the TOP OF
+ * THE SCREEN (the Figma 390x844 frame includes the status-bar area, so these
+ * are applied as fixed padding rather than stacked on a safe-area inset).
+ */
+export const anchor = {
+  monoHeader: 77, // mono code/date row
+  lead: 229, // "get ready to contemplate" / "want to keep contemplating?"
+  leadTitle: 300, // big lowercase title under the lead
+  screenTitle: 240, // "Reflect"
+  statement: 248, // player question / day-exit closing line
+  optionLabelA: 507,
+  optionRowA: 534,
+  optionLabelB: 588,
+  optionRowB: 615,
+  bottomLinks: 757, // link row (Begin / Submit / Resume …)
 } as const;
 
 export const space = {

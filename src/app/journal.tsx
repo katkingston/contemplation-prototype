@@ -12,7 +12,7 @@ import { journalHelp } from '@/content/copy';
 import { getSeries, seriesCode, seriesLength } from '@/content/series';
 import { questionFor } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, radius, space } from '@/theme/tokens';
+import { anchor, color, radius, space } from '@/theme/tokens';
 
 export default function Journal() {
   const { data, act } = useApp();
@@ -86,11 +86,12 @@ export default function Journal() {
   };
 
   return (
-    <Screen testID="journal-screen">
-      <Gap size="md" />
-      <MonoHeader code={seriesCode(series, index)} title={contemplation.hint} />
-      <Gap size="xl" />
-      <AppText variant="titleLower">Reflect</AppText>
+    <Screen testID="journal-screen" padded={false}>
+      <View style={{ flex: 1, paddingHorizontal: space.lg }}>
+        <View style={{ height: anchor.monoHeader }} />
+        <MonoHeader code={seriesCode(series, index)} title={contemplation.hint} />
+        <View style={{ height: anchor.screenTitle - anchor.monoHeader - 19 }} />
+        <AppText variant="titleLower">Reflect</AppText>
       <Gap size="xs" />
       <AppText variant="small" muted>
         {prompt}
@@ -129,6 +130,7 @@ export default function Journal() {
       <AppText variant="caption" muted>
         Reflections are saved privately and revealed when you complete the series.
       </AppText>
+      </View>
       <Sheet
         visible={showHelp}
         onClose={() => setShowHelp(false)}

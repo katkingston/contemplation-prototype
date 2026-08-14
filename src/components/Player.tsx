@@ -30,7 +30,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { TextLink } from '@/components/ui';
-import { color, space, timing, type } from '@/theme/tokens';
+import { anchor, color, space, timing, type } from '@/theme/tokens';
 
 export type FinishReason = 'time' | 'end';
 
@@ -248,6 +248,7 @@ export function ContemplationPlayer({
       ) : null}
       <SafeAreaView style={styles.content} pointerEvents="box-none">
         <View style={styles.center} pointerEvents="none">
+          <View style={{ height: anchor.statement }} />
           <Animated.Text style={[styles.prompt, textStyle]}>{prompt}</Animated.Text>
         </View>
         <View style={styles.bottomRow}>
@@ -257,6 +258,7 @@ export function ContemplationPlayer({
             label="Crisis Support"
             dark
             muted
+            small
             onPress={() => router.replace('/crisis')}
             testID="crisis-button"
           />
@@ -305,6 +307,7 @@ export function ContemplationPlayer({
                 label="Crisis Support"
                 dark
                 muted
+                small
                 onPress={() => router.replace('/crisis')}
                 testID="crisis-button-paused"
               />
@@ -334,8 +337,8 @@ const styles = StyleSheet.create({
     bottom: '28%',
     borderRadius: 64,
   },
-  content: { flex: 1, paddingHorizontal: space.lg },
-  center: { flex: 1, justifyContent: 'center' },
+  content: { flex: 1, paddingHorizontal: 32 },
+  center: { flex: 1 },
   prompt: {
     // Jul 30 designs: the question speaks in the typewriter mono, centered.
     ...type.contemplation,

@@ -196,6 +196,7 @@ export function TextLink({
   muted = false,
   arrow = false,
   disabled = false,
+  small = false,
   testID,
 }: {
   label: string;
@@ -205,6 +206,8 @@ export function TextLink({
   /** Trailing → for forward-motion actions. */
   arrow?: boolean;
   disabled?: boolean;
+  /** 12/130% — the player's Crisis Support link (measured off C4). */
+  small?: boolean;
   testID?: string;
 }) {
   const fg = dark
@@ -225,7 +228,9 @@ export function TextLink({
       style={({ pressed }) => [{ alignSelf: 'flex-start' }, (pressed || disabled) && { opacity: 0.5 }]}>
       <Text
         style={[
-          muted ? type.body : type.bodyBold,
+          // Measured: quiet links 15/130%, primary 15/140% -3%.
+          muted ? type.bodyLink : type.bodyBold,
+          small && { fontSize: 12, lineHeight: 15.6 },
           { color: fg, textDecorationLine: 'underline', textDecorationColor: fg },
         ]}>
         {arrow ? `${label} →` : label}

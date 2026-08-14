@@ -22,7 +22,7 @@ import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap, MonoHeader, Row, Sheet, Spacer, TextLink } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { useApp } from '@/services/provider';
-import { color, font, seriesPalettes, space, timing } from '@/theme/tokens';
+import { anchor, color, font, seriesPalettes, space, timing } from '@/theme/tokens';
 
 /**
  * Named ambience tracks (Jul 30 designs). All three named tracks currently
@@ -154,8 +154,9 @@ export function GetReadyScreen({
         pointerEvents="none"
       />
       <View style={styles.videoScrim} pointerEvents="none" />
-      <SafeAreaView style={styles.content}>
-        <Gap size="md" />
+      {/* Fixed anchors measured off C3 Get Ready (see tokens.ts `anchor`). */}
+      <SafeAreaView style={styles.content} edges={['left', 'right', 'bottom']}>
+        <View style={{ height: anchor.monoHeader }} />
         {seriesContext ? (
           <MonoHeader code={seriesContext.code} title={seriesContext.hint} dark>
             <SeriesDashes total={seriesContext.total} done={seriesContext.done} active dark />
@@ -163,63 +164,81 @@ export function GetReadyScreen({
         ) : (
           <AppText style={styles.spiral as never}>꩜</AppText>
         )}
+        <View style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.lead }}>
+          <AppText variant="monoBody" dark>
+            get ready to{'\n'}contemplate
+          </AppText>
+        </View>
+        <View
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.leadTitle }}>
+          <AppText variant="displayLower" dark>
+            {(seriesContext?.hint ?? 'a moment of stillness').toLowerCase()}
+          </AppText>
+        </View>
+        <View
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionLabelA }}>
+          <AppText variant="caption" dark muted>
+            Add time
+          </AppText>
+        </View>
+        <View
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionRowA }}>
+          <MonoOptionRow
+            options={timing.timerChoicesMin}
+            value={minutes}
+            onChange={setMinutes}
+            labels={(m) => `${m} min`}
+            testID="select-time"
+          />
+        </View>
+        <View
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionLabelB }}>
+          <AppText variant="caption" dark muted>
+            Select music
+          </AppText>
+        </View>
+        <View
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionRowB }}>
+          <MonoOptionRow
+            options={MUSIC_TRACKS}
+            value={track}
+            onChange={setTrack}
+            testID="select-music"
+          />
+        </View>
         <Spacer />
-        <AppText variant="monoBody" dark>
-          get ready to{'\n'}contemplate
-        </AppText>
-        <Gap size="sm" />
-        <AppText variant="displayLower" dark>
-          {(seriesContext?.hint ?? 'a moment of stillness').toLowerCase()}
-        </AppText>
-        <Spacer />
-        <AppText variant="caption" dark muted>
-          Add time
-        </AppText>
-        <Gap size="sm" />
-        <MonoOptionRow
-          options={timing.timerChoicesMin}
-          value={minutes}
-          onChange={setMinutes}
-          labels={(m) => `${m} min`}
-          testID="select-time"
-        />
-        <Gap size="lg" />
-        <AppText variant="caption" dark muted>
-          Select music
-        </AppText>
-        <Gap size="sm" />
-        <MonoOptionRow
-          options={MUSIC_TRACKS}
-          value={track}
-          onChange={setTrack}
-          testID="select-music"
-        />
-        <Spacer />
-        <Row style={{ gap: space.md }}>
-          {seriesContext ? (
+        <View
+          style={{
+            position: 'absolute',
+            left: space.lg,
+            right: space.lg,
+            top: anchor.bottomLinks,
+          }}>
+          <Row style={{ gap: space.md }}>
+            {seriesContext ? (
+              <TextLink
+                label="Exit to homepage,"
+                dark
+                muted
+                onPress={() => router.replace('/home')}
+                testID="go-home"
+              />
+            ) : null}
             <TextLink
-              label="Exit to homepage,"
+              label="Instructions,"
               dark
               muted
-              onPress={() => router.replace('/home')}
-              testID="go-home"
+              onPress={() => setShowInstructions(true)}
+              testID="instructions-button"
             />
-          ) : null}
-          <TextLink
-            label="Instructions,"
-            dark
-            muted
-            onPress={() => setShowInstructions(true)}
-            testID="instructions-button"
-          />
-          <TextLink
-            label="Begin"
-            dark
-            onPress={() => onBegin(minutes, track !== 'none')}
-            testID="begin-button"
-          />
-        </Row>
-        <Gap size="lg" />
+            <TextLink
+              label="Begin"
+              dark
+              onPress={() => onBegin(minutes, track !== 'none')}
+              testID="begin-button"
+            />
+          </Row>
+        </View>
       </SafeAreaView>
       <Sheet
         visible={showInstructions}
@@ -236,7 +255,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
   videoScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.55)' },
   spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
-  optionRow: { flexDirection: 'row', gap: space.xl, flexWrap: 'wrap' },
+  optionRow: { flexDirection: 'row', justifyContent: 'space-between' },
   option: {
     fontFamily: font.mono,
     fontSize: 14,

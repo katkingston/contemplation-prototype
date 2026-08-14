@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MonoOptionRow, MUSIC_TRACKS, MusicTrack } from '@/components/GetReady';
 import { AppText, Gap, MonoHeader, Row, Spacer, TextLink } from '@/components/ui';
 import { getSeries, seriesCode } from '@/content/series';
-import { color, space, timing } from '@/theme/tokens';
+import { anchor, color, space, timing } from '@/theme/tokens';
 
 export default function AddTime() {
   const params = useLocalSearchParams<{
@@ -69,13 +69,13 @@ export default function AddTime() {
         end={{ x: 0.9, y: 1 }}
       />
       <SafeAreaView style={styles.content}>
-        <Gap size="md" />
+        <View style={{ height: anchor.monoHeader }} />
         <MonoHeader code={seriesCode(series, index)} title={c.hint} dark />
-        <Spacer />
+        <View style={{ height: anchor.lead - anchor.monoHeader - 19 }} />
         <AppText variant="monoBody" dark>
           want to keep{'\n'}contemplating?
         </AppText>
-        <Spacer />
+        <View style={{ height: anchor.optionLabelA - anchor.lead - 45 }} />
         <AppText variant="caption" dark muted>
           Add time
         </AppText>

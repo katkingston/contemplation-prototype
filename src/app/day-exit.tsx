@@ -14,7 +14,7 @@ import { dayExit } from '@/content/copy';
 import { getSeries, seriesCode } from '@/content/series';
 import { dropLabel, nextDropAt } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, space } from '@/theme/tokens';
+import { anchor, color, space } from '@/theme/tokens';
 
 export default function DayExit() {
   const { data } = useApp();
@@ -30,11 +30,11 @@ export default function DayExit() {
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.content}>
-        <Gap size="md" />
+        <View style={{ height: anchor.monoHeader }} />
         {series ? <MonoHeader code={seriesCode(series, index)} title={hint} dark /> : null}
-        <View style={{ flex: 1 }} />
+        <View style={{ height: anchor.statement - anchor.monoHeader - 19 }} />
         <ScreenFade>
-          <AppText variant="monoBody" dark center style={{ fontSize: 17 }}>
+          <AppText variant="monoStatement" dark center>
             {closer}
           </AppText>
         </ScreenFade>
