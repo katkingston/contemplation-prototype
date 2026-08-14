@@ -28,6 +28,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import { TextLink } from '@/components/ui';
 import { color, space, timing, type } from '@/theme/tokens';
 
@@ -250,14 +251,29 @@ export function ContemplationPlayer({
         </View>
       </SafeAreaView>
       {paused ? (
-        // Paused state — full taupe surface (Jul 30 designs): dimmed question,
-        // spiral, "contemplation paused", Resume / End links. Crisis stays
-        // reachable (hard rule: every contemplation screen).
+        // Paused state — full taupe surface (C4 Player · Tap Pause): the
+        // question stays in place but sits UNDER a blur layer so the
+        // contemplation is hidden; spiral + "contemplation paused" +
+        // Resume / End render crisply on top. Crisis stays reachable
+        // (hard rule: every contemplation screen).
         <View style={[StyleSheet.absoluteFill, styles.pausedScreen]}>
-          <SafeAreaView style={styles.content}>
+          <SafeAreaView style={styles.content} pointerEvents="none">
             <View style={styles.center}>
               <Text style={[styles.prompt, styles.pausedPrompt]}>{prompt}</Text>
-              <View style={{ height: space.xl }} />
+              {/* Reserve the space the controls occupy below the question so
+                  the blurred question lands where the design places it. */}
+              <View style={{ height: 180 }} />
+            </View>
+          </SafeAreaView>
+          <BlurView
+            intensity={22}
+            tint="light"
+            experimentalBlurMethod="dimezisBlurView"
+            style={StyleSheet.absoluteFill}
+          />
+          <SafeAreaView style={[StyleSheet.absoluteFill, styles.content]}>
+            <View style={styles.center}>
+              <View style={{ height: 120 }} />
               <Text style={styles.pausedSpiral}>꩜</Text>
               <View style={{ height: space.xl }} />
               <Text style={styles.pausedLabel}>contemplation paused</Text>
