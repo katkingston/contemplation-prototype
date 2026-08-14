@@ -82,6 +82,13 @@ export function VideoBackground({ source, paused }: { source: VideoSource; pause
   );
 }
 
+/** Hex (with or without #) to an rgba() string at the given alpha. */
+function hexToRgba(hex: string, a: number): string {
+  const h = hex.replace('#', '');
+  const n = parseInt(h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
 /** Mix two hex colors (no #) — t=0 returns a, t=1 returns b. */
 function mixHex(a: string, b: string, t: number): string {
   const ah = a.replace('#', '');
@@ -138,16 +145,25 @@ export function ContemplationPlayer({
   const reducedMotion = useReducedMotion();
   const textIn = useSharedValue(0);
   const drift = useSharedValue(0);
+  const driftB = useSharedValue(0);
+  const driftC = useSharedValue(0);
   const scrimPulse = useSharedValue(0);
 
   useEffect(() => {
     if (reducedMotion) {
       textIn.value = 1;
       drift.value = 0.5;
+      driftB.value = 0.5;
+      driftC.value = 0.5;
       return;
     }
     textIn.value = withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) });
-    drift.value = withRepeat(withTiming(1, { duration: 9000, easing: Easing.inOut(Easing.quad) }), -1, true);
+    // Mutually prime periods so the three layers never resync into a visible loop.
+    const breathe = (ms: number) =>
+      withRepeat(withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) }), -1, true);
+    drift.value = breathe(11000);
+    driftB.value = breathe(17000);
+    driftC.value = breathe(23000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reducedMotion]);
 
@@ -196,35 +212,86 @@ export function ContemplationPlayer({
     opacity: textIn.value,
     transform: [{ translateY: (1 - textIn.value) * 14 }],
   }));
-  // The glow band slowly breathes: gentle opacity + scale drift, never gone.
-  const driftStyle = useAnimatedStyle(() => ({
-    opacity: 0.7 + drift.value * 0.3,
-    transform: [{ scale: 1 + drift.value * 0.05 }],
+  // Three layers breathe on different periods so the field never repeats
+  // visibly: the halo swells, the glow drifts across it, the core pulses.
+  const haloStyle = useAnimatedStyle(() => ({
+    opacity: 0.55 + drift.value * 0.45,
+    transform: [{ scale: 1.02 + drift.value * 0.12 }],
+  }));
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: 0.5 + driftB.value * 0.5,
+    transform: [
+      { scale: 0.96 + driftB.value * 0.14 },
+      { translateY: -18 + driftB.value * 36 },
+    ],
+  }));
+  const coreStyle = useAnimatedStyle(() => ({
+    opacity: 0.9 + driftC.value * 0.1,
+    transform: [{ scale: 0.985 + driftC.value * 0.035 }],
   }));
   const pulseStyle = useAnimatedStyle(() => ({ opacity: scrimPulse.value * 0.3 }));
 
-  // Ember palette derived from this contemplation's gradient stops:
-  // pale outer edge → saturated glow band → near-black core (Kat's refs).
-  const edge = mixHex(gradient[1], 'f4f4ec', 0.85);
-  const core = mixHex(gradient[0], '000000', 0.72);
+  // Ember palette derived from this contemplation's own gradient
+  // (Kat's refs: pale field → warm lift → saturated glow → near-black core).
+  const edge = mixHex(gradient[1], 'f4f4ec', 0.9);
+  const lift = mixHex(gradient[1], color.accentBright.slice(1), 0.5);
+  const glow = mixHex(gradient[1], gradient[0], 0.3);
+  const core = mixHex(gradient[0], '000000', 0.5);
+
+  // Concentric rings, widest+faintest first, produce the airbrushed falloff
+  // WITHOUT leaning on a blur pass (BlurView's tint washes the colour out on
+  // web). Many small steps keep it smooth instead of banded. All are centred
+  // on the question block, so the field reads as light radiating from the
+  // words themselves.
+  const RING_COUNT = 22;
+  const rings = Array.from({ length: RING_COUNT }, (_, i) => {
+    const t0 = i / (RING_COUNT - 1); // 0 = outermost, 1 = innermost
+    const ease = t0 * t0; // concentrate opacity near the core
+    return {
+      inset: -170 + t0 * 212, // -170 → +42
+      rise: 250 - t0 * 212, // 250 → 38
+      hex: t0 < 0.45 ? lift : t0 < 0.78 ? glow : core,
+      a: 0.05 + ease * 0.72,
+      r: 320 - t0 * 230,
+    };
+  });
 
   return (
     <View style={[styles.root, { backgroundColor: edge }]} testID="contemplation-player">
-      {/* Animated ember gradient (replaces the video — footage now lives on
-          Get Ready). Bands render hard-edged, then a heavy BlurView melts
-          them together; the drift value slowly breathes the glow. */}
-      <Animated.View style={[styles.glowBand, driftStyle]} pointerEvents="none">
+      {/* Animated ember field, aligned to the question. The halo and glow
+          layers breathe on different periods; the rings give the diffusion. */}
+      <Animated.View style={[styles.halo, haloStyle]} pointerEvents="none">
         <LinearGradient
-          colors={[gradient[1], gradient[0], gradient[1]]}
+          colors={[edge, lift, edge]}
           locations={[0, 0.5, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={{ flex: 1, borderRadius: 72 }}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={styles.bandFill}
         />
       </Animated.View>
-      <View style={[styles.coreBand, { backgroundColor: `#${core}` }]} pointerEvents="none" />
+      <Animated.View style={[styles.glowBand, glowStyle]} pointerEvents="none">
+        {rings.map((ring, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: ring.inset,
+              right: ring.inset,
+              top: 240 - ring.rise,
+              bottom: 240 - ring.rise,
+              borderRadius: ring.r,
+              backgroundColor: hexToRgba(ring.hex, ring.a),
+            }}
+          />
+        ))}
+      </Animated.View>
+      <Animated.View
+        style={[styles.coreBand, { backgroundColor: `#${core}` }, coreStyle]}
+        pointerEvents="none"
+      />
+      {/* Light blur only to kill banding — not doing the diffusion work. */}
       <BlurView
-        intensity={55}
+        intensity={34}
         tint="default"
         experimentalBlurMethod="dimezisBlurView"
         style={StyleSheet.absoluteFill}
@@ -273,21 +340,22 @@ export function ContemplationPlayer({
         <View style={[StyleSheet.absoluteFill, styles.pausedScreen]}>
           <SafeAreaView style={styles.content} pointerEvents="none">
             <View style={styles.center}>
+              {/* Same anchor as the live question, so blurring it in place
+                  does not make the text appear to jump. */}
+              <View style={{ height: anchor.statement }} />
               <Text style={[styles.prompt, styles.pausedPrompt]}>{prompt}</Text>
-              {/* Reserve the space the controls occupy below the question so
-                  the blurred question lands where the design places it. */}
-              <View style={{ height: 180 }} />
             </View>
           </SafeAreaView>
           <BlurView
-            intensity={22}
+            intensity={34}
             tint="light"
             experimentalBlurMethod="dimezisBlurView"
             style={StyleSheet.absoluteFill}
           />
           <SafeAreaView style={[StyleSheet.absoluteFill, styles.content]}>
             <View style={styles.center}>
-              <View style={{ height: 120 }} />
+              {/* Controls sit just below the (blurred) question block. */}
+              <View style={{ height: anchor.statement + 120 }} />
               <Text style={styles.pausedSpiral}>꩜</Text>
               <View style={{ height: space.xl }} />
               <Text style={styles.pausedLabel}>contemplation paused</Text>
@@ -321,21 +389,31 @@ export function ContemplationPlayer({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.dark },
-  // Ember bands (Kat's gradient refs): glow halo + dark core, melted by blur.
+  // Ember bands (Kat's gradient refs). Geometry is ALIGNED TO THE QUESTION:
+  // the core wraps the text block at `anchor.statement`, and the glow/halo
+  // radiate outward from it. Huge radii keep the edges soft pre-blur.
+  bandFill: { flex: 1, borderRadius: 140 },
+  halo: {
+    position: 'absolute',
+    left: '-14%',
+    right: '-14%',
+    top: anchor.statement - 250,
+    height: 700,
+  },
   glowBand: {
     position: 'absolute',
-    left: '6%',
-    right: '6%',
-    top: '10%',
-    bottom: '10%',
+    left: 0,
+    right: 0,
+    top: anchor.statement - 202,
+    height: 480,
   },
   coreBand: {
     position: 'absolute',
-    left: '10%',
-    right: '10%',
-    top: '26%',
-    bottom: '28%',
-    borderRadius: 64,
+    left: '11%',
+    right: '11%',
+    top: anchor.statement - 68,
+    height: 212,
+    borderRadius: 76,
   },
   content: { flex: 1, paddingHorizontal: 32 },
   center: { flex: 1 },
