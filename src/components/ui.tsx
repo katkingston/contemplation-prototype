@@ -14,6 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import { ScreenFade } from '@/components/Transitions';
 import { color, font, radius, space, type } from '@/theme/tokens';
 
@@ -553,9 +554,26 @@ export function Sheet({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable
-        style={[styles.sheetBackdrop, overlay && { backgroundColor: 'rgba(168,159,140,0.92)' }]}
+        style={[styles.sheetBackdrop, overlay && { backgroundColor: 'transparent' }]}
         onPress={onClose}
         accessibilityLabel="Close pop-up">
+        {overlay ? (
+          // Same treatment as the paused contemplation: blur what's behind,
+          // then wash it in the taupe overlay tone.
+          <>
+            <BlurView
+              intensity={30}
+              tint="default"
+              experimentalBlurMethod="dimezisBlurView"
+              style={StyleSheet.absoluteFill}
+              pointerEvents="none"
+            />
+            <View
+              style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(168,159,140,0.6)' }]}
+              pointerEvents="none"
+            />
+          </>
+        ) : null}
         <Pressable
           style={[styles.sheetCard, overlay && styles.sheetCardOverlay]}
           onPress={(e) => e.stopPropagation()}>

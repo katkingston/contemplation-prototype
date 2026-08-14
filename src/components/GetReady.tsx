@@ -11,6 +11,7 @@
  * contemplation player). The Begin tap IS the required timer confirmation.
  */
 import { Asset } from 'expo-asset';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -31,18 +32,18 @@ import { color, font, seriesPalettes, space, timing } from '@/theme/tokens';
 export const MUSIC_TRACKS = ['none', 'floating', 'studio', 'nature'] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
 
-export function InstructionsContent() {
+export function InstructionsContent({ dark = false }: { dark?: boolean }) {
   return (
     <View>
-      <AppText variant="body" style={{ marginBottom: space.md }}>
+      <AppText variant="body" dark={dark} style={{ marginBottom: space.md }}>
         {instructions.intro}
       </AppText>
       {instructions.steps.map((s, i) => (
-        <AppText key={i} variant="body" style={{ marginBottom: space.sm }}>
+        <AppText key={i} variant="body" dark={dark} style={{ marginBottom: space.sm }}>
           {i + 1}. {s}
         </AppText>
       ))}
-      <AppText variant="body" style={{ marginTop: space.sm }}>
+      <AppText variant="body" dark={dark} style={{ marginTop: space.sm }}>
         {instructions.outro}
       </AppText>
     </View>
@@ -142,8 +143,16 @@ export function GetReadyScreen({
         style={StyleSheet.absoluteFill}
       />
       {/* The day's footage now lives HERE (the player uses the animated
-          ember gradient). Gradient stays underneath as the loading backdrop. */}
+          ember gradient). Gradient stays underneath as the loading backdrop.
+          A light blur + color wash keeps the text legible over any footage. */}
       <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />
+      <BlurView
+        intensity={18}
+        tint="default"
+        experimentalBlurMethod="dimezisBlurView"
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
       <View style={styles.videoScrim} pointerEvents="none" />
       <SafeAreaView style={styles.content}>
         <Gap size="md" />
@@ -185,14 +194,6 @@ export function GetReadyScreen({
           onChange={setTrack}
           testID="select-music"
         />
-        <Gap size="lg" />
-        <TextLink
-          label="Instructions"
-          dark
-          muted
-          onPress={() => setShowInstructions(true)}
-          testID="instructions-button"
-        />
         <Spacer />
         <Row style={{ gap: space.md }}>
           {seriesContext ? (
@@ -205,6 +206,13 @@ export function GetReadyScreen({
             />
           ) : null}
           <TextLink
+            label="Instructions,"
+            dark
+            muted
+            onPress={() => setShowInstructions(true)}
+            testID="instructions-button"
+          />
+          <TextLink
             label="Begin"
             dark
             onPress={() => onBegin(minutes, track !== 'none')}
@@ -216,8 +224,9 @@ export function GetReadyScreen({
       <Sheet
         visible={showInstructions}
         onClose={() => setShowInstructions(false)}
+        tone="overlay"
         title={instructions.title}>
-        <InstructionsContent />
+        <InstructionsContent dark />
       </Sheet>
     </View>
   );
@@ -225,7 +234,7 @@ export function GetReadyScreen({
 
 const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
-  videoScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.45)' },
+  videoScrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(24,28,12,0.55)' },
   spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
   optionRow: { flexDirection: 'row', gap: space.xl, flexWrap: 'wrap' },
   option: {
