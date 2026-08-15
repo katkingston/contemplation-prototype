@@ -29,6 +29,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { Dither } from '@/components/Dither';
 import { TextLink } from '@/components/ui';
 import { anchor, color, space, timing, type } from '@/theme/tokens';
 
@@ -305,6 +306,9 @@ export function ContemplationPlayer({
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
+      {/* Dither goes ABOVE the blur — below it the blur would average the
+          noise away, which is exactly what it is there to prevent. */}
+      <Dither />
       {/* Final-5s breathing layer. */}
       <Animated.View
         pointerEvents="none"

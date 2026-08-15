@@ -9,6 +9,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dither } from '@/components/Dither';
 import { MonoOptionRow, MUSIC_TRACKS, MusicTrack } from '@/components/GetReady';
 import { AppText, Gap, MonoHeader, Row, Spacer, TextLink } from '@/components/ui';
 import { getSeries, seriesCode } from '@/content/series';
@@ -68,6 +69,7 @@ export default function AddTime() {
         start={{ x: 0.1, y: 0 }}
         end={{ x: 0.9, y: 1 }}
       />
+      <Dither />
       <SafeAreaView style={styles.content}>
         <View style={{ height: anchor.monoHeader }} />
         <MonoHeader code={seriesCode(series, index)} title={c.hint} dark />

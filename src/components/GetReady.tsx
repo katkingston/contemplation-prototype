@@ -17,6 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MediaWash, PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
+import { Dither } from '@/components/Dither';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap, MonoHeader, Row, Sheet, TextLink } from '@/components/ui';
 import { instructions } from '@/content/copy';
@@ -141,6 +142,7 @@ export function GetReadyScreen({
         end={{ x: 0.9, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
+      <Dither />
       {/* The day's footage now lives HERE (the player uses the animated
           ember gradient). Gradient stays underneath as the loading backdrop;
           MediaWash blurs and sinks it into this series' own dark stop. */}

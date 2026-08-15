@@ -14,7 +14,7 @@ import { AppText, Gap, ListRow, Wordmark } from '@/components/ui';
 import { dailyQuote } from '@/content/copy';
 import { useApp } from '@/services/provider';
 
-const FEEDBACK_MAILTO = 'mailto:hey@katkingston.design?subject=Contemplate%20feedback';
+const FEEDBACK_MAILTO = 'mailto:support@deathtination.io?subject=Contemplate%20feedback';
 
 export default function Account() {
   const { data, services, act } = useApp();

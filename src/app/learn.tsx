@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
+import { Dither } from '@/components/Dither';
 import { AppText, Gap } from '@/components/ui';
 import { POSTS } from '@/content/posts';
 import { color, seriesPalettes, space } from '@/theme/tokens';
@@ -28,6 +29,7 @@ export default function Learn() {
           end={{ x: 0.9, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
+        <Dither />
         <AppText variant="displayLower" dark>
           learn
         </AppText>

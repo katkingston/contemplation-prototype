@@ -8,6 +8,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
+import { Dither } from '@/components/Dither';
 
 export function SeriesArt({
   gradient,
@@ -37,6 +38,7 @@ export function SeriesArt({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
+      <Dither />
       <View
         style={{
           position: 'absolute',
