@@ -52,12 +52,6 @@ export default function SeriesIntro() {
         {slides[slide]}
       </AppText>
       <Spacer />
-      {!last && (
-        <AppText variant="caption" dark muted>
-          No skip — the introduction completes before the first contemplation
-        </AppText>
-      )}
-      <Gap size="md" />
       <TextLink
         label={last ? (isReplayView ? 'Close' : 'Continue') : 'Next'}
         dark
