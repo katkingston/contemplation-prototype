@@ -1,12 +1,14 @@
 /**
  * C2 — Series Introduction (Jul 30 designs): dark surface, mono caps header
- * ("SERIES 1 — INTRODUCTION"), centered mono slide text, underlined Next.
- * Cannot be skipped: Continue unlocks only after the user has stepped through
- * every slide. Replayable from the menu.
+ * ("CHAPTER 1 — INTRODUCTION"), centered mono slide text, underlined Next.
+ * A tap anywhere on the screen advances. Cannot be skipped: Continue only
+ * appears once the user has stepped through every slide. Replayable from the
+ * menu.
  */
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { AppText, Gap, Screen, Spacer, TextLink } from '@/components/ui';
+import { Pressable, StyleSheet } from 'react-native';
+import { AppText, Gap, Screen, Spacer } from '@/components/ui';
 import { chapterNumber, getSeries } from '@/content/series';
 import { useApp } from '@/services/provider';
 import { progressFor } from '@/services/logic';
@@ -41,25 +43,38 @@ export default function SeriesIntro() {
     }
   };
 
+  const nextLabel = last ? (isReplayView ? 'Close' : 'Continue') : 'Next';
+
   return (
-    <Screen dark scroll={false} testID="series-intro">
-      <Gap size="md" />
-      <AppText variant="label" dark muted>
-        Chapter {chapterNumber(series)} — Introduction
-      </AppText>
-      <Spacer />
-      <AppText variant="contemplation" dark center>
-        {slides[slide]}
-      </AppText>
-      <Spacer />
-      <TextLink
-        label={last ? (isReplayView ? 'Close' : 'Continue') : 'Next'}
-        dark
-        arrow={!isReplayView}
-        onPress={onNext}
-        testID="intro-next"
-      />
-      <Gap size="lg" />
-    </Screen>
+    // A tap ANYWHERE advances — the link is the affordance, not the only
+    // target. One handler on the wrapper, so the label below is purely visual
+    // and a tap on it can't fire twice.
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={nextLabel}
+      onPress={onNext}
+      style={styles.flex}
+      testID="intro-next">
+      <Screen dark scroll={false} testID="series-intro">
+        <Gap size="md" />
+        <AppText variant="label" dark muted>
+          Chapter {chapterNumber(series)} — Introduction
+        </AppText>
+        <Spacer />
+        <AppText variant="contemplation" dark center>
+          {slides[slide]}
+        </AppText>
+        <Spacer />
+        <AppText variant="bodyBold" dark style={styles.nextLabel}>
+          {isReplayView ? nextLabel : `${nextLabel} →`}
+        </AppText>
+        <Gap size="lg" />
+      </Screen>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  nextLabel: { textDecorationLine: 'underline' },
+});
