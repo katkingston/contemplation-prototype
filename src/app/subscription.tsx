@@ -5,12 +5,11 @@
  */
 import { router } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
-import { AppText, Button, Gap, ListRow, Screen } from '@/components/ui';
+import { StyleSheet, View } from 'react-native';
+import { AppText, Gap, ListRow, Screen, Spacer, TextLink } from '@/components/ui';
 import { plans } from '@/content/copy';
-import { orderedSeries } from '@/content/series';
 import { useApp } from '@/services/provider';
-import { space } from '@/theme/tokens';
+import { anchor, space } from '@/theme/tokens';
 
 export default function Subscription() {
   const { data, act } = useApp();
@@ -23,17 +22,17 @@ export default function Subscription() {
     ? (plans.find((p) => p.productType === current.productType)?.title ?? current.productType)
     : 'No active plan';
 
-  const buy = async (productType: (typeof plans)[number]['productType']) => {
-    const intro = orderedSeries()[0];
-    await act((s) => s.grantAccess(productType, productType === 'series_pack' ? intro.id : null));
-  };
+  const price = current
+    ? (plans.find((p) => p.productType === current.productType)?.price ?? '')
+    : '';
 
+  // A3: title 66, "Member since" 108, then rows from 192. Current Plan carries
+  // its plan and price as a right-hand column with the renewal date beneath.
   return (
-    <Screen testID="subscription-screen">
-      <Gap size="xl" />
+    <Screen testID="subscription-screen" top={anchor.pageTitle}>
       <AppText variant="titleLower">Subscription</AppText>
       {data.profile ? (
-        <AppText variant="small" muted>
+        <AppText variant="small" muted style={{ marginTop: 11 }}>
           Member since{' '}
           {new Date(data.profile.createdAt).toLocaleDateString(undefined, {
             year: 'numeric',
@@ -42,36 +41,34 @@ export default function Subscription() {
           })}
         </AppText>
       ) : null}
-      <Gap size="xl" />
+      <View style={{ height: 51 }} />
       <ListRow
         label="Current Plan"
-        rightLabel={
-          current
-            ? `${planLabel}  ${plans.find((p) => p.productType === current.productType)?.price ?? ''}`
-            : 'None'
+        arrow={false}
+        right={
+          <View style={styles.planColumn}>
+            <AppText variant="small" muted>
+              {current ? `${planLabel}   ${price}` : 'None'}
+            </AppText>
+            {current?.expiresAt ? (
+              <AppText variant="small" muted>
+                {new Date(current.expiresAt).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </AppText>
+            ) : null}
+          </View>
         }
-        right={<View />}
         testID="current-plan"
       />
-      {current?.expiresAt ? (
-        <AppText variant="small" muted>
-          Access until {new Date(current.expiresAt).toLocaleDateString()}
-        </AppText>
-      ) : null}
-      <Gap size="lg" />
-      {plans.map((p) => (
-        <ListRow
-          key={p.productType}
-          label={`Upgrade to ${p.title}`}
-          sub={`${p.price} — ${p.detail}`}
-          onPress={() => buy(p.productType)}
-          testID={`buy-${p.productType}`}
-        />
-      ))}
+      <ListRow label="Upgrade" onPress={() => router.push('/paywall')} testID="upgrade-plan" />
+      {/* Not in A3, but the App Store requires a restore path for IAP. */}
       <ListRow
         label="Restore purchase"
-        sub="re-applies your latest plan"
-        onPress={() => current && buy(current.productType)}
+        onPress={() => current && void act((s) => s.grantAccess(current.productType, current.seriesId ?? null))}
+        testID="restore-purchase"
       />
       <ListRow
         label="Cancel Subscription"
@@ -79,13 +76,18 @@ export default function Subscription() {
         onPress={() => act((s) => s.cancelAccess())}
         testID="cancel-subscription"
       />
-      <AppText variant="small" muted style={{ marginTop: space.sm }}>
+      <AppText variant="small" muted style={{ marginTop: space.md }}>
         Cancelling keeps access until the period ends. (Prototype: purchases are
         simulated with no real charges, and cancelling ends access immediately.)
       </AppText>
+      <Spacer />
       <Gap size="xl" />
-      <Button label="Back" kind="secondary" onPress={() => router.back()} />
-      <Gap size="lg" />
+      <TextLink label="Back" center muted onPress={() => router.back()} />
+      <Gap size="xl" />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  planColumn: { alignItems: 'flex-end' },
+});

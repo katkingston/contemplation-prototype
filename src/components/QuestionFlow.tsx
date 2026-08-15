@@ -8,9 +8,9 @@
  */
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { AppText, Gap, Row, Screen, Spacer, TextLink } from '@/components/ui';
+import { Anchored, AnchoredBottom, AppText, Row, Stage, TextLink } from '@/components/ui';
 import type { AnswerValue } from '@/services/types';
-import { color, font, space, type } from '@/theme/tokens';
+import { anchor, anchorBottom, color, font, space, type } from '@/theme/tokens';
 
 export interface Question {
   id: string;
@@ -68,26 +68,29 @@ export function QuestionFlow({
 
   const pad = (n: number) => String(n).padStart(2, '0');
 
+  // O8 / Q pin the whole slide: header 77, prompt 221, scale 392 (or the
+  // option list from 341 on a 41pt pitch), endpoint labels 459/467, and the
+  // link centred at 760. Nothing here stacks.
   return (
-    <Screen scroll={false}>
-      <Gap size="md" />
-      <Row between>
-        <AppText variant="label" muted>
-          {headerLabel}
+    <Stage>
+      <Anchored y={anchor.monoHeader}>
+        <Row between>
+          <AppText variant="label" muted>
+            {headerLabel}
+          </AppText>
+          <AppText variant="label" muted>
+            {`${pad(step + 1)}/${pad(questions.length)}`}
+          </AppText>
+        </Row>
+      </Anchored>
+      <Anchored y={anchor.question}>
+        <AppText variant="titleLower" center style={{ fontSize: 20, lineHeight: 24 }}>
+          {q.prompt}
         </AppText>
-        <AppText variant="label" muted>
-          {`${pad(step + 1)}/${pad(questions.length)}`}
-        </AppText>
-      </Row>
-      <Gap size="xxl" />
-      <Gap size="xl" />
-      <AppText variant="titleLower" center style={{ fontSize: 22, lineHeight: 28 }}>
-        {q.prompt}
-      </AppText>
-      <Gap size="xl" />
+      </Anchored>
       {q.kind === 'scale' && (
-        <View>
-          <View style={styles.scaleRow}>
+        <>
+          <Anchored y={anchor.scaleRow} style={styles.scaleRow}>
             {Array.from(
               { length: (q.max ?? 5) - (q.min ?? 1) + 1 },
               (_, i) => (q.min ?? 1) + i,
@@ -101,10 +104,11 @@ export function QuestionFlow({
                   onPress={() => set(n)}
                   style={[styles.scaleBox, sel && styles.scaleBoxSelected]}>
                   <AppText
-                    variant={sel ? 'bodyBold' : 'body'}
+                    variant="body"
                     style={
                       {
                         fontFamily: font.mono,
+                        fontSize: 14,
                         textDecorationLine: sel ? 'underline' : 'none',
                       } as never
                     }>
@@ -113,20 +117,19 @@ export function QuestionFlow({
                 </Pressable>
               );
             })}
-          </View>
-          <Gap size="sm" />
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <AppText variant="caption" muted>
+          </Anchored>
+          <Anchored y={459} style={styles.endpointRow}>
+            <AppText variant="caption" muted style={{ marginTop: 8 }}>
               {q.minLabel}
             </AppText>
-            <AppText variant="caption" muted style={{ textAlign: 'right' }}>
+            <AppText variant="caption" muted style={styles.endpointRight}>
               {q.maxLabel}
             </AppText>
-          </View>
-        </View>
+          </Anchored>
+        </>
       )}
       {q.kind === 'multi' && (
-        <View>
+        <Anchored y={341}>
           {(q.options ?? []).map((opt) => {
             const cur = Array.isArray(value) ? value : [];
             const sel = cur.includes(opt);
@@ -138,7 +141,7 @@ export function QuestionFlow({
                 onPress={() => set(sel ? cur.filter((x) => x !== opt) : [...cur, opt])}
                 style={({ pressed }) => [styles.optionRow, pressed && { opacity: 0.6 }]}>
                 <AppText
-                  variant={sel ? 'bodyBold' : 'body'}
+                  variant="body"
                   style={
                     {
                       fontFamily: font.mono,
@@ -163,53 +166,53 @@ export function QuestionFlow({
               testID="other-text-input"
             />
           )}
-        </View>
+        </Anchored>
       )}
       {q.kind === 'text' && (
-        <TextInput
-          multiline
-          value={typeof value === 'string' ? value : ''}
-          onChangeText={(t) => set(t)}
-          accessibilityLabel="Your answer"
-          placeholder="Write as little or as much as you like…"
-          placeholderTextColor={color.muted}
-          style={styles.textInput}
-          testID="question-text-input"
-        />
+        <Anchored y={341}>
+          <TextInput
+            multiline
+            value={typeof value === 'string' ? value : ''}
+            onChangeText={(t) => set(t)}
+            accessibilityLabel="Your answer"
+            placeholder="Write as little or as much as you like…"
+            placeholderTextColor={color.muted}
+            style={styles.textInput}
+            testID="question-text-input"
+          />
+        </Anchored>
       )}
-      <Spacer />
-      <View style={{ alignItems: 'center' }}>
+      <AnchoredBottom up={anchorBottom.flowLink}>
         <TextLink
           label={step + 1 < questions.length ? 'Next question' : completeLabel}
           onPress={next}
           disabled={!answered}
+          center
           testID="question-next"
         />
-      </View>
-      <Gap size="lg" />
-    </Screen>
+      </AnchoredBottom>
+    </Stage>
   );
 }
 
 const styles = StyleSheet.create({
-  scaleRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: space.sm,
-    justifyContent: 'center',
-  },
+  // O8: five 39x48 boxes spread across the full 342 measure, not a centred
+  // cluster — the gaps are what make the row read as a scale.
+  scaleRow: { flexDirection: 'row', justifyContent: 'space-between' },
   scaleBox: {
-    minWidth: 48,
+    width: 39,
     height: 48,
     borderWidth: 1,
     borderColor: color.line,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: space.sm,
   },
-  scaleBoxSelected: { borderColor: color.ink, backgroundColor: color.faint },
+  /** Selection is the underlined numeral (O8) — the box itself stays quiet. */
+  scaleBoxSelected: { borderColor: color.muted },
+  endpointRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  endpointRight: { textAlign: 'right', maxWidth: 90 },
   optionRow: {
-    paddingVertical: 13,
+    paddingVertical: 9,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.muted,
   },

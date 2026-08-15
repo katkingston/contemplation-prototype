@@ -1,25 +1,35 @@
 /** O7 — Baseline Intro: frame the intake as a baseline to reflect on later. */
 import { router } from 'expo-router';
 import React from 'react';
-import { AppText, Button, Gap, Screen, Spacer, Wordmark } from '@/components/ui';
+import {
+  Anchored,
+  AnchoredBottom,
+  AppText,
+  Button,
+  Stage,
+  Wordmark,
+} from '@/components/ui';
 import { baselineIntro } from '@/content/copy';
+import { anchor, anchorBottom } from '@/theme/tokens';
 
 export default function BaselineIntro() {
-  // Jul 30 designs: wordmark top, lowercase-style title, mono body, full-width CTA.
+  // O7: wordmark 72, title 241, body 324, full-width CTA on the bottom line.
   return (
-    <Screen testID="baseline-intro">
-      <Gap size="lg" />
-      <Wordmark />
-      <Gap size="xxl" />
-      <Gap size="xl" />
-      <AppText variant="titleLower">{baselineIntro.title}</AppText>
-      <Gap size="md" />
-      <AppText variant="monoBody" muted>
-        {baselineIntro.body}
-      </AppText>
-      <Spacer />
-      <Button label="Begin" arrow onPress={() => router.push('/intake')} testID="baseline-begin" />
-      <Gap size="lg" />
-    </Screen>
+    <Stage testID="baseline-intro">
+      <Anchored y={anchor.wordmark}>
+        <Wordmark />
+      </Anchored>
+      <Anchored y={anchor.formTitle}>
+        <AppText variant="titleLower">{baselineIntro.title}</AppText>
+      </Anchored>
+      <Anchored y={anchor.formBody}>
+        <AppText variant="monoBody" muted>
+          {baselineIntro.body}
+        </AppText>
+      </Anchored>
+      <AnchoredBottom up={anchorBottom.action}>
+        <Button label="Begin" arrow onPress={() => router.push('/intake')} testID="baseline-begin" />
+      </AnchoredBottom>
+    </Stage>
   );
 }

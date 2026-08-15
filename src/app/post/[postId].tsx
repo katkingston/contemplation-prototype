@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SeriesArt } from '@/components/SeriesArt';
 import { AppText, Gap, Row, TextLink } from '@/components/ui';
 import { getPost, POSTS } from '@/content/posts';
-import { color, radius, space } from '@/theme/tokens';
+import { anchor, color, radius, space } from '@/theme/tokens';
 
 export default function PostPage() {
   const params = useLocalSearchParams<{ postId?: string }>();
@@ -22,10 +22,11 @@ export default function PostPage() {
   const idx = POSTS.findIndex((p) => p.id === post.id);
   const next = POSTS[(idx + 1) % POSTS.length];
 
+  // No 'top' edge: the 77 padding is measured from the true top of the frame,
+  // status bar included, like every other mono-header screen.
   return (
-    <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="post-screen">
-      <ScrollView contentContainerStyle={{ paddingBottom: space.xxl, paddingHorizontal: space.lg }}>
-        <Gap size="md" />
+    <SafeAreaView style={styles.shell} edges={['left', 'right']} testID="post-screen">
+      <ScrollView contentContainerStyle={styles.content}>
         <Row between>
           <AppText variant="label" muted>
             {post.tag}
@@ -34,7 +35,7 @@ export default function PostPage() {
             {post.minutes} min read
           </AppText>
         </Row>
-        <Gap size="lg" />
+        <View style={{ height: 20 }} />
         <AppText variant="titleLower">{post.title}</AppText>
         <Gap size="lg" />
         <View style={styles.art}>
@@ -46,8 +47,10 @@ export default function PostPage() {
           />
         </View>
         <Gap size="lg" />
+        {/* Body is the DS body role — 15/140%, same as the disclaimer's long
+            copy (O1). A looser leading here would be off-system. */}
         {post.paragraphs.map((p, i) => (
-          <AppText key={i} variant="body" style={{ marginBottom: space.md, lineHeight: 26 }}>
+          <AppText key={i} variant="body" style={{ marginBottom: space.md }}>
             {p}
           </AppText>
         ))}
@@ -77,5 +80,11 @@ export default function PostPage() {
 
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
+  // Mono meta row on the same line as every other flow screen (77).
+  content: {
+    paddingBottom: space.xxl,
+    paddingHorizontal: space.lg,
+    paddingTop: anchor.monoHeader,
+  },
   art: { height: 300, borderRadius: radius.sm, overflow: 'hidden' },
 });

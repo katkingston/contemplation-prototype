@@ -10,19 +10,76 @@
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { AppText, Button, Gap, Row, Screen, Wordmark } from '@/components/ui';
+import {
+  Anchored,
+  AnchoredBottom,
+  AppText,
+  Button,
+  Gap,
+  Screen,
+  Stage,
+  Wordmark,
+} from '@/components/ui';
 import { useApp } from '@/services/provider';
-import { color, font, space, type } from '@/theme/tokens';
+import { anchor, anchorBottom, color, font, radius, space, type } from '@/theme/tokens';
 
+/**
+ * Measured off O6: label top 349, value 367, underline 391 — so the label box
+ * is 16, then a 2px gap, then a 24-tall value sitting on the rule. The second
+ * field repeats it 76 lower.
+ */
 const inputStyle = {
   ...type.body,
+  height: 24,
+  paddingVertical: 0,
   borderBottomWidth: 1,
   borderBottomColor: color.muted,
-  paddingVertical: space.sm,
   color: color.ink,
 } as const;
 
+const FIELD_PITCH = 76;
+
 const CODE_LENGTH = 6;
+
+/** Outlined SSO pair — 49 tall, hugging their labels (O6: 85 and 93 wide). */
+function SsoButton({
+  label,
+  onPress,
+  disabled,
+}: {
+  label: string;
+  onPress?: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [styles.sso, (pressed || disabled) && { opacity: 0.5 }]}>
+      <AppText variant="body" style={{ fontSize: 14 }}>
+        {label}
+      </AppText>
+    </Pressable>
+  );
+}
+
+/** Mono caps label over an underlined input (O6). */
+function Field({
+  label,
+  ...input
+}: { label: string } & React.ComponentProps<typeof TextInput>) {
+  return (
+    <>
+      <AppText variant="fieldLabel" muted>
+        {label}
+      </AppText>
+      <View style={{ height: 2 }} />
+      <TextInput placeholderTextColor={color.muted} style={inputStyle} {...input} />
+    </>
+  );
+}
 
 /** Six visible digit boxes fed by one invisible input (Jul 30 designs). */
 function CodeBoxes({
@@ -114,11 +171,9 @@ export default function Login() {
 
   if (cloud && stage === 'code') {
     return (
-      <Screen testID="login-code-screen">
-        <Gap size="lg" />
+      <Screen testID="login-code-screen" top={anchor.wordmark}>
         <Wordmark />
-        <Gap size="xxl" />
-        <Gap size="xl" />
+        <View style={{ height: anchor.formTitle - anchor.wordmark - 25 }} />
         <AppText variant="titleLower">Check your email</AppText>
         <Gap size="md" />
         <AppText variant="body" muted>
@@ -153,94 +208,95 @@ export default function Login() {
     );
   }
 
+  // O6 pins every block to the frame: wordmark 72, title 241, fields 349 and
+  // 425, SSO pair 496, privacy 612, CTA 729. Anchored, not stacked.
   return (
-    <Screen testID="login-screen">
-      <Gap size="lg" />
-      <Wordmark />
-      <Gap size="xxl" />
-      <AppText variant="titleLower">Log in or sign up</AppText>
-      <Gap size="xl" />
-      <AppText variant="label" muted>
-        Email
-      </AppText>
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="name@example.com"
-        accessibilityLabel="Email address"
-        placeholderTextColor={color.muted}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={inputStyle}
-        testID="email-input"
-      />
-      <Gap size="lg" />
-      <AppText variant="label" muted>
-        Username
-      </AppText>
-      <TextInput
-        value={username}
-        onChangeText={setUsername}
-        placeholder="How should we address you?"
-        accessibilityLabel="Username"
-        placeholderTextColor={color.muted}
-        autoCapitalize="none"
-        style={inputStyle}
-        testID="username-input"
-      />
-      <Gap size="xl" />
-      <Row>
-        <Button
+    <Stage testID="login-screen">
+      <Anchored y={anchor.wordmark}>
+        <Wordmark />
+      </Anchored>
+      <Anchored y={anchor.formTitle}>
+        <AppText variant="titleLower">Log in or sign up</AppText>
+      </Anchored>
+      <Anchored y={349}>
+        <Field
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="name@example.com"
+          accessibilityLabel="Email address"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          testID="email-input"
+        />
+      </Anchored>
+      <Anchored y={349 + FIELD_PITCH}>
+        <Field
+          label="Username"
+          value={username}
+          onChangeText={setUsername}
+          placeholder="How should we address you?"
+          accessibilityLabel="Username"
+          autoCapitalize="none"
+          testID="username-input"
+        />
+      </Anchored>
+      <Anchored y={496} style={styles.ssoRow}>
+        <SsoButton
           label="Apple"
-          kind="secondary"
           onPress={cloud ? undefined : () => proceedLocal('apple')}
           disabled={cloud}
         />
-        <Button
+        <SsoButton
           label="Google"
-          kind="secondary"
           onPress={cloud ? undefined : () => proceedLocal('google')}
           disabled={cloud}
         />
-      </Row>
-      {cloud ? (
-        <>
-          <Gap size="sm" />
-          <AppText variant="caption" muted>
-            Apple & Google sign-in arrive with the native app build.
-          </AppText>
-        </>
-      ) : null}
-      <Gap size="xl" />
-      <AppText variant="small" muted>
-        We never sell or share your data.
-      </AppText>
-      <AppText variant="small" style={{ color: color.accent, textDecorationLine: 'underline' }}>
-        Privacy Policy + Terms ›
-      </AppText>
-      {error ? (
-        <>
-          <Gap size="sm" />
-          <AppText variant="small" style={{ color: color.danger }}>
-            {error}
-          </AppText>
-        </>
-      ) : null}
-      <Gap size="xl" />
-      <Button
-        label={busy ? 'Sending code…' : cloud ? 'Email Code' : 'Continue'}
-        arrow
-        onPress={cloud ? sendCode : () => proceedLocal()}
-        disabled={!validForm || busy}
-        testID="login-continue"
-      />
-      <Gap size="lg" />
-    </Screen>
+      </Anchored>
+      <Anchored y={612}>
+        <AppText variant="small" muted>
+          {cloud
+            ? 'Apple & Google sign-in arrive with the native app build.'
+            : 'We never sell or share your data.'}
+        </AppText>
+        <View style={{ height: 9 }} />
+        <AppText variant="small" style={{ color: color.accent, textDecorationLine: 'underline' }}>
+          Privacy Policy + Terms ›
+        </AppText>
+        {error ? (
+          <>
+            <Gap size="sm" />
+            <AppText variant="small" style={{ color: color.danger }}>
+              {error}
+            </AppText>
+          </>
+        ) : null}
+      </Anchored>
+      <AnchoredBottom up={anchorBottom.action}>
+        <Button
+          label={busy ? 'Sending code…' : cloud ? 'Email Code' : 'Continue'}
+          arrow
+          onPress={cloud ? sendCode : () => proceedLocal()}
+          disabled={!validForm || busy}
+          testID="login-continue"
+        />
+      </AnchoredBottom>
+    </Stage>
   );
 }
 
 const styles = StyleSheet.create({
   codeRow: { flexDirection: 'row', gap: space.sm },
+  ssoRow: { flexDirection: 'row', gap: space.sm },
+  sso: {
+    height: 49,
+    paddingHorizontal: 22,
+    borderWidth: 1,
+    borderColor: color.onDarkMuted,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   codeBox: {
     width: 44,
     height: 52,

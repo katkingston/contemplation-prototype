@@ -7,16 +7,16 @@ import { AppText, Button, Gap, Screen } from '@/components/ui';
 import { getSeries } from '@/content/series';
 import { formatMinutes, seriesTotals } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color, font, space } from '@/theme/tokens';
+import { anchor, color, font, space } from '@/theme/tokens';
 
-function Stat({ value, label }: { value: string; label: string }) {
-  // Jul 30 designs: open mono numerals over the paper, no boxed tiles.
+/** Same stat setting as S4/Journey: 36/44 mono numeral over an 11px label. */
+function Stat({ value, label, wide = false }: { value: string; label: string; wide?: boolean }) {
   return (
-    <View style={{ flex: 1, minWidth: 130, paddingVertical: space.sm }}>
-      <AppText style={{ fontFamily: font.mono, fontSize: 34, lineHeight: 42, color: color.ink } as never}>
+    <View style={wide ? { width: 182, paddingRight: space.md } : { flex: 1 }}>
+      <AppText style={{ fontFamily: font.mono, fontSize: 36, lineHeight: 44, color: color.ink } as never}>
         {value}
       </AppText>
-      <AppText variant="small" muted>
+      <AppText variant="caption" muted style={{ marginTop: 4 }}>
         {label}
       </AppText>
     </View>
@@ -37,17 +37,19 @@ export default function Stats() {
   }
 
   return (
-    <Screen testID="stats-screen">
-      <Gap size="xl" />
+    <Screen testID="stats-screen" top={anchor.pageTitle}>
       <AppText variant="titleLower">Look how far you came</AppText>
-      <Gap size="lg" />
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-        <Stat value={formatMinutes(stats.totalSeconds)} label="time contemplating" />
+      <View style={{ height: 82 }} />
+      <View style={{ flexDirection: 'row' }}>
+        <Stat wide value={formatMinutes(stats.totalSeconds)} label="time contemplating" />
         <Stat value={String(stats.thoughtsShared)} label="thoughts shared" />
-        <Stat value={`${stats.daysComplete}/${stats.seriesLength}`} label="contemplations complete" />
-        <Stat value={`🔥 ${stats.streak}`} label="day streak" />
       </View>
-      <Gap size="lg" />
+      <View style={{ height: 34 }} />
+      <View style={{ flexDirection: 'row' }}>
+        <Stat wide value={`${stats.daysComplete}/${stats.seriesLength}`} label="contemplations complete" />
+        <Stat value={String(stats.streak)} label="day streak" />
+      </View>
+      <View style={{ height: 60 }} />
       <AppText variant="heading">A few of your thoughts</AppText>
       <Gap size="sm" />
       {stats.revealedEntries.length === 0 ? (

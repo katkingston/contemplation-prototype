@@ -15,11 +15,12 @@ import { color, font, space } from '@/theme/tokens';
 
 const RECENT_COUNT = 5;
 
-function Stat({ value, label }: { value: string; label: string }) {
+/** S4: a 36/44 mono numeral over an 11px label, 4 apart. */
+function Stat({ value, label, wide = false }: { value: string; label: string; wide?: boolean }) {
   return (
-    <View style={styles.statCell}>
+    <View style={wide ? styles.statCellLeft : styles.statCellRight}>
       <AppText style={styles.statValue as never}>{value}</AppText>
-      <AppText variant="small" muted>
+      <AppText variant="caption" muted style={{ marginTop: 4 }}>
         {label}
       </AppText>
     </View>
@@ -36,17 +37,22 @@ export default function Journey() {
   const recent = entries.slice(0, RECENT_COUNT);
 
   return (
+    // S4: "journey" 61 at 34, stat pairs on 182 and 279 with their labels at
+    // 230 and 328, right column starting at 206.
     <TabScreen active="journey">
-      <Gap size="xl" />
-      <AppText variant="titleLower">journey</AppText>
-      <Gap size="lg" />
-      <View style={styles.statsGrid}>
-        <Stat value={String(life.minutes)} label="Minutes contemplating" />
+      <View style={{ height: 61 }} />
+      <AppText variant="heroTitle">journey</AppText>
+      <View style={{ height: 82 }} />
+      <View style={styles.statsRow}>
+        <Stat wide value={String(life.minutes)} label="Minutes contemplating" />
         <Stat value={String(data.diary.length)} label="Thoughts shared" />
-        <Stat value={`${Math.min(p.currentIndex, len)}/${len}`} label="Days complete" />
+      </View>
+      <View style={{ height: 34 }} />
+      <View style={styles.statsRow}>
+        <Stat wide value={`${Math.min(p.currentIndex, len)}/${len}`} label="Days complete" />
         <Stat value={String(life.currentStreak)} label="Day streak" />
       </View>
-      <Gap size="lg" />
+      <View style={{ height: 73 }} />
       {recent.length === 0 ? (
         <>
           <View style={styles.dotted} />
@@ -103,8 +109,10 @@ export default function Journey() {
 }
 
 const styles = StyleSheet.create({
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space.lg },
-  statCell: { width: '50%', paddingRight: space.md },
+  statsRow: { flexDirection: 'row' },
+  // The right column starts at 206, not at the midpoint.
+  statCellLeft: { width: 182, paddingRight: space.md },
+  statCellRight: { flex: 1 },
   statValue: {
     fontFamily: font.mono,
     fontSize: 36,

@@ -106,21 +106,31 @@ export default function SeriesDetail() {
     shareMessage(`${series.title}, a chapter of ${SERIES_ONE.title} on Contemplate. ${SHARE_URL}`);
 
   return (
-    <SafeAreaView style={styles.shell} edges={['top', 'left', 'right']} testID="series-detail">
+    <SafeAreaView style={styles.shell} edges={['left', 'right']} testID="series-detail">
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 140, paddingHorizontal: space.lg }}>
-        <Gap size="md" />
-        {/* Jul 30 designs: dot progress top-left, computed n/len top-right. */}
+        {/* S2: square progress marks + n/len at 71, title 106, art 176 (160
+            tall), meta 344, theme 371, then the rows from 451 on a 38 pitch. */}
+        <View style={{ height: 71 }} />
         <Row between>
-          <SeriesDashes total={len} done={Math.min(p.currentIndex, len)} active={!completed && !atWrap} />
+          <SeriesDashes
+            total={len}
+            done={Math.min(p.currentIndex, len)}
+            active={!completed && !atWrap}
+            shape="square"
+          />
           <AppText variant="label" muted>
             {`${Math.min(p.currentIndex, len)}/${len}`}
           </AppText>
         </Row>
-        <Gap size="md" />
-        <AppText variant="titleLower">{series.title}</AppText>
-        <Gap size="md" />
+        <View style={{ height: 16 }} />
+        {/* S2 sets the chapter title over two lines; the fixed well keeps the
+            art on 176 and the meta row on 344 for short titles too. */}
+        <View style={{ height: 48 }}>
+          <AppText variant="heading">{series.title}</AppText>
+        </View>
+        <View style={{ height: 22 }} />
         <View style={styles.hero}>
           <SeriesArt
             gradient={series.contemplations[0].gradient}
@@ -129,7 +139,7 @@ export default function SeriesDetail() {
             style={StyleSheet.absoluteFill as never}
           />
         </View>
-        <Gap size="sm" />
+        <View style={{ height: 8 }} />
         <Row between>
           <AppText variant="label" muted>
             {`${SERIES_ONE.title} · Chapter ${chapterNumber(series)}`}
@@ -138,11 +148,11 @@ export default function SeriesDetail() {
             {series.tag}
           </AppText>
         </Row>
-        <Gap size="sm" />
+        <View style={{ height: 8 }} />
         <AppText variant="small" muted>
           {series.theme}
         </AppText>
-        <Gap size="xl" />
+        <View style={{ height: 61 }} />
         {series.contemplations.map((c, i) => {
           const done = i < p.currentIndex;
           const isNext = i === p.currentIndex && !atWrap && !completed;
@@ -179,7 +189,8 @@ export default function SeriesDetail() {
         <View style={styles.endRule} />
       </ScrollView>
       {/* Back / Share / Contemplate pinned low (Jul 30 designs). */}
-      <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, space.md) }]}>
+      {/* S2 rests these on 758, a clear 65 above the frame's edge. */}
+      <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom + space.md, 65) }]}>
         <TextLink
           label="Back"
           muted
@@ -202,16 +213,18 @@ export default function SeriesDetail() {
 
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
-  hero: { height: 220, borderRadius: radius.sm, overflow: 'hidden' },
+  hero: { height: 160, borderRadius: radius.sm, overflow: 'hidden' },
   row: {
+    // 38pt pitch: one 15/21 line with 8.5 either side, ruled above. Rows that
+    // reveal a completed prompt grow past it, by design.
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
-    paddingVertical: 14,
+    paddingVertical: 8.5,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.muted,
   },
-  rowCode: { minWidth: 44 },
+  rowCode: { minWidth: 50 },
   rowDotDone: { width: 7, height: 7, borderRadius: 4, backgroundColor: color.ink },
   rowDotNext: {
     width: 7,

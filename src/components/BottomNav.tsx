@@ -79,16 +79,23 @@ export function TabScreen({
   children,
   padded = true,
   dark = false,
+  bleedTop = false,
 }: {
   active: TabKey;
   children: React.ReactNode;
   padded?: boolean;
   dark?: boolean;
+  /**
+   * Screens whose art runs under the status bar (Learn, Home). The designs
+   * measure those heroes from the true top of the frame, so the shell must not
+   * push them down by the safe-area inset — the screen handles its own.
+   */
+  bleedTop?: boolean;
 }) {
   return (
     <SafeAreaView
       style={[styles.shell, dark && { backgroundColor: color.dark }]}
-      edges={['top', 'left', 'right']}>
+      edges={bleedTop ? ['left', 'right'] : ['top', 'left', 'right']}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[

@@ -10,7 +10,7 @@ import { Linking } from 'react-native';
 import React from 'react';
 import { View } from 'react-native';
 import { TabScreen } from '@/components/BottomNav';
-import { AppText, Gap, ListRow, Wordmark } from '@/components/ui';
+import { AppText, ListRow } from '@/components/ui';
 import { dailyQuote } from '@/content/copy';
 import { useApp } from '@/services/provider';
 
@@ -39,14 +39,15 @@ export default function Account() {
       ? 'Active'
       : 'Choose a plan';
 
+  // A1: name 72, email 108, rows from 192 on the 48pt pitch.
   return (
     <TabScreen active="account">
-      <Gap size="xl" />
+      <View style={{ height: 72 }} />
       <AppText variant="titleLower">{firstName}</AppText>
-      <AppText variant="small" muted>
+      <AppText variant="small" muted style={{ marginTop: 5 }}>
         {data.profile?.email ?? `@${username}`}
       </AppText>
-      <Gap size="xl" />
+      <View style={{ height: 51 }} />
       <ListRow
         label="Subscription"
         rightLabel={subscriptionRight}
@@ -66,31 +67,18 @@ export default function Account() {
         testID="account-feedback"
       />
       <View style={{ flexGrow: 1 }} />
-      {/* Member-since wordmark + quote footer */}
-      <Gap size="xxl" />
+      {/* A1 closes on the daily quote alone (596) with its attribution in mono
+          caps at 652. "Member since" lives on A3 Subscription, not here. */}
       <View style={{ alignItems: 'center' }}>
-        <Wordmark />
-        <Gap size="xs" />
-        <AppText variant="caption" muted center>
-          Member since{' '}
-          {data.profile
-            ? new Date(data.profile.createdAt).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })
-            : '·'}
-        </AppText>
-        <Gap size="md" />
-        <AppText variant="monoBody" muted center style={{ maxWidth: 300, fontSize: 13 }}>
+        <AppText variant="monoBody" muted center style={{ maxWidth: 300 }}>
           “{dailyQuote().text}”
         </AppText>
-        <Gap size="xs" />
-        <AppText variant="caption" muted center>
+        <View style={{ height: 34 }} />
+        <AppText variant="label" muted center>
           {dailyQuote().by}
         </AppText>
       </View>
-      <Gap size="lg" />
+      <View style={{ height: 53 }} />
     </TabScreen>
   );
 }

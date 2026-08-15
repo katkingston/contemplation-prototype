@@ -110,6 +110,14 @@ export const type = {
   small: { fontFamily: font.grotesk, fontSize: 13, lineHeight: 19, letterSpacing: 0 },
   /** Field labels ("Add time", "Select music"): Inter Regular 11 / 140%. */
   caption: { fontFamily: font.grotesk, fontSize: 11, lineHeight: 15.4, letterSpacing: 0 },
+  /** Form field labels (O6 "EMAIL" / "USERNAME"): WT Garamono 10 / 160%, +5%. */
+  fieldLabel: {
+    fontFamily: font.monoLabel,
+    fontSize: 10,
+    lineHeight: 16,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
   /** Mono caps micro-label (WT Garamono): 12 / 160%, +5% tracking. */
   label: {
     fontFamily: font.monoLabel,
@@ -138,6 +146,7 @@ export const type = {
  * are applied as fixed padding rather than stacked on a safe-area inset).
  */
 export const anchor = {
+  // --- Contemplation flow (C3 / C4 / C5 / C6 / C7) ---
   monoHeader: 77, // mono code/date row
   lead: 229, // "get ready to contemplate" / "want to keep contemplating?"
   leadTitle: 300, // big lowercase title under the lead
@@ -148,7 +157,36 @@ export const anchor = {
   optionLabelB: 588,
   optionRowB: 615,
   bottomLinks: 757, // link row (Begin / Submit / Resume …)
+
+  // --- Page grid, shared by the utility + onboarding frames ---
+  // A1 Account 72/108, A2 Settings 66, A3 Subscription 66/108, S2 Chapter
+  // Detail, X2 Resources, O5 Paywall, O6 Login, O7 Baseline intro, J3 Learn.
+  // Every one of those frames lands its parts on the same handful of lines.
+  wordmark: 72, // brand wordmark top (O5, O6)
+  pageTitle: 66, // screen title top ("Settings", "Subscription", "journey")
+  pageMeta: 108, // the 13px sub-line under a screen title
+  intro: 180, // standalone intro paragraph (X2, O5)
+  formTitle: 241, // big title on a form/intro screen (O6, O7, C6)
+  formBody: 324, // body paragraph under a form title (O7)
+  rowsTop: 192, // first row of a utility list
+  rowPitch: 48, // …and its pitch. Rows are single-line labels, not stacks.
+  question: 221, // centred intake question (O8)
+  scaleRow: 392, // intake 1–5 scale boxes (O8)
 } as const;
+
+/**
+ * Footer anchors, expressed as distance from the BOTTOM of the screen so they
+ * survive viewports that aren't exactly 844 tall. Converted from the Figma
+ * frame: a 342x49 CTA at y=729 ends at 778, i.e. 66 up from the bottom.
+ */
+export const anchorBottom = {
+  action: 66, // full-width CTA (O5 / O6 / O7) — 342x49 ending at 778
+  backLink: 76, // centred "Back" (A1 / A2 / A3 / X2 / S2) — text top 749
+  flowLink: 65, // "Next question" / "Contemplate" (O8 / Q / S2) — text top 760
+} as const;
+
+/** Figma's own frame height — the basis for every anchor above. */
+export const FRAME_HEIGHT = 844;
 
 export const space = {
   xs: 4,

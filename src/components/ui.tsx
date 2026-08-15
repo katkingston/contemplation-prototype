@@ -13,7 +13,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { ScreenFade } from '@/components/Transitions';
 import { color, font, radius, space, type } from '@/theme/tokens';
@@ -56,6 +56,7 @@ export function Screen({
   scroll = true,
   padded = true,
   fade = true,
+  top,
   children,
   style,
   testID,
@@ -65,29 +66,122 @@ export function Screen({
   padded?: boolean;
   /** Crisis/support screens set false: help must appear instantly. */
   fade?: boolean;
+  /**
+   * Measured Figma y for the first block, from the TRUE top of the screen.
+   * The Jul 30 frames are 390x844 with the status bar included, so whatever
+   * the device already contributes as a safe-area inset is subtracted here —
+   * the first block lands on the designed line on web and on device alike.
+   */
+  top?: number;
   children: React.ReactNode;
   style?: ViewStyle;
   testID?: string;
 }) {
+  const insets = useSafeAreaInsets();
   const bg = { backgroundColor: dark ? color.dark : color.paper };
   const pad = padded ? { paddingHorizontal: space.lg } : null;
+  const padTop = top != null ? { paddingTop: Math.max(top - insets.top, space.sm) } : null;
   return (
     <SafeAreaView style={[styles.flex, bg]} testID={testID}>
       {scroll ? (
         <ScrollView
           style={styles.flex}
-          contentContainerStyle={[pad, { paddingBottom: space.xxl, flexGrow: 1 }, style]}
+          contentContainerStyle={[pad, padTop, { paddingBottom: space.xxl, flexGrow: 1 }, style]}
           keyboardShouldPersistTaps="handled">
           {fade ? <ScreenFade>{children}</ScreenFade> : children}
         </ScrollView>
       ) : fade ? (
         <ScreenFade style={{ flex: 1 }}>
-          <View style={[styles.flex, pad, style]}>{children}</View>
+          <View style={[styles.flex, pad, padTop, style]}>{children}</View>
         </ScreenFade>
       ) : (
-        <View style={[styles.flex, pad, style]}>{children}</View>
+        <View style={[styles.flex, pad, padTop, style]}>{children}</View>
       )}
     </SafeAreaView>
+  );
+}
+
+// ---------- Measured layout ----------
+
+/**
+ * A screen whose blocks sit on measured Figma coordinates instead of stacking.
+ * Use it for the fixed compositions — the ones the designs pin to the frame
+ * (login, paywall, intake, disclaimer) rather than the ones that grow with
+ * their content. Children are `Anchored` / `AnchoredBottom`.
+ */
+export function Stage({
+  dark = false,
+  fade = true,
+  children,
+  style,
+  testID,
+}: {
+  dark?: boolean;
+  fade?: boolean;
+  children: React.ReactNode;
+  style?: ViewStyle;
+  testID?: string;
+}) {
+  const bg = { backgroundColor: dark ? color.dark : color.paper };
+  const body = <View style={[styles.flex, style]}>{children}</View>;
+  return (
+    <View style={[styles.flex, bg]} testID={testID}>
+      {fade ? <ScreenFade style={styles.flex}>{body}</ScreenFade> : body}
+    </View>
+  );
+}
+
+/**
+ * Pins a block to a measured Figma y — offset from the true top of the screen,
+ * status bar included, matching how the Jul 30 frames are drawn. On a device
+ * the safe-area inset is already part of that offset, so nothing is added.
+ */
+export function Anchored({
+  y,
+  gutter = true,
+  children,
+  style,
+}: {
+  y: number;
+  /** false = full-bleed (hero art, edge-to-edge rules). */
+  gutter?: boolean;
+  children: React.ReactNode;
+  style?: ViewStyle;
+}) {
+  return (
+    <View
+      style={[
+        { position: 'absolute', top: y },
+        gutter ? { left: space.lg, right: space.lg } : { left: 0, right: 0 },
+        style,
+      ]}>
+      {children}
+    </View>
+  );
+}
+
+/** The same, measured up from the bottom edge — see `anchorBottom`. */
+export function AnchoredBottom({
+  up,
+  gutter = true,
+  children,
+  style,
+}: {
+  up: number;
+  gutter?: boolean;
+  children: React.ReactNode;
+  style?: ViewStyle;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View
+      style={[
+        { position: 'absolute', bottom: Math.max(up, insets.bottom + space.sm) },
+        gutter ? { left: space.lg, right: space.lg } : { left: 0, right: 0 },
+        style,
+      ]}>
+      {children}
+    </View>
   );
 }
 
@@ -197,6 +291,7 @@ export function TextLink({
   arrow = false,
   disabled = false,
   small = false,
+  center = false,
   testID,
 }: {
   label: string;
@@ -208,6 +303,8 @@ export function TextLink({
   disabled?: boolean;
   /** 12/130% — the player's Crisis Support link (measured off C4). */
   small?: boolean;
+  /** Centres the link in its container ("Next question", "Back"). */
+  center?: boolean;
   testID?: string;
 }) {
   const fg = dark
@@ -225,7 +322,10 @@ export function TextLink({
       disabled={disabled}
       hitSlop={10}
       testID={testID}
-      style={({ pressed }) => [{ alignSelf: 'flex-start' }, (pressed || disabled) && { opacity: 0.5 }]}>
+      style={({ pressed }) => [
+        { alignSelf: center ? 'center' : 'flex-start' },
+        (pressed || disabled) && { opacity: 0.5 },
+      ]}>
       <Text
         style={[
           // Measured: quiet links 15/130%, primary 15/140% -3%.
@@ -471,6 +571,7 @@ export function ListRow({
   onPress,
   danger = false,
   dark = false,
+  arrow = true,
   testID,
 }: {
   label: string;
@@ -481,6 +582,11 @@ export function ListRow({
   onPress?: () => void;
   danger?: boolean;
   dark?: boolean;
+  /**
+   * A2 draws its toggle and time rows with the value alone and no chevron —
+   * only the rows that navigate get one.
+   */
+  arrow?: boolean;
   testID?: string;
 }) {
   return (
@@ -509,7 +615,12 @@ export function ListRow({
           {rightLabel}
         </AppText>
       ) : null}
-      {right ?? (onPress ? <AppText variant="body" dark={dark} muted>{'→'}</AppText> : null)}
+      {right ??
+        (onPress && arrow ? (
+          <AppText variant="body" dark={dark} muted>
+            {'→'}
+          </AppText>
+        ) : null)}
     </Pressable>
   );
 }
@@ -663,11 +774,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   listRow: {
-    // Jul 30 designs: hairline rule above each row, roomy vertical rhythm.
+    // Measured off A1/A2/A3: rows sit on a 48pt pitch (192, 240, 288, 336,
+    // 384) with a hairline rule above each. A 15/21 label centred in 48 leaves
+    // 13.5 either side — do not round this to 14, the drift compounds down the
+    // list. Rows that carry a `sub` grow past the pitch by design.
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
-    paddingVertical: 16,
+    paddingVertical: 13.25,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.muted,
   },

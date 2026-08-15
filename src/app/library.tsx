@@ -26,10 +26,10 @@ export default function Library() {
 
   return (
     <TabScreen active="journey">
-      <Gap size="md" />
-      {/* S3 Library: ONE series artwork, the series title, then its chapters.
-          (The dots belong to the rows as completion indicators — there is no
-          carousel and no pagination on this screen.) */}
+      {/* S3 Library: ONE series artwork (27→277), the series title at 390, then
+          its chapters on a 67pt pitch from 455. The dots belong to the rows as
+          completion indicators — there is no carousel here. */}
+      <View style={{ height: 27 }} />
       <View style={styles.hero}>
         <SeriesArt
           gradient={hero.contemplations[0].gradient}
@@ -38,9 +38,13 @@ export default function Library() {
           style={StyleSheet.absoluteFill as never}
         />
       </View>
-      <Gap size="xxl" />
-      <AppText variant="titleLower">{SERIES_ONE.title}</AppText>
-      <Gap size="md" />
+      <View style={{ height: 113 }} />
+      {/* S3 sets the series title over two lines, so the well is fixed at 48
+          and the chapter rows always begin on 455 however short the name is. */}
+      <View style={{ height: 48 }}>
+        <AppText variant="heading">{SERIES_ONE.title}</AppText>
+      </View>
+      <View style={{ height: 17 }} />
       {all.map((s) => {
         const p = progressFor(data, s.id);
         const done = isSeriesCompleted(data, s);
@@ -90,10 +94,11 @@ export default function Library() {
 const styles = StyleSheet.create({
   hero: { height: 250, borderRadius: radius.sm, overflow: 'hidden' },
   row: {
+    // 67pt pitch: a two-line 15/21 chapter title with 12.5 either side.
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    paddingVertical: space.md,
+    paddingVertical: 12.5,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.muted,
   },

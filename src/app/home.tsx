@@ -129,8 +129,10 @@ export default function Home() {
   const dropReady = isDropAvailable(data, series.id);
   const dropAt = nextDropAt(data, series.id);
 
-  const heroHeight = Math.min(680, Math.max(420, windowHeight - 230));
-  const cardW = Math.min(190, windowWidth * 0.44);
+  // C1 draws the hero card at 25 and 470 tall, and the rail cards 160x192.
+  // Both stay clamped so a shorter phone doesn't push the rail off-screen.
+  const heroHeight = Math.min(470, Math.max(320, windowHeight - 374));
+  const cardW = Math.min(160, windowWidth * 0.41);
 
   // Done for today: show the COMPLETED contemplation with a note (never
   // tease tomorrow's hint early). Otherwise the hero is one big Start link.
@@ -171,7 +173,7 @@ export default function Home() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 120, flexGrow: 1 }}>
-        <Gap size="md" />
+        <View style={{ height: 25 }} />
         {/* Today hero — artwork-led. Done-today shows the completed item;
             otherwise the whole card is the Start link. */}
         <View style={{ paddingHorizontal: space.lg }}>
@@ -207,7 +209,8 @@ export default function Home() {
             <AppText variant="heroTitle" style={{ color: color.onDark }}>
               {atWrap ? 'complete' : (shown?.hint ?? '').toLowerCase()}
             </AppText>
-            <Gap size="lg" />
+            {/* C1: title block closes at ~373, button opens at 429. */}
+            <View style={{ height: 56 }} />
             {doneToday ? (
               <Pressable
                 accessibilityRole="button"
@@ -237,14 +240,8 @@ export default function Home() {
                 </AppText>
               </Pressable>
             )}
-            {doneToday ? (
-              <>
-                <Gap size="sm" />
-                <AppText variant="label" center style={{ color: 'rgba(251,251,246,0.7)', alignSelf: 'center' }}>
-                  New contemplation at {dropLabel(dropAt!)}
-                </AppText>
-              </>
-            ) : null}
+            {/* The drop time used to repeat here; C1 leaves the card on its
+                button and the tab bar already carries "Next session …". */}
           </View>
           {!accessOk && (
             <>
@@ -256,8 +253,8 @@ export default function Home() {
           )}
         </View>
 
-        {/* Active series — horizontal artwork rail */}
-        <Gap size="xl" />
+        {/* Active series — horizontal artwork rail (header 547, cards 585). */}
+        <View style={{ height: 44 }} />
         <View style={{ paddingHorizontal: space.lg }}>
           <SectionHeader
             label={`${series.title} · ${Math.min(p.currentIndex, len)}/${len}`}
@@ -267,7 +264,7 @@ export default function Home() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: space.lg, gap: space.md }}>
+          contentContainerStyle={{ paddingHorizontal: space.lg, gap: 23 }}>
           {series.contemplations.map((c, i) => {
             const done = i < p.currentIndex;
             const isNext = i === p.currentIndex && !atWrap;
@@ -321,10 +318,11 @@ export default function Home() {
 const styles = StyleSheet.create({
   shell: { flex: 1, backgroundColor: color.paper },
   hero: {
+    // C1 sets the card's content 21 in from its edge (frame x=45).
     borderRadius: radius.sm,
     overflow: 'hidden',
-    paddingVertical: space.lg,
-    paddingHorizontal: space.lg,
+    paddingVertical: 21,
+    paddingHorizontal: 21,
     alignItems: 'stretch',
   },
   heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
@@ -339,7 +337,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(251,251,246,0.9)',
     borderRadius: radius.sm,
-    paddingVertical: 13,
+    paddingVertical: 12, // 45 tall with a 21-line label (C1)
     alignItems: 'center',
     alignSelf: 'stretch',
   },
@@ -351,7 +349,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.line,
     paddingTop: space.sm,
-    marginBottom: space.md,
+    marginBottom: 19, // rail cards open on 585
   },
   card: {
     borderRadius: radius.sm,
