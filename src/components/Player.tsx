@@ -23,6 +23,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withRepeat,
   withSequence,
   withTiming,
@@ -34,6 +35,45 @@ import { TextLink } from '@/components/ui';
 import { anchor, color, space, timing, type } from '@/theme/tokens';
 
 export type FinishReason = 'time' | 'end';
+
+/**
+ * How the words arrive (Kat, Aug 17): the field blooms out of the flat dark
+ * ground first, then the question animates on word by word.
+ */
+const FIELD_IN_MS = 1100;
+const WORD_STAGGER_MS = 110;
+const WORD_IN_MS = 650;
+
+/** One word of the prompt, fading up on its own beat. */
+function WordIn({ word, delay }: { word: string; delay: number }) {
+  const reducedMotion = useReducedMotion();
+  const v = useSharedValue(0);
+  useEffect(() => {
+    if (reducedMotion) {
+      v.value = 1;
+      return;
+    }
+    v.value = withDelay(delay, withTiming(1, { duration: WORD_IN_MS, easing: Easing.out(Easing.cubic) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const st = useAnimatedStyle(() => ({
+    opacity: v.value,
+    transform: [{ translateY: (1 - v.value) * 10 }],
+  }));
+  return <Animated.Text style={[styles.prompt, st]}>{word}</Animated.Text>;
+}
+
+/** The prompt as a centred, wrapping row of individually-entering words. */
+function PromptWords({ prompt }: { prompt: string }) {
+  const words = prompt.split(/\s+/).filter(Boolean);
+  return (
+    <View style={styles.promptRow}>
+      {words.map((w, i) => (
+        <WordIn key={`${i}-${w}`} word={w} delay={FIELD_IN_MS + i * WORD_STAGGER_MS} />
+      ))}
+    </View>
+  );
+}
 
 /** Placeholder media for ALL contemplations until per-contemplation assets exist. */
 export const PLACEHOLDER_VIDEO: VideoSource = require('../../assets/media/contemplation-loop.mp4');
@@ -167,7 +207,7 @@ export function ContemplationPlayer({
 
   // --- animations (respect OS reduce-motion) ---
   const reducedMotion = useReducedMotion();
-  const textIn = useSharedValue(0);
+  const fieldIn = useSharedValue(0);
   const drift = useSharedValue(0);
   const driftB = useSharedValue(0);
   const driftC = useSharedValue(0);
@@ -175,13 +215,15 @@ export function ContemplationPlayer({
 
   useEffect(() => {
     if (reducedMotion) {
-      textIn.value = 1;
+      fieldIn.value = 1;
       drift.value = 0.5;
       driftB.value = 0.5;
       driftC.value = 0.5;
       return;
     }
-    textIn.value = withTiming(1, { duration: 1800, easing: Easing.out(Easing.cubic) });
+    // The screen opens as the flat dark ground the Get Ready countdown faded
+    // into; the ember field blooms out of it, then the words follow (below).
+    fieldIn.value = withTiming(1, { duration: FIELD_IN_MS, easing: Easing.out(Easing.cubic) });
     // Mutually prime periods so the three layers never resync into a visible loop.
     const breathe = (ms: number) =>
       withRepeat(withTiming(1, { duration: ms, easing: Easing.inOut(Easing.quad) }), -1, true);
@@ -232,14 +274,11 @@ export function ContemplationPlayer({
     onFinish('end', elapsedRef.current);
   };
 
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: textIn.value,
-    transform: [{ translateY: (1 - textIn.value) * 14 }],
-  }));
   // ONE field, breathing. Two drivers on co-prime periods are combined into a
-  // single transform so the whole thing swells and drifts as one body.
+  // single transform so the whole thing swells and drifts as one body; the
+  // whole field is scaled by its own entrance fade.
   const fieldStyle = useAnimatedStyle(() => ({
-    opacity: 0.9 + driftC.value * 0.1,
+    opacity: (0.9 + driftC.value * 0.1) * fieldIn.value,
     transform: [
       { scale: 1 + drift.value * 0.08 },
       { translateY: -14 + driftB.value * 28 },
@@ -328,7 +367,7 @@ export function ContemplationPlayer({
       <SafeAreaView style={styles.content} pointerEvents="box-none">
         <View style={styles.center} pointerEvents="none">
           <View style={{ height: anchor.statement }} />
-          <Animated.Text style={[styles.prompt, textStyle]}>{prompt}</Animated.Text>
+          <PromptWords prompt={prompt} />
         </View>
         <View style={styles.bottomRow}>
           {/* Crisis ENDS the contemplation immediately (media stops on
@@ -414,6 +453,14 @@ const styles = StyleSheet.create({
   },
   content: { flex: 1, paddingHorizontal: 32 },
   center: { flex: 1 },
+  // Words enter one by one, wrapping as centred lines; the column gap stands
+  // in for the mono space the split removed (HAL advance ≈ 0.6em at 16).
+  promptRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    columnGap: 9,
+  },
   prompt: {
     // Jul 30 designs: the question speaks in the typewriter mono, centered.
     ...type.contemplation,

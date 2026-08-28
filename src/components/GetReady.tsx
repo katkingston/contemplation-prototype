@@ -9,12 +9,22 @@
  *  - First-run/minimal: spiral glyph up top, footer is just "Begin".
  * Instructions stay behind a pop-up. No crisis button here (it remains on the
  * contemplation player). The Begin tap IS the required timer confirmation.
+ * Begin then runs a 5..1 countdown (Kat, Aug 17): chrome and wash fade away,
+ * the numbers play centred over the naked footage, and the whole thing fades
+ * into the contemplation's dark ground before the player takes over.
  */
 import { Asset } from 'expo-asset';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MediaWash, PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
 import { Dither } from '@/components/Dither';
@@ -126,6 +136,81 @@ export function GetReadyScreen({
 
   const gradient = seriesContext?.gradient ?? seriesPalettes['s1-impermanence'];
 
+  // --- Begin → countdown (Kat, Aug 17): everything but the footage fades
+  // away, 5..1 counts down centred over the naked video, then video and
+  // number fade into the contemplation's flat dark ground. The player opens
+  // on that same ground, so the seam is invisible.
+  const reducedMotion = useReducedMotion();
+  const [counting, setCounting] = useState(false);
+  const [count, setCount] = useState(5);
+  const uiOut = useSharedValue(1); // 1 = page chrome visible
+  const numIn = useSharedValue(0); // per-number entrance/exit
+  const cover = useSharedValue(0); // final fade to the player's ground
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const begin = () => {
+    if (counting) return;
+    setCounting(true);
+    setCount(5);
+    uiOut.value = reducedMotion ? 0 : withTiming(0, { duration: 450, easing: Easing.out(Easing.quad) });
+    let n = 5;
+    const tick = () => {
+      if (n > 1) {
+        n -= 1;
+        setCount(n);
+        timers.current.push(setTimeout(tick, 1000));
+      } else {
+        // "1" has had its second — fade video + number into the dark ground.
+        cover.value = reducedMotion
+          ? 1
+          : withTiming(1, { duration: 600, easing: Easing.inOut(Easing.quad) });
+        timers.current.push(
+          setTimeout(() => onBegin(minutes, track !== 'none'), reducedMotion ? 50 : 650),
+        );
+      }
+    };
+    timers.current.push(setTimeout(tick, 1000));
+  };
+
+  // Each number rises in and then HOLDS its whole beat — the next number's
+  // own entrance is the beat change. (A fade-out tail left visible gaps
+  // whenever a tick lagged, and the number must stay readable over bright
+  // footage the whole second.)
+  useEffect(() => {
+    if (!counting) return;
+    if (reducedMotion) {
+      numIn.value = 1;
+      return;
+    }
+    numIn.value = 0;
+    numIn.value = withTiming(1, { duration: 280, easing: Easing.out(Easing.cubic) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count, counting, reducedMotion]);
+
+  // Coming BACK to this screen (push keeps it mounted): restore the chrome
+  // and cancel any pending countdown so a stale timer can't re-navigate.
+  useFocusEffect(
+    useCallback(() => {
+      setCounting(false);
+      setCount(5);
+      uiOut.value = 1;
+      numIn.value = 0;
+      cover.value = 0;
+      return () => {
+        timers.current.forEach(clearTimeout);
+        timers.current = [];
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+
+  const uiStyle = useAnimatedStyle(() => ({ opacity: uiOut.value }));
+  const numStyle = useAnimatedStyle(() => ({
+    opacity: numIn.value,
+    transform: [{ translateY: (1 - numIn.value) * 8 }],
+  }));
+  const coverStyle = useAnimatedStyle(() => ({ opacity: cover.value }));
+
   // Pre-warm the contemplation footage while the user chooses their time so
   // the player opens without a loading lag (browser/OS cache does the rest).
   useEffect(() => {
@@ -147,9 +232,16 @@ export function GetReadyScreen({
           ember gradient). Gradient stays underneath as the loading backdrop;
           MediaWash blurs and sinks it into this series' own dark stop. */}
       <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />
-      <MediaWash tint={gradient[0]} />
+      {/* The wash fades away with the chrome — the countdown plays over the
+          naked footage. */}
+      <Animated.View style={[StyleSheet.absoluteFill, uiStyle]} pointerEvents="none">
+        <MediaWash tint={gradient[0]} />
+      </Animated.View>
       {/* Fixed anchors measured off C3 Get Ready (see tokens.ts `anchor`). */}
       <SafeAreaView style={styles.content} edges={['left', 'right', 'bottom']}>
+        <Animated.View
+          style={[{ flex: 1 }, uiStyle]}
+          pointerEvents={counting ? 'none' : 'auto'}>
         <View style={{ height: anchor.monoHeader }} />
         {seriesContext ? (
           <MonoHeader code={seriesContext.code} title={seriesContext.hint} dark>
@@ -224,15 +316,27 @@ export function GetReadyScreen({
               onPress={() => setShowInstructions(true)}
               testID="instructions-button"
             />
-            <TextLink
-              label="Begin"
-              dark
-              onPress={() => onBegin(minutes, track !== 'none')}
-              testID="begin-button"
-            />
+            <TextLink label="Begin" dark onPress={begin} testID="begin-button" />
           </Row>
         </View>
+        </Animated.View>
       </SafeAreaView>
+      {/* 5..1, centred over the naked footage. */}
+      {counting ? (
+        <View style={styles.countdownWrap} pointerEvents="none" testID="countdown">
+          <Animated.Text
+            style={[styles.countdownNum, numStyle]}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={`Starting in ${count}`}>
+            {count}
+          </Animated.Text>
+        </View>
+      ) : null}
+      {/* Final fade into the contemplation's flat dark ground. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: color.dark }, coverStyle]}
+      />
       <Sheet
         visible={showInstructions}
         onClose={() => setShowInstructions(false)}
@@ -246,6 +350,22 @@ export function GetReadyScreen({
 
 const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: space.lg },
+  countdownWrap: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countdownNum: {
+    // The contemplation's own typewriter voice, sized up for the beat. The
+    // heavy shadow is what keeps a cream numeral legible over blown-out sky.
+    fontFamily: font.mono,
+    fontSize: 72,
+    lineHeight: 86,
+    color: color.onDark,
+    textShadowColor: 'rgba(24,28,12,0.75)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 22,
+  },
   spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
   optionRow: { flexDirection: 'row', justifyContent: 'space-between' },
   option: {
