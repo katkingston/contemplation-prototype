@@ -38,7 +38,13 @@ export default function Library() {
           style={StyleSheet.absoluteFill as never}
         />
       </View>
-      <View style={{ height: 113 }} />
+      <View style={{ height: 74 }} />
+      {/* Wayfinding pair (Kat, Aug 18): "You are here" over the series name,
+          both in the same title setting. Rows still open on the 455 line. */}
+      <AppText variant="heading" muted>
+        You are here
+      </AppText>
+      <View style={{ height: 8 }} />
       {/* S3 sets the series title over two lines, so the well is fixed at 48
           and the chapter rows always begin on 455 however short the name is. */}
       <View style={{ height: 48 }}>
@@ -77,7 +83,8 @@ export default function Library() {
         );
       })}
       <View style={styles.endRule} />
-      <Gap size="xl" />
+      {/* Doubled from 32 (Kat, Aug 18) — the catalogue keeps its distance. */}
+      <View style={{ height: 64 }} />
       <AppText variant="monoBody" muted>
         coming soon
       </AppText>

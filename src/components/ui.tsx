@@ -628,6 +628,8 @@ export function ListRow({
 // ---------- Step dots ----------
 
 export function Dots({ count, active, dark = false }: { count: number; active: number; dark?: boolean }) {
+  // Advancement reads through COLOUR only — the active dot stays a circle,
+  // never stretching into a pill (Kat, Aug 18).
   return (
     <View style={styles.dotsRow}>
       {Array.from({ length: count }, (_, i) => (
@@ -635,7 +637,6 @@ export function Dots({ count, active, dark = false }: { count: number; active: n
           key={i}
           style={[
             styles.dot,
-            i === active && styles.dotActive,
             {
               backgroundColor:
                 i === active ? (dark ? color.onDark : color.ink) : dark ? color.onDarkMuted : color.line,
@@ -787,7 +788,6 @@ const styles = StyleSheet.create({
   },
   dotsRow: { flexDirection: 'row', gap: 6, alignSelf: 'center', alignItems: 'center' },
   dot: { width: 7, height: 7, borderRadius: 4 },
-  dotActive: { width: 18 },
   sheetBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

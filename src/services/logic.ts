@@ -106,8 +106,11 @@ export function hasActiveAccess(data: AppData, seriesId: string): boolean {
 export function isSeriesUnlocked(data: AppData, s: Series): boolean {
   if (!hasActiveAccess(data, s.id)) return false;
   if (s.displayOrder === 1) return true;
-  const intro = orderedSeries()[0];
-  return intro ? isSeriesCompleted(data, intro) : false;
+  // Chapters unlock strictly in sequence: each needs the one IMMEDIATELY
+  // before it completed. (This used to check only chapter 1, which threw
+  // chapters 3 and 4 open the moment chapter 1 wrapped — Kat, Aug 18.)
+  const prev = orderedSeries().find((x) => x.displayOrder === s.displayOrder - 1);
+  return prev ? isSeriesCompleted(data, prev) : false;
 }
 
 /** The series the user is currently working through (first with progress not completed), else first unlocked, else intro. */
