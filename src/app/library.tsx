@@ -49,17 +49,26 @@ export default function Library() {
         const p = progressFor(data, s.id);
         const done = isSeriesCompleted(data, s);
         const unlocked = isSeriesUnlocked(data, s);
+        // Same disabled rule as everywhere (Kat, Aug 17): a chapter is live
+        // only once reachable — started/startable or already completed.
+        const available = unlocked || done;
         const len = seriesLength(s);
         return (
           <Pressable
             key={s.id}
             accessibilityRole="button"
             accessibilityLabel={s.title}
+            accessibilityState={{ disabled: !available }}
+            disabled={!available}
             onPress={() => open(s.id)}
-            style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}
+            style={({ pressed }) => [
+              styles.row,
+              !available && { opacity: 0.45 },
+              pressed && { opacity: 0.6 },
+            ]}
             testID={`library-${s.id}`}>
-            <View style={{ flex: 1, opacity: unlocked || done ? 1 : 0.5 }}>
-              <AppText variant="bodyBold" numberOfLines={2}>
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyBold" numberOfLines={2} muted={!available}>
                 {s.title}
               </AppText>
             </View>

@@ -23,7 +23,6 @@ import {
   isSeriesCompleted,
   isSeriesUnlocked,
   progressFor,
-  questionFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
 import { color, radius, seriesPalettes, space } from '@/theme/tokens';
@@ -118,7 +117,6 @@ export default function SeriesDetail() {
             total={len}
             done={Math.min(p.currentIndex, len)}
             active={!completed && !atWrap}
-            shape="square"
           />
           <AppText variant="label" muted>
             {`${Math.min(p.currentIndex, len)}/${len}`}
@@ -156,31 +154,28 @@ export default function SeriesDetail() {
         {series.contemplations.map((c, i) => {
           const done = i < p.currentIndex;
           const isNext = i === p.currentIndex && !atWrap && !completed;
-          const today = isNext && dropReady;
-          const future = !done && !isNext;
+          // Colour logic (Kat, Aug 17): a row is live ONLY if it was already
+          // completed, or it is today's contemplation and today's drop has
+          // arrived on an unlocked, paid-for chapter. Everything else —
+          // tomorrow's, future days, locked chapters — reads disabled.
+          const available = done || (isNext && dropReady && unlocked && accessOk);
           return (
+            // No contemplation copy here, done or not (Kat, Aug 17) — the
+            // questions live only inside the practice itself.
             <View key={c.id} style={styles.row}>
-              <View style={{ flex: 1, opacity: future ? 0.45 : 1 }}>
+              <View style={{ flex: 1, opacity: available ? 1 : 0.45 }}>
                 <Row>
                   <AppText variant="label" muted style={styles.rowCode as never}>
                     {seriesCode(series, i)}
                   </AppText>
-                  <AppText variant="bodyBold" muted={future}>
+                  <AppText variant="bodyBold" muted={!available}>
                     {c.hint}
                   </AppText>
                 </Row>
-                {done ? (
-                  <>
-                    <Gap size="xs" />
-                    <AppText variant="small" muted>
-                      {questionFor(data, series, i)}
-                    </AppText>
-                  </>
-                ) : null}
               </View>
               {done ? (
                 <View style={styles.rowDotDone} />
-              ) : isNext ? (
+              ) : available ? (
                 <View style={styles.rowDotNext} />
               ) : null}
             </View>

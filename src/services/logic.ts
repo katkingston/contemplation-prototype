@@ -218,6 +218,8 @@ export function formatMinutes(totalSeconds: number): string {
 export interface LifetimeStats {
   contemplations: number;
   minutes: number;
+  /** Distinct calendar days with at least one session — "days contemplated". */
+  daysPracticed: number;
   currentStreak: number;
   bestStreak: number;
 }
@@ -227,6 +229,7 @@ export function lifetimeStats(data: AppData): LifetimeStats {
   return {
     contemplations: data.sessions.length,
     minutes: Math.round(secs / 60),
+    daysPracticed: new Set(data.sessions.map((s) => s.date)).size,
     currentStreak: computeStreak(data),
     bestStreak: bestStreak(data),
   };

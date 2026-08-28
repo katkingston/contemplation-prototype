@@ -92,7 +92,9 @@ export const SERIES: Series[] = [
         ['#1d221a', '#515a30'],
         ['#242a1b', '#5f6633'],
       ],
-    ['Small joys', 'Lost things', 'Taken for granted', 'Unrepeatable day', 'Daily rhythm', 'Precious now', 'Passing moments'],
+    // Hints stay abstract — atmosphere, not instruction (Kat, Aug 17): they
+    // must never summarise the question or colour the experience.
+    ['Amber', 'Driftwood', 'Still water', 'One day', 'The hours', 'Close at hand', 'Falling leaves'],
     ),
     wrapSlides: [
       'Awareness of impermanence is not meant to make life feel smaller.',
@@ -140,7 +142,7 @@ export const SERIES: Series[] = [
         ['#361f19', '#94493a'],
         ['#241210', '#66281f'],
       ],
-    ['Time spent', 'Unspoken thanks', 'Distractions', 'Unsaid words', 'Being missed', 'Fleeting bonds', 'One moment'],
+    ['Warmth', 'A thread', 'Across the table', 'In the margins', 'Echoes', 'Orbits', 'Meanwhile'],
     ),
     wrapSlides: [
       'This week you explored what and who matters most',
@@ -191,7 +193,7 @@ export const SERIES: Series[] = [
         ['#2d251b', '#7a7158'],
         ['#1f1a14', '#514a39'],
       ],
-    ['What arises', 'The unknown', 'Groundedness', 'One quality', 'Meaning', 'Finitude', 'Making peace'],
+    ['Weather', 'Fog', 'Roots', 'A grain', 'The well', 'Horizon', 'Evening'],
     ),
     wrapSlides: [
       'This week you practiced turning toward difficult questions rather than away from them',
@@ -240,7 +242,7 @@ export const SERIES: Series[] = [
         ['#383a20', '#a3b95a'],
         ['#262813', '#657529'],
       ],
-    ['Unseen devotion', 'No postponing', 'Passing wisdom', 'Daily values', 'One year', 'Remembrance', 'Presence'],
+    ['Quiet hands', 'Soon', 'Heirloom', 'True north', 'Four seasons', 'A stone', 'Daylight'],
     ),
     wrapSlides: [
       'Over the past four weeks…',
@@ -274,7 +276,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
   {
     id: 'intro-1',
     sequenceIndex: 0,
-    hint: 'What remains',
+    hint: 'Nearby',
     prompt: 'What is present in your life right now that you would miss if it were gone tomorrow?',
     videoUri: null,
     gradient: ['#242a1b', '#6f7036'],
@@ -282,7 +284,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
   {
     id: 'intro-2',
     sequenceIndex: 1,
-    hint: 'Full presence',
+    hint: 'One breath',
     prompt: 'When did you last feel fully present, and what made that moment different?',
     videoUri: null,
     gradient: ['#20261b', '#5a6136'],
@@ -290,7 +292,7 @@ export const INTRO_CONTEMPLATIONS: Contemplation[] = [
   {
     id: 'intro-3',
     sequenceIndex: 2,
-    hint: 'Slowing down',
+    hint: 'Passing by',
     prompt: 'What are you moving too quickly past that deserves a longer look?',
     videoUri: null,
     gradient: ['#262b1c', '#4c5232'],

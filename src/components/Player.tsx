@@ -41,8 +41,9 @@ export type FinishReason = 'time' | 'end';
  * ground first, then the question animates on word by word.
  */
 const FIELD_IN_MS = 1100;
-const WORD_STAGGER_MS = 110;
-const WORD_IN_MS = 650;
+// Slowed per Kat (Aug 17) — the words should surface at a meditative pace.
+const WORD_STAGGER_MS = 200;
+const WORD_IN_MS = 1300;
 
 /** One word of the prompt, fading up on its own beat. */
 function WordIn({ word, delay }: { word: string; delay: number }) {
@@ -352,7 +353,7 @@ export function ContemplationPlayer({
       />
       {!paused ? (
         // Jul 30 designs: no visible pause control — tapping the surface
-        // pauses. The overlay sits under the text/links so Crisis stays tappable.
+        // pauses.
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Pause contemplation"
@@ -361,22 +362,14 @@ export function ContemplationPlayer({
           testID="pause-button"
         />
       ) : null}
+      {/* No chrome at all during the live contemplation (Kat, Aug 17) —
+          Crisis Support lives on the paused screen, one surface-tap away.
+          NOTE: this deviates from App-CLAUDE.md's "persistent button on every
+          contemplation screen" hard rule; revisit before App Store review. */}
       <SafeAreaView style={styles.content} pointerEvents="box-none">
         <View style={styles.center} pointerEvents="none">
           <View style={{ height: anchor.statement }} />
           <PromptWords prompt={prompt} />
-        </View>
-        <View style={styles.bottomRow}>
-          {/* Crisis ENDS the contemplation immediately (media stops on
-              unmount, nothing recorded) and opens full-screen support. */}
-          <TextLink
-            label="Crisis Support"
-            dark
-            muted
-            small
-            onPress={() => router.replace('/crisis')}
-            testID="crisis-button"
-          />
         </View>
       </SafeAreaView>
       {paused ? (
@@ -415,18 +408,18 @@ export function ContemplationPlayer({
                   onPress={() => setPaused(false)}
                   testID="resume-button"
                 />
+                {/* Right next to Resume (Kat, Aug 17). Ends the contemplation
+                    immediately — media stops, nothing recorded — and opens
+                    full-screen support. */}
+                <TextLink
+                  label="Crisis Support,"
+                  dark
+                  muted
+                  onPress={() => router.replace('/crisis')}
+                  testID="crisis-button"
+                />
                 <TextLink label="End" dark muted onPress={handleEnd} testID="end-button" />
               </View>
-            </View>
-            <View style={styles.bottomRow}>
-              <TextLink
-                label="Crisis Support"
-                dark
-                muted
-                small
-                onPress={() => router.replace('/crisis')}
-                testID="crisis-button-paused"
-              />
             </View>
           </SafeAreaView>
         </View>
@@ -466,11 +459,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 10,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    paddingBottom: space.lg,
   },
   pausedScreen: { backgroundColor: color.overlay },
   pausedPrompt: {

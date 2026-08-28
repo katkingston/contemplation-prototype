@@ -15,7 +15,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { MediaWash } from '@/components/Player';
 import { SeriesArt } from '@/components/SeriesArt';
 import { AppText, Gap } from '@/components/ui';
-import { seriesLength } from '@/content/series';
+import { seriesCode, seriesLength } from '@/content/series';
 import {
   activeSeries,
   dropLabel,
@@ -275,24 +275,26 @@ export default function Home() {
           {series.contemplations.map((c, i) => {
             const done = i < p.currentIndex;
             const isNext = i === p.currentIndex && !atWrap;
-            // 'Today' only while the drop is actually available — after
-            // completing, the next one is tomorrow and reads (and dims) so.
-            const today = isNext && dropReady;
-            const tomorrow = isNext && !dropReady;
+            const today = isNext && dropReady && accessOk;
+            // Live only when done or doable today (Kat, Aug 17) — tomorrow's
+            // and beyond read disabled, art and labels dimmed together.
+            const available = done || today;
+            const code = seriesCode(series, i);
             return (
               <Pressable
                 key={c.id}
                 accessibilityRole="button"
-                accessibilityLabel={`No. ${i + 1} · ${c.hint}`}
+                accessibilityLabel={`${code} · ${c.hint}`}
+                accessibilityState={{ disabled: !available }}
+                disabled={!available}
                 onPress={today ? onPlay : () => openSeries(series.id)}
-                style={({ pressed }) => [{ width: cardW }, pressed && { opacity: 0.7 }]}
+                style={({ pressed }) => [
+                  { width: cardW },
+                  !available && { opacity: 0.45 },
+                  pressed && { opacity: 0.7 },
+                ]}
                 testID={`rail-${c.id}`}>
-                <View
-                  style={[
-                    styles.card,
-                    { width: cardW, height: cardW * 1.2 },
-                    !done && !today && { opacity: 0.55 },
-                  ]}>
+                <View style={[styles.card, { width: cardW, height: cardW * 1.2 }]}>
                   <SeriesArt
                     gradient={c.gradient}
                     accent={palette[2]}
@@ -302,11 +304,12 @@ export default function Home() {
                   {done ? <View style={styles.cardDoneDot} /> : null}
                 </View>
                 <Gap size="sm" />
+                {/* The chapter's own numbering (01.3), not an ordinal. */}
                 <AppText variant="label" muted>
-                  No. {i + 1}
-                  {today ? ' · Today' : tomorrow ? ' · Tomorrow' : ''}
+                  {code}
+                  {today ? ' · Today' : ''}
                 </AppText>
-                <AppText variant="bodyBold" numberOfLines={1}>
+                <AppText variant="bodyBold" numberOfLines={1} muted={!available}>
                   {c.hint}
                 </AppText>
               </Pressable>
