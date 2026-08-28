@@ -11,11 +11,10 @@
  *   practice pauses the music too.
  * - Only small, dim Pause/End controls + persistent Crisis pill (hard rule).
  */
-import { useAudioPlayer } from 'expo-audio';
 import { useVideoPlayer, VideoSource, VideoView } from 'expo-video';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -32,6 +31,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Dither } from '@/components/Dither';
 import { TextLink } from '@/components/ui';
+import { pauseAmbient, playAmbient } from '@/services/ambient';
 import { anchor, color, space, timing, type } from '@/theme/tokens';
 
 export type FinishReason = 'time' | 'end';
@@ -56,10 +56,8 @@ function WordIn({ word, delay }: { word: string; delay: number }) {
     v.value = withDelay(delay, withTiming(1, { duration: WORD_IN_MS, easing: Easing.out(Easing.cubic) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const st = useAnimatedStyle(() => ({
-    opacity: v.value,
-    transform: [{ translateY: (1 - v.value) * 10 }],
-  }));
+  // Opacity only (Kat, Aug 17) — the words surface gently, nothing moves.
+  const st = useAnimatedStyle(() => ({ opacity: v.value }));
   return <Animated.Text style={[styles.prompt, st]}>{word}</Animated.Text>;
 }
 
@@ -77,7 +75,6 @@ function PromptWords({ prompt }: { prompt: string }) {
 
 /** Placeholder media for ALL contemplations until per-contemplation assets exist. */
 export const PLACEHOLDER_VIDEO: VideoSource = require('../../assets/media/contemplation-loop.mp4');
-const AMBIENT_MUSIC = require('../../assets/media/ambient-music.mp3');
 
 const SCRIM_RGB = '24,28,12'; // dark olive
 
@@ -187,23 +184,23 @@ export function ContemplationPlayer({
   const finishedRef = useRef(false);
   const [inFinalPulse, setInFinalPulse] = useState(false);
 
-  // --- ambient music: plays ONLY on this screen, only if chosen; pauses with the practice ---
-  const music = useAudioPlayer(AMBIENT_MUSIC);
+  // --- ambient music: the SHARED player the Get Ready countdown already
+  // started; pauses with the practice, and stops on every way out. On web the
+  // router keeps left screens mounted, so unmount cleanup never runs — the
+  // blur callback below is the stop that actually fires when the route
+  // changes (finish, End, and Crisis included).
   useEffect(() => {
-    music.loop = true;
-    if (musicOn && !paused && !finishedRef.current) music.play();
-    else music.pause();
-  }, [music, musicOn, paused]);
+    if (musicOn && !paused && !finishedRef.current) playAmbient();
+    else pauseAmbient();
+  }, [musicOn, paused]);
+  useFocusEffect(
+    useCallback(() => {
+      return () => pauseAmbient();
+    }, []),
+  );
   useEffect(() => {
-    // Hard stop when leaving the contemplation, whatever the route.
-    return () => {
-      try {
-        music.pause();
-      } catch {
-        // player may already be released on unmount
-      }
-    };
-  }, [music]);
+    return () => pauseAmbient();
+  }, []);
 
   // --- animations (respect OS reduce-motion) ---
   const reducedMotion = useReducedMotion();
@@ -260,17 +257,17 @@ export function ContemplationPlayer({
       if (remaining <= 0 && !finishedRef.current) {
         finishedRef.current = true;
         clearInterval(id);
-        music.pause();
+        pauseAmbient();
         onFinish('time', elapsedRef.current);
       }
     }, 1000);
     return () => clearInterval(id);
-  }, [paused, totalSeconds, onFinish, music]);
+  }, [paused, totalSeconds, onFinish]);
 
   const handleEnd = () => {
     if (finishedRef.current) return;
     finishedRef.current = true;
-    music.pause();
+    pauseAmbient();
     onFinish('end', elapsedRef.current);
   };
 

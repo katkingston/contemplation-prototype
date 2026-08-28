@@ -9,9 +9,11 @@
  *  - First-run/minimal: spiral glyph up top, footer is just "Begin".
  * Instructions stay behind a pop-up. No crisis button here (it remains on the
  * contemplation player). The Begin tap IS the required timer confirmation.
- * Begin then runs a 5..1 countdown (Kat, Aug 17): chrome and wash fade away,
- * the numbers play centred over the naked footage, and the whole thing fades
- * into the contemplation's dark ground before the player takes over.
+ * Begin then runs a 5..1 countdown (Kat, Aug 17): the page chrome fades away
+ * (the wash and blur stay), the numbers surface centred over the filtered
+ * footage at the contemplation copy's own size, ambient music opens with the
+ * count, and the whole thing fades into the contemplation's dark ground
+ * before the player takes over.
  */
 import { Asset } from 'expo-asset';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,8 +33,9 @@ import { Dither } from '@/components/Dither';
 import { SeriesDashes } from '@/components/SeriesDashes';
 import { AppText, Gap, MonoHeader, Row, Sheet, TextLink } from '@/components/ui';
 import { instructions } from '@/content/copy';
+import { pauseAmbient, playAmbient } from '@/services/ambient';
 import { useApp } from '@/services/provider';
-import { anchor, color, font, seriesPalettes, space, timing } from '@/theme/tokens';
+import { anchor, color, font, seriesPalettes, space, timing, type } from '@/theme/tokens';
 
 /**
  * Named ambience tracks (Jul 30 designs). All three named tracks currently
@@ -152,6 +155,9 @@ export function GetReadyScreen({
     if (counting) return;
     setCounting(true);
     setCount(5);
+    // Music opens WITH the countdown (Kat, Aug 17) and runs unbroken into
+    // the contemplation — same shared player, no restart at the seam.
+    if (track !== 'none') playAmbient();
     uiOut.value = reducedMotion ? 0 : withTiming(0, { duration: 450, easing: Easing.out(Easing.quad) });
     let n = 5;
     const tick = () => {
@@ -187,10 +193,13 @@ export function GetReadyScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count, counting, reducedMotion]);
 
-  // Coming BACK to this screen (push keeps it mounted): restore the chrome
-  // and cancel any pending countdown so a stale timer can't re-navigate.
+  // Coming BACK to this screen (push keeps it mounted): restore the chrome,
+  // silence any countdown music, and cancel pending countdown timers so a
+  // stale one can't re-navigate. (Pause on FOCUS, not blur — on blur the
+  // player has just taken the music over.)
   useFocusEffect(
     useCallback(() => {
+      pauseAmbient();
       setCounting(false);
       setCount(5);
       uiOut.value = 1;
@@ -204,11 +213,9 @@ export function GetReadyScreen({
     }, []),
   );
 
+  // Opacity only, everywhere (Kat, Aug 17) — nothing slides, it all surfaces.
   const uiStyle = useAnimatedStyle(() => ({ opacity: uiOut.value }));
-  const numStyle = useAnimatedStyle(() => ({
-    opacity: numIn.value,
-    transform: [{ translateY: (1 - numIn.value) * 8 }],
-  }));
+  const numStyle = useAnimatedStyle(() => ({ opacity: numIn.value }));
   const coverStyle = useAnimatedStyle(() => ({ opacity: cover.value }));
 
   // Pre-warm the contemplation footage while the user chooses their time so
@@ -232,11 +239,9 @@ export function GetReadyScreen({
           ember gradient). Gradient stays underneath as the loading backdrop;
           MediaWash blurs and sinks it into this series' own dark stop. */}
       <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />
-      {/* The wash fades away with the chrome — the countdown plays over the
-          naked footage. */}
-      <Animated.View style={[StyleSheet.absoluteFill, uiStyle]} pointerEvents="none">
-        <MediaWash tint={gradient[0]} />
-      </Animated.View>
+      {/* The wash STAYS through the countdown (Kat, Aug 17) — only the page
+          chrome fades; the numbers play over the filtered, blurred footage. */}
+      <MediaWash tint={gradient[0]} />
       {/* Fixed anchors measured off C3 Get Ready (see tokens.ts `anchor`). */}
       <SafeAreaView style={styles.content} edges={['left', 'right', 'bottom']}>
         <Animated.View
@@ -321,7 +326,7 @@ export function GetReadyScreen({
         </View>
         </Animated.View>
       </SafeAreaView>
-      {/* 5..1, centred over the naked footage. */}
+      {/* 5..1, centred over the washed footage. */}
       {counting ? (
         <View style={styles.countdownWrap} pointerEvents="none" testID="countdown">
           <Animated.Text
@@ -356,15 +361,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   countdownNum: {
-    // The contemplation's own typewriter voice, sized up for the beat. The
-    // heavy shadow is what keeps a cream numeral legible over blown-out sky.
-    fontFamily: font.mono,
-    fontSize: 72,
-    lineHeight: 86,
+    // Same voice AND size as the contemplation copy (Kat, Aug 17) — the
+    // countdown speaks at the question's own register, not over it.
+    ...type.contemplation,
     color: color.onDark,
-    textShadowColor: 'rgba(24,28,12,0.75)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 22,
+    textAlign: 'center',
+    textShadowColor: 'rgba(24,28,12,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
   },
   spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
   optionRow: { flexDirection: 'row', justifyContent: 'space-between' },
