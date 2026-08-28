@@ -410,12 +410,13 @@ export function ContemplationPlayer({
                 />
                 {/* Right next to Resume (Kat, Aug 17). Ends the contemplation
                     immediately — media stops, nothing recorded — and opens
-                    full-screen support. */}
+                    the mental-health resources page (the single support page
+                    since Aug 18; the separate X1 crisis screen is gone). */}
                 <TextLink
                   label="Crisis Support,"
                   dark
                   muted
-                  onPress={() => router.replace('/crisis')}
+                  onPress={() => router.replace('/resources')}
                   testID="crisis-button"
                 />
                 <TextLink label="End" dark muted onPress={handleEnd} testID="end-button" />

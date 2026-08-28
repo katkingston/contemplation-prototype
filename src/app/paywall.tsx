@@ -15,6 +15,7 @@ import {
   AppText,
   Button,
   Stage,
+  TextLink,
   Wordmark,
 } from '@/components/ui';
 import { paywall, plans, ProductType } from '@/content/copy';
@@ -30,6 +31,9 @@ import { anchor, anchorBottom, color, space } from '@/theme/tokens';
 const PLAN_TOP = 373;
 const PLAN_PITCH = 76;
 const PLAN_RULE = 62;
+/** Air between a rule and the next row's text — folded INTO the cell above
+ *  the text so the selection tint reaches the rule (Kat, Aug 18). */
+const PLAN_LEAD = PLAN_PITCH - PLAN_RULE - 1;
 const PRICE_COLUMN = 270;
 
 export default function Paywall() {
@@ -60,8 +64,14 @@ export default function Paywall() {
       </Anchored>
       {plans.map((p, i) => {
         const sel = selected === p.productType;
+        // The cell runs RULE TO RULE (Kat, Aug 18): the tinted, tappable block
+        // starts just under the previous row's rule and ends at its own, so
+        // the selection wash covers the entire clickable area with no gap.
         return (
-          <Anchored key={p.productType} y={PLAN_TOP + i * PLAN_PITCH} gutter={false}>
+          <Anchored
+            key={p.productType}
+            y={PLAN_TOP + i * PLAN_PITCH - PLAN_LEAD}
+            gutter={false}>
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ selected: sel }}
@@ -107,6 +117,15 @@ export default function Paywall() {
       <AnchoredBottom up={anchorBottom.action}>
         <Button label={paywall.cta} arrow onPress={purchase} testID="start-trial" />
       </AnchoredBottom>
+      <AnchoredBottom up={20}>
+        <TextLink
+          label="Back"
+          center
+          muted
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
+          testID="paywall-back"
+        />
+      </AnchoredBottom>
     </Stage>
   );
 }
@@ -116,8 +135,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingHorizontal: space.lg,
-    height: PLAN_RULE,
-    paddingTop: 0,
+    // Full cell: lead-in air + the 62 content block, ending at the rule.
+    height: PLAN_LEAD + PLAN_RULE,
+    paddingTop: PLAN_LEAD,
   },
   /** Selection tint bleeds the full width, like the rules — no inset card. */
   planSelected: { backgroundColor: color.faint },

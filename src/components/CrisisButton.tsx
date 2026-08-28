@@ -7,13 +7,13 @@ import React, { useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { mentalHealthResources, resourcesFootnote } from '@/content/copy';
 import { color, radius, space, type } from '@/theme/tokens';
-import { AppText, Sheet, TextLink } from './ui';
+import { AppText, Sheet } from './ui';
 
 /**
  * X2: mono intro on a narrow measure at 180, then resource rows on a ~74pt
- * pitch ruled above, and the footnote at 652. Call/Text are underlined text
- * links set right — the same affordance Kat approved on X1 Crisis Support, not
- * a filled chip.
+ * pitch ruled above, and the footnote at 652. No Call/Text affordances on the
+ * right (Kat, Aug 18) — the whole row is the action: tel rows dial, url rows
+ * open the site.
  */
 export function ResourcesList({ dark = false }: { dark?: boolean }) {
   return (
@@ -24,14 +24,21 @@ export function ResourcesList({ dark = false }: { dark?: boolean }) {
         style={{ maxWidth: dark ? 240 : undefined, marginBottom: 130 }}>
         If this content brings up difficult feelings, support is available.
       </AppText>
-      {mentalHealthResources.map((r) => (
-        <View
-          key={r.label}
-          style={[styles.resourceRow, dark && { borderTopColor: 'rgba(251,251,246,0.3)' }]}>
+      {mentalHealthResources.map((r) => {
+        const target = r.tel ?? r.url;
+        return (
           <Pressable
-            accessibilityRole={r.url ? 'link' : undefined}
-            onPress={r.url ? () => Linking.openURL(r.url!) : undefined}
-            style={{ flex: 1 }}>
+            key={r.label}
+            accessibilityRole={target ? 'link' : undefined}
+            accessibilityLabel={
+              r.tel ? `${r.tel.startsWith('sms') ? 'Text' : 'Call'} ${r.label}` : r.label
+            }
+            onPress={target ? () => Linking.openURL(target) : undefined}
+            style={({ pressed }) => [
+              styles.resourceRow,
+              dark && { borderTopColor: 'rgba(251,251,246,0.3)' },
+              pressed && { opacity: 0.6 },
+            ]}>
             <AppText variant="bodyBold" dark={dark}>
               {r.label}
             </AppText>
@@ -39,15 +46,8 @@ export function ResourcesList({ dark = false }: { dark?: boolean }) {
               {r.detail}
             </AppText>
           </Pressable>
-          {r.tel ? (
-            <TextLink
-              label={r.tel.startsWith('sms') ? 'Text' : 'Call'}
-              dark={dark}
-              onPress={() => Linking.openURL(r.tel!)}
-            />
-          ) : null}
-        </View>
-      ))}
+        );
+      })}
       <View style={[styles.endRule, dark && { borderTopColor: 'rgba(251,251,246,0.3)' }]} />
       <AppText variant="caption" muted dark={dark} style={{ marginTop: space.md }}>
         {resourcesFootnote}
@@ -97,9 +97,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.line,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
   },
   endRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.line },
 });
