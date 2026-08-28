@@ -116,7 +116,14 @@ export default function Home() {
   // Home stays mounted beneath other routes (web keeps stack screens alive);
   // the video must unmount when unfocused or it bleeds through page changes.
   const isFocused = useIsFocused();
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  // The static export (GitHub Pages) pre-renders with a 0x0 window and no
+  // resize event ever corrects it after hydration — deriving sizes straight
+  // from useWindowDimensions collapses the rail cards to zero width on the
+  // live site (dev server is unaffected, which is how it slipped through).
+  // Fall back to the design frame whenever the runtime reports nothing.
+  const dims = useWindowDimensions();
+  const windowWidth = dims.width || 390;
+  const windowHeight = dims.height || 844;
   const series = activeSeries(data);
   const palette = seriesPalettes[series.id] ?? ['#232619', '#4c5232', '#6f7036'];
   const p = progressFor(data, series.id);
