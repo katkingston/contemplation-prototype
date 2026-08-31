@@ -7,7 +7,7 @@
  * Answers are saved to the backend and never shown back to the user.
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { Anchored, AnchoredBottom, AppText, Row, Stage, TextLink, useAnchor } from '@/components/ui';
 import type { AnswerValue } from '@/services/types';
 import { anchor, anchorBottom, color, font, space, type } from '@/theme/tokens';
@@ -38,6 +38,7 @@ export function QuestionFlow({
   // Long option lists must clear the bottom link on short phone viewports —
   // the row padding compresses with the grid (text size never changes).
   const ax = useAnchor();
+  const { width: winWidth } = useWindowDimensions();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
@@ -94,10 +95,17 @@ export function QuestionFlow({
       {q.kind === 'scale' && (
         <>
           <Anchored y={anchor.scaleRow} style={styles.scaleRow}>
-            {Array.from(
-              { length: (q.max ?? 5) - (q.min ?? 1) + 1 },
-              (_, i) => (q.min ?? 1) + i,
-            ).map((n) => {
+            {(() => {
+              const opts = Array.from(
+                { length: (q.max ?? 5) - (q.min ?? 1) + 1 },
+                (_, i) => (q.min ?? 1) + i,
+              );
+              // A 1–10 scale can't keep the 39-wide boxes of the 5-point
+              // design — width adapts so the whole row always fits the
+              // measure (Kat, Aug 19: 10 was running off-screen).
+              const measure = (winWidth || 390) - space.lg * 2;
+              const boxW = Math.min(39, Math.floor((measure - (opts.length - 1) * 4) / opts.length));
+              return opts.map((n) => {
               const sel = value === n;
               return (
                 <Pressable
@@ -105,7 +113,7 @@ export function QuestionFlow({
                   accessibilityRole="button"
                   accessibilityState={{ selected: sel }}
                   onPress={() => set(n)}
-                  style={[styles.scaleBox, sel && styles.scaleBoxSelected]}>
+                  style={[styles.scaleBox, { width: boxW }, sel && styles.scaleBoxSelected]}>
                   <AppText
                     variant="body"
                     style={
@@ -119,7 +127,8 @@ export function QuestionFlow({
                   </AppText>
                 </Pressable>
               );
-            })}
+              });
+            })()}
           </Anchored>
           <Anchored y={459} style={styles.endpointRow}>
             <AppText variant="caption" muted style={{ marginTop: 8 }}>
@@ -207,7 +216,6 @@ const styles = StyleSheet.create({
   // cluster — the gaps are what make the row read as a scale.
   scaleRow: { flexDirection: 'row', justifyContent: 'space-between' },
   scaleBox: {
-    width: 39,
     height: 48,
     borderWidth: 1,
     borderColor: color.line,

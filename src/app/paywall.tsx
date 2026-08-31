@@ -61,7 +61,10 @@ export default function Paywall() {
           {/* O5: intro at 180 on a narrow measure — four short typewriter lines. */}
           <View style={{ height: ax(anchor.intro) - ax(anchor.wordmark) - 25 }} />
           <View style={styles.gutter}>
-            <AppText variant="monoBody" style={{ maxWidth: 250 }}>
+            {/* Smaller than the mono body voice (Kat, Aug 19). */}
+            <AppText
+              variant="monoBody"
+              style={{ fontSize: 12, lineHeight: 19.2, letterSpacing: -0.24, maxWidth: 230 }}>
               {paywall.subhead}
             </AppText>
           </View>

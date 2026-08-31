@@ -7,7 +7,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { VoiceRecorder, WordCapInput, countWords } from '@/components/diary';
-import { AppText, Gap, MonoHeader, Row, Screen, Sheet, Spacer, TextLink, useAnchor } from '@/components/ui';
+import { AppText, Gap, MonoHeader, Row, Screen, Sheet, TextLink, useAnchor } from '@/components/ui';
 import { journalHelp } from '@/content/copy';
 import { getSeries, seriesCode, seriesLength } from '@/content/series';
 import { questionFor } from '@/services/logic';
@@ -109,12 +109,15 @@ export default function Journal() {
             <AppText variant="small">{prior.text ?? '(voice memo)'}</AppText>
           </View>
         )}
-        {/* Writing surface sits at the measured C6 anchor (write here… y=473). */}
-        <View style={{ height: ax(473) - ax(anchor.screenTitle) - 32 }} />
+        {/* C6 sets the writing surface low-middle (write here… y=473) with the
+            memo + links beneath. The blank above the input is the FLEXIBLE
+            zone — it absorbs whatever the viewport lacks or spares — while
+            the input→memo→links rhythm below stays fixed (Kat, Aug 19). */}
+        <View style={{ flex: 2, minHeight: space.lg }} />
         <WordCapInput value={text} onChange={setText} />
-        <Gap size="xl" />
+        <Gap size="lg" />
         <VoiceRecorder onRecorded={(uri, sec) => setAudio({ uri, sec })} />
-        <Spacer />
+        <View style={{ flex: 1, minHeight: space.lg }} />
         <Row style={{ gap: space.md }}>
           <TextLink label="Skip," muted onPress={() => finishDay(false)} testID="journal-skip" />
           <TextLink

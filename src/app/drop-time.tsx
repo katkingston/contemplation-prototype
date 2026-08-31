@@ -5,6 +5,7 @@
  */
 import { router } from 'expo-router';
 import React from 'react';
+import { View } from 'react-native';
 import { DropTimeInput } from '@/components/DropTimeInput';
 import {
   Anchored,
@@ -27,13 +28,15 @@ export default function DropTime() {
       <Anchored y={247}>
         <AppText variant="heading">Each day’s new contemplation arrives at this time.</AppText>
       </Anchored>
+      {/* The input FLOWS below the copy with a fixed gap (Kat, Aug 19) — an
+          independently-anchored input crowded the paragraph whenever the copy
+          wrapped one line further on a narrower phone. */}
       <Anchored y={349}>
         <AppText variant="body" muted>
           Evening tends to suit the practice, a moment to look back at the day, but
           choose what fits your life. You can change this anytime in Settings.
         </AppText>
-      </Anchored>
-      <Anchored y={440}>
+        <View style={{ height: 28 }} />
         <DropTimeInput />
       </Anchored>
       <AnchoredBottom up={anchorBottom.action}>

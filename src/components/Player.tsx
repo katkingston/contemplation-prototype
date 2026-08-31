@@ -40,10 +40,11 @@ export type FinishReason = 'time' | 'end';
  * How the words arrive (Kat, Aug 17): the field blooms out of the flat dark
  * ground first, then the question animates on word by word.
  */
-const FIELD_IN_MS = 1100;
-// Slowed per Kat (Aug 17) — the words should surface at a meditative pace.
-const WORD_STAGGER_MS = 200;
-const WORD_IN_MS = 1300;
+// Slowed twice per Kat (Aug 17, then again Aug 19) — the field blooms long
+// and the words surface one breath at a time.
+const FIELD_IN_MS = 1600;
+const WORD_STAGGER_MS = 350;
+const WORD_IN_MS = 2400;
 
 /** One word of the prompt, fading up on its own beat. */
 function WordIn({ word, delay }: { word: string; delay: number }) {
@@ -449,17 +450,18 @@ const styles = StyleSheet.create({
   center: { flex: 1 },
   // Words enter one by one, wrapping as centred lines; the column gap stands
   // in for the mono space the split removed (HAL advance ≈ 0.6em at 16).
+  // Left-aligned (Kat, Aug 19) — the words set like a page, not a poster.
   promptRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     columnGap: 9,
   },
   prompt: {
     // Jul 30 designs: the question speaks in the typewriter mono, centered.
     ...type.contemplation,
     color: color.onDark,
-    textAlign: 'center',
+    textAlign: 'left',
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 10,
@@ -473,18 +475,18 @@ const styles = StyleSheet.create({
   pausedSpiral: {
     fontSize: 30,
     color: color.onOverlay,
-    textAlign: 'center',
+    textAlign: 'left',
     opacity: 0.8,
     fontFamily: type.body.fontFamily,
   },
   pausedLabel: {
     ...type.monoBody,
     color: color.onOverlay,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   pausedLinks: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: space.md,
   },
 });

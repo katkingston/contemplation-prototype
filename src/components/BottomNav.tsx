@@ -100,7 +100,9 @@ export function TabScreen({
         style={{ flex: 1 }}
         contentContainerStyle={[
           padded && { paddingHorizontal: space.lg },
-          { paddingBottom: 120, flexGrow: 1 },
+          // The bar is a SIBLING below the scroll view, not an overlay — the
+          // old 120 bottom padding just read as a block of blank (Kat, Aug 19).
+          { paddingBottom: space.lg, flexGrow: 1 },
         ]}
         keyboardShouldPersistTaps="handled">
         <Fade style={{ flex: 1 }}>{children}</Fade>
