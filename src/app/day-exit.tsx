@@ -9,7 +9,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RatingPrompt } from '@/components/RatingPrompt';
 import { Fade, ScreenFade } from '@/components/Transitions';
-import { AppText, MonoHeader, Row, TextLink } from '@/components/ui';
+import { AppText, MonoHeader, Row, TextLink, useAnchor } from '@/components/ui';
 import { dayExit } from '@/content/copy';
 import { getSeries, seriesCode } from '@/content/series';
 import { dropLabel, nextDropAt } from '@/services/logic';
@@ -17,6 +17,7 @@ import { useApp } from '@/services/provider';
 import { anchor, color, space, type } from '@/theme/tokens';
 
 export default function DayExit() {
+  const ax = useAnchor();
   const { data } = useApp();
   const params = useLocalSearchParams<{ seriesId?: string; index?: string }>();
   const series = getSeries(params.seriesId ?? '');
@@ -30,9 +31,9 @@ export default function DayExit() {
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.content}>
-        <View style={{ height: anchor.monoHeader }} />
+        <View style={{ height: ax(anchor.monoHeader) }} />
         {series ? <MonoHeader code={seriesCode(series, index)} title={hint} dark /> : null}
-        <View style={{ height: anchor.statement - anchor.monoHeader - 19 }} />
+        <View style={{ height: ax(anchor.statement) - ax(anchor.monoHeader) - 19 }} />
         {/* The closing line carries the screen on its own — body copy removed
             (Kat, Aug 14) so the day ends on one thought, not a paragraph. */}
         <ScreenFade>

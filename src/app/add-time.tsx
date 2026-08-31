@@ -11,7 +11,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dither } from '@/components/Dither';
 import { MonoOptionRow, MUSIC_TRACKS, MusicTrack } from '@/components/GetReady';
-import { AppText, Gap, MonoHeader, Row, Spacer, TextLink } from '@/components/ui';
+import { AppText, Gap, MonoHeader, Row, Spacer, TextLink, useAnchor } from '@/components/ui';
 import { getSeries, seriesCode } from '@/content/series';
 import { anchor, color, space, timing } from '@/theme/tokens';
 
@@ -29,6 +29,7 @@ export default function AddTime() {
   const c = series?.contemplations[index];
   const [minutes, setMinutes] = useState<number>(timing.addTimeChoicesMin[2] ?? 3);
   const [track, setTrack] = useState<MusicTrack>(params.music === '0' ? 'none' : 'floating');
+  const ax = useAnchor();
 
   if (!series || !c) {
     router.replace('/home');
@@ -71,13 +72,13 @@ export default function AddTime() {
       />
       <Dither />
       <SafeAreaView style={styles.content}>
-        <View style={{ height: anchor.monoHeader }} />
+        <View style={{ height: ax(anchor.monoHeader) }} />
         <MonoHeader code={seriesCode(series, index)} title={c.hint} dark />
-        <View style={{ height: anchor.lead - anchor.monoHeader - 19 }} />
+        <View style={{ height: ax(anchor.lead) - ax(anchor.monoHeader) - 19 }} />
         <AppText variant="monoBody" dark>
           want to keep{'\n'}contemplating?
         </AppText>
-        <View style={{ height: anchor.optionLabelA - anchor.lead - 45 }} />
+        <View style={{ height: ax(anchor.optionLabelA) - ax(anchor.lead) - 45 }} />
         <AppText variant="caption" dark muted>
           Add time
         </AppText>

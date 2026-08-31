@@ -10,13 +10,35 @@ import {
   StyleSheet,
   Text,
   TextStyle,
+  useWindowDimensions,
   View,
   ViewStyle,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { ScreenFade } from '@/components/Transitions';
-import { color, font, radius, space, type } from '@/theme/tokens';
+import { color, font, FRAME_HEIGHT, radius, space, type } from '@/theme/tokens';
+
+// ---------- Viewport-proportional anchors ----------
+
+/**
+ * The Jul 30 frames pin blocks to a 390x844 grid, but a real phone's WEB
+ * viewport runs shorter — iPhone Safari's chrome leaves ~660 of the 844 —
+ * which pushed bottom-anchored rows clean off the screen (Kat, Aug 19).
+ *
+ * Fix: POSITIONS scale with the viewport height; TYPE NEVER SCALES. The
+ * returned ax() maps a designed y to this viewport, floored at 75% of the
+ * designed spacing (crowding guard) and capped at 110% (very tall screens).
+ * At exactly 844 it is the identity, so desktop previews still match Figma
+ * to the pixel. The static export pre-renders with a 0-height window — the
+ * fallback keeps that render on the designed grid.
+ */
+export function useAnchor(): (y: number) => number {
+  const { height } = useWindowDimensions();
+  const h = height || FRAME_HEIGHT;
+  const scale = Math.min(1.1, Math.max(0.75, h / FRAME_HEIGHT));
+  return (y: number) => Math.round(y * scale);
+}
 
 // ---------- Text ----------
 
@@ -78,9 +100,10 @@ export function Screen({
   testID?: string;
 }) {
   const insets = useSafeAreaInsets();
+  const ax = useAnchor();
   const bg = { backgroundColor: dark ? color.dark : color.paper };
   const pad = padded ? { paddingHorizontal: space.lg } : null;
-  const padTop = top != null ? { paddingTop: Math.max(top - insets.top, space.sm) } : null;
+  const padTop = top != null ? { paddingTop: Math.max(ax(top) - insets.top, space.sm) } : null;
   return (
     <SafeAreaView style={[styles.flex, bg]} testID={testID}>
       {scroll ? (
@@ -148,10 +171,11 @@ export function Anchored({
   children: React.ReactNode;
   style?: ViewStyle;
 }) {
+  const ax = useAnchor();
   return (
     <View
       style={[
-        { position: 'absolute', top: y },
+        { position: 'absolute', top: ax(y) },
         gutter ? { left: space.lg, right: space.lg } : { left: 0, right: 0 },
         style,
       ]}>
@@ -173,10 +197,11 @@ export function AnchoredBottom({
   style?: ViewStyle;
 }) {
   const insets = useSafeAreaInsets();
+  const ax = useAnchor();
   return (
     <View
       style={[
-        { position: 'absolute', bottom: Math.max(up, insets.bottom + space.sm) },
+        { position: 'absolute', bottom: Math.max(ax(up), insets.bottom + space.sm) },
         gutter ? { left: space.lg, right: space.lg } : { left: 0, right: 0 },
         style,
       ]}>

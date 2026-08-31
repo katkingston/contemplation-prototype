@@ -31,7 +31,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MediaWash, PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
 import { Dither } from '@/components/Dither';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Gap, MonoHeader, Row, Sheet, TextLink } from '@/components/ui';
+import { AppText, Gap, MonoHeader, Row, Sheet, TextLink, useAnchor } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { pauseAmbient, playAmbient } from '@/services/ambient';
 import { useApp } from '@/services/provider';
@@ -138,6 +138,8 @@ export function GetReadyScreen({
   const [showInstructions, setShowInstructions] = useState(false);
 
   const gradient = seriesContext?.gradient ?? seriesPalettes['s1-impermanence'];
+  // Viewport-proportional grid (type never scales) — see useAnchor in ui.tsx.
+  const ax = useAnchor();
 
   // --- Begin → countdown (Kat, Aug 17): everything but the footage fades
   // away, 5..1 counts down centred over the naked video, then video and
@@ -247,7 +249,7 @@ export function GetReadyScreen({
         <Animated.View
           style={[{ flex: 1 }, uiStyle]}
           pointerEvents={counting ? 'none' : 'auto'}>
-        <View style={{ height: anchor.monoHeader }} />
+        <View style={{ height: ax(anchor.monoHeader) }} />
         {seriesContext ? (
           <MonoHeader code={seriesContext.code} title={seriesContext.hint} dark>
             <SeriesDashes total={seriesContext.total} done={seriesContext.done} active dark />
@@ -255,25 +257,25 @@ export function GetReadyScreen({
         ) : (
           <AppText style={styles.spiral as never}>꩜</AppText>
         )}
-        <View style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.lead }}>
+        <View style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.lead) }}>
           <AppText variant="monoBody" dark>
             get ready to{'\n'}contemplate
           </AppText>
         </View>
         <View
-          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.leadTitle }}>
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.leadTitle) }}>
           <AppText variant="displayLower" dark>
             {(seriesContext?.hint ?? 'a moment of stillness').toLowerCase()}
           </AppText>
         </View>
         <View
-          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionLabelA }}>
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.optionLabelA) }}>
           <AppText variant="caption" dark muted>
             Add time
           </AppText>
         </View>
         <View
-          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionRowA }}>
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.optionRowA) }}>
           <MonoOptionRow
             options={timing.timerChoicesMin}
             value={minutes}
@@ -283,13 +285,13 @@ export function GetReadyScreen({
           />
         </View>
         <View
-          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionLabelB }}>
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.optionLabelB) }}>
           <AppText variant="caption" dark muted>
             Select music
           </AppText>
         </View>
         <View
-          style={{ position: 'absolute', left: space.lg, right: space.lg, top: anchor.optionRowB }}>
+          style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.optionRowB) }}>
           <MonoOptionRow
             options={MUSIC_TRACKS}
             value={track}
@@ -302,7 +304,7 @@ export function GetReadyScreen({
             position: 'absolute',
             left: space.lg,
             right: space.lg,
-            top: anchor.bottomLinks,
+            top: ax(anchor.bottomLinks),
           }}>
           <Row style={{ gap: space.md }}>
             {seriesContext ? (

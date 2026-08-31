@@ -7,7 +7,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { VoiceRecorder, WordCapInput, countWords } from '@/components/diary';
-import { AppText, Gap, MonoHeader, Row, Screen, Sheet, Spacer, TextLink } from '@/components/ui';
+import { AppText, Gap, MonoHeader, Row, Screen, Sheet, Spacer, TextLink, useAnchor } from '@/components/ui';
 import { journalHelp } from '@/content/copy';
 import { getSeries, seriesCode, seriesLength } from '@/content/series';
 import { questionFor } from '@/services/logic';
@@ -15,6 +15,7 @@ import { useApp } from '@/services/provider';
 import { anchor, color, radius, space } from '@/theme/tokens';
 
 export default function Journal() {
+  const ax = useAnchor();
   const { data, act } = useApp();
   const params = useLocalSearchParams<{
     seriesId?: string;
@@ -88,9 +89,9 @@ export default function Journal() {
   return (
     <Screen testID="journal-screen" padded={false}>
       <View style={{ flex: 1, paddingHorizontal: space.lg }}>
-        <View style={{ height: anchor.monoHeader }} />
+        <View style={{ height: ax(anchor.monoHeader) }} />
         <MonoHeader code={seriesCode(series, index)} title={contemplation.hint} />
-        <View style={{ height: anchor.screenTitle - anchor.monoHeader - 19 }} />
+        <View style={{ height: ax(anchor.screenTitle) - ax(anchor.monoHeader) - 19 }} />
         <AppText variant="titleLower">Reflect</AppText>
         {/* C6 does NOT repeat the contemplation — the question was just held
             for the full sitting; reprinting it here crowds the blank page. */}
@@ -109,7 +110,7 @@ export default function Journal() {
           </View>
         )}
         {/* Writing surface sits at the measured C6 anchor (write here… y=473). */}
-        <View style={{ height: 473 - anchor.screenTitle - 32 }} />
+        <View style={{ height: ax(473) - ax(anchor.screenTitle) - 32 }} />
         <WordCapInput value={text} onChange={setText} />
         <Gap size="xl" />
         <VoiceRecorder onRecorded={(uri, sec) => setAudio({ uri, sec })} />

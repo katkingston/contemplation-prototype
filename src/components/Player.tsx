@@ -30,7 +30,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Dither } from '@/components/Dither';
-import { TextLink } from '@/components/ui';
+import { TextLink, useAnchor } from '@/components/ui';
 import { pauseAmbient, playAmbient } from '@/services/ambient';
 import { anchor, color, space, timing, type } from '@/theme/tokens';
 
@@ -180,6 +180,8 @@ export function ContemplationPlayer({
   onFinish: (reason: FinishReason, secondsElapsed: number) => void;
 }) {
   const totalSeconds = Math.round(minutes * 60);
+  // Viewport-proportional grid (type never scales) — see useAnchor in ui.tsx.
+  const ax = useAnchor();
   const [paused, setPaused] = useState(false);
   const elapsedRef = useRef(0);
   const finishedRef = useRef(false);
@@ -319,7 +321,9 @@ export function ContemplationPlayer({
       {/* One animated ember field, centred on the question: a single ring
           stack running pale edge → glow → near-black core, then blurred so
           the whole thing melds. */}
-      <Animated.View style={[styles.field, fieldStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.field, { top: ax(anchor.statement) - 330 }, fieldStyle]}
+        pointerEvents="none">
         {rings.map((ring, i) => (
           <View
             key={i}
@@ -368,7 +372,7 @@ export function ContemplationPlayer({
           contemplation screen" hard rule; revisit before App Store review. */}
       <SafeAreaView style={styles.content} pointerEvents="box-none">
         <View style={styles.center} pointerEvents="none">
-          <View style={{ height: anchor.statement }} />
+          <View style={{ height: ax(anchor.statement) }} />
           <PromptWords prompt={prompt} />
         </View>
       </SafeAreaView>
@@ -383,7 +387,7 @@ export function ContemplationPlayer({
             <View style={styles.center}>
               {/* Same anchor as the live question, so blurring it in place
                   does not make the text appear to jump. */}
-              <View style={{ height: anchor.statement }} />
+              <View style={{ height: ax(anchor.statement) }} />
               <Text style={[styles.prompt, styles.pausedPrompt]}>{prompt}</Text>
             </View>
           </SafeAreaView>
@@ -396,7 +400,7 @@ export function ContemplationPlayer({
           <SafeAreaView style={[StyleSheet.absoluteFill, styles.content]}>
             <View style={styles.center}>
               {/* Controls sit just below the (blurred) question block. */}
-              <View style={{ height: anchor.statement + 120 }} />
+              <View style={{ height: ax(anchor.statement) + 120 }} />
               <Text style={styles.pausedSpiral}>꩜</Text>
               <View style={{ height: space.xl }} />
               <Text style={styles.pausedLabel}>contemplation paused</Text>
@@ -439,7 +443,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: anchor.statement - 330,
     height: 800,
   },
   content: { flex: 1, paddingHorizontal: 32 },

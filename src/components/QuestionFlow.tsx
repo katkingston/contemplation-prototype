@@ -8,7 +8,7 @@
  */
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { Anchored, AnchoredBottom, AppText, Row, Stage, TextLink } from '@/components/ui';
+import { Anchored, AnchoredBottom, AppText, Row, Stage, TextLink, useAnchor } from '@/components/ui';
 import type { AnswerValue } from '@/services/types';
 import { anchor, anchorBottom, color, font, space, type } from '@/theme/tokens';
 
@@ -35,6 +35,9 @@ export function QuestionFlow({
   /** Mono caps header, left side ("01 — Baseline" / "02 — Survey"). */
   headerLabel?: string;
 }) {
+  // Long option lists must clear the bottom link on short phone viewports —
+  // the row padding compresses with the grid (text size never changes).
+  const ax = useAnchor();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
@@ -139,7 +142,11 @@ export function QuestionFlow({
                 accessibilityRole="button"
                 accessibilityState={{ selected: sel }}
                 onPress={() => set(sel ? cur.filter((x) => x !== opt) : [...cur, opt])}
-                style={({ pressed }) => [styles.optionRow, pressed && { opacity: 0.6 }]}>
+                style={({ pressed }) => [
+                  styles.optionRow,
+                  { paddingVertical: ax(9) },
+                  pressed && { opacity: 0.6 },
+                ]}>
                 <AppText
                   variant="body"
                   style={
