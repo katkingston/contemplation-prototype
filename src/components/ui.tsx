@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import { useReducedMotion } from 'react-native-reanimated';
 import { ScreenFade } from '@/components/Transitions';
 import { color, font, FRAME_HEIGHT, radius, space, type } from '@/theme/tokens';
 
@@ -286,21 +287,40 @@ export function Button({
 // ---------- LogoMark ----------
 
 const LOGO_MARK = require('../../assets/brand/logo-mark.png');
+const LOGO_MARK_ANIMATED = require('../../assets/brand/logo-mark-animated.webp');
 
 /**
- * The hand-drawn spiral mark (Kat, Sep 18 — "Spiral Thick 1" in the Figma
- * file) — replaces the ꩜ glyph that stood in for it. The chalky texture
- * lives in the alpha channel, so `tint` recolours it per surface without
- * losing the grain; the default is the light sage of Kat's reference.
+ * The hand-drawn spiral mark (Kat's Contemplate-Animated-Spiral-03 exports,
+ * Sep 18) — replaces the ꩜ glyph that stood in for it. Static by default;
+ * `animated` plays her 6.5s dissolve loop (both assets share the same crop,
+ * so the swap is seamless). Reduce Motion always gets the still. The chalky
+ * texture lives in the alpha channel, so `tint` recolours the STILL without
+ * losing the grain — the animation keeps its own baked-in sage (masking it
+ * would stop the playback on web).
  */
-export function LogoMark({ size = 44, tint = color.sage }: { size?: number; tint?: string }) {
+export function LogoMark({
+  size = 44,
+  tint = color.sage,
+  animated = false,
+}: {
+  size?: number;
+  tint?: string;
+  animated?: boolean;
+}) {
+  const reducedMotion = useReducedMotion();
+  const playing = animated && !reducedMotion;
   return (
     <Image
-      source={LOGO_MARK}
+      source={playing ? LOGO_MARK_ANIMATED : LOGO_MARK}
       accessible
       accessibilityRole="image"
       accessibilityLabel="Contemplate"
-      style={{ width: size, height: size, resizeMode: 'contain', tintColor: tint }}
+      style={{
+        width: size,
+        height: size,
+        resizeMode: 'contain',
+        tintColor: playing ? undefined : tint,
+      }}
     />
   );
 }

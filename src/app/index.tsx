@@ -84,7 +84,7 @@ export default function Splash() {
   return (
     <Screen dark scroll={false} style={{ justifyContent: 'center' }}>
       <View style={{ alignItems: 'center' }}>
-        <LogoMark size={64} />
+        <LogoMark size={64} animated />
       </View>
       <Gap size="xl" />
       <Wordmark dark size={34} />
