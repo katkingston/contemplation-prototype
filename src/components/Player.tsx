@@ -402,7 +402,7 @@ export function ContemplationPlayer({
             <View style={styles.center}>
               {/* Controls sit just below the (blurred) question block. */}
               <View style={{ height: ax(anchor.statement) + 120 }} />
-              <LogoMark size={44} />
+              <LogoMark size={44} animated />
               <View style={{ height: space.xl }} />
               <Text style={styles.pausedLabel}>contemplation paused</Text>
               <View style={{ height: space.md }} />

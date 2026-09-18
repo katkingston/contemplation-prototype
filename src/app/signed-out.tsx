@@ -14,7 +14,7 @@ export default function SignedOut() {
     <View style={styles.root} testID="signed-out-screen">
       <SafeAreaView style={styles.content}>
         <View style={styles.center}>
-          <LogoMark size={48} />
+          <LogoMark size={48} animated />
           <Gap size="xl" />
           <AppText variant="monoBody" style={{ color: color.onOverlay }} center>
             you are signed out

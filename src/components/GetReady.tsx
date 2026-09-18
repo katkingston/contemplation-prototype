@@ -255,7 +255,7 @@ export function GetReadyScreen({
             <SeriesDashes total={seriesContext.total} done={seriesContext.done} active dark />
           </MonoHeader>
         ) : (
-          <LogoMark size={44} />
+          <LogoMark size={44} animated />
         )}
         <View style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.lead) }}>
           <AppText variant="monoBody" dark>

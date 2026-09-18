@@ -60,7 +60,8 @@ export default function Splash() {
                   : '/disclaimer';
         router.replace(route);
       }
-    }, 900); // brief brand moment
+    }, 6600); // one full spiral loop (65 frames x 100ms) — Kat, Sep 18:
+    // hold the brand moment long enough for the mark to visibly form.
     return () => clearTimeout(t);
   }, [hydrated, hydrationFailed, navState?.key, data]);
 
