@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
   optionEndRule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.muted },
   otherInput: {
     ...type.body,
+    fontSize: 16, // iOS auto-zoom guard (MP's review, Sep 2026)
     marginTop: space.md,
     borderBottomWidth: 1,
     borderBottomColor: color.muted,
@@ -242,6 +243,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     ...type.monoBody,
+    fontSize: 16, // iOS auto-zoom guard (MP's review, Sep 2026)
     minHeight: 120,
     borderBottomWidth: 1,
     borderBottomColor: color.muted,

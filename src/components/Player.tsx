@@ -278,12 +278,12 @@ export function ContemplationPlayer({
   // ONE field, breathing. Two drivers on co-prime periods are combined into a
   // single transform so the whole thing swells and drifts as one body; the
   // whole field is scaled by its own entrance fade.
+  // No scale in the breathing (MP's review, Sep 2026): the zooming layer made
+  // the question text appear to swell and shrink with it. The field now
+  // breathes through opacity and a slow vertical drift only.
   const fieldStyle = useAnimatedStyle(() => ({
-    opacity: (0.9 + driftC.value * 0.1) * fieldIn.value,
-    transform: [
-      { scale: 1 + drift.value * 0.08 },
-      { translateY: -14 + driftB.value * 28 },
-    ],
+    opacity: (0.86 + driftC.value * 0.14) * fieldIn.value,
+    transform: [{ translateY: -14 + driftB.value * 28 }],
   }));
   const pulseStyle = useAnimatedStyle(() => ({ opacity: scrimPulse.value * 0.3 }));
 
@@ -313,7 +313,9 @@ export function ContemplationPlayer({
       rise: 470 - t * 400,
       hex: rampAt(t),
       a: 0.14 + Math.pow(t, 1.15) * 0.86, // opaque by the core
-      r: 380 - t * 290,
+      // Fully rounded — a finite radius let the outermost rings' CORNERS
+      // surface as a faint lighter square on phones (MP's review, Sep 2026).
+      r: 9999,
     };
   });
 

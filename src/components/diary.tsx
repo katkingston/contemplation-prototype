@@ -51,6 +51,7 @@ export function WordCapInput({
         style={{
           // Jul 30 designs: open mono writing surface over a dotted rule.
           ...type.monoBody,
+          fontSize: 16, // iOS auto-zoom guard (MP's review, Sep 2026)
           minHeight: 120,
           textAlignVertical: 'top',
           color: color.ink,

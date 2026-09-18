@@ -6,7 +6,7 @@
  */
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { notify } from '@/components/Notice';
 import { shareMessage } from '@/services/share';
@@ -161,8 +161,21 @@ export default function SeriesDetail() {
           const available = done || (isNext && dropReady && unlocked && accessOk);
           return (
             // No contemplation copy here, done or not (Kat, Aug 17) — the
-            // questions live only inside the practice itself.
-            <View key={c.id} style={styles.row}>
+            // questions live only inside the practice itself. Completed rows
+            // are tappable REVISITS (MP's review, Sep 2026: skipped-over and
+            // past days were unreachable) — a redo never advances progress.
+            <Pressable
+              key={c.id}
+              accessibilityRole={done ? 'button' : undefined}
+              accessibilityLabel={done ? `Revisit ${c.hint}` : undefined}
+              disabled={!done}
+              onPress={() =>
+                router.push({
+                  pathname: '/get-ready',
+                  params: { seriesId: series.id, index: String(i), redo: '1' },
+                })
+              }
+              style={({ pressed }) => [styles.row, pressed && done && { opacity: 0.6 }]}>
               <View style={{ flex: 1, opacity: available ? 1 : 0.45 }}>
                 <Row>
                   <AppText variant="label" muted style={styles.rowCode as never}>
@@ -178,7 +191,7 @@ export default function SeriesDetail() {
               ) : available ? (
                 <View style={styles.rowDotNext} />
               ) : null}
-            </View>
+            </Pressable>
           );
         })}
         <View style={styles.endRule} />
@@ -189,7 +202,9 @@ export default function SeriesDetail() {
         <TextLink
           label="Back"
           muted
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
+          // Always the library — history-based back could land on a stale
+          // contemplation-flow screen (MP's review, Sep 2026).
+          onPress={() => router.replace('/library')}
           testID="series-back"
         />
         <TextLink label="Share" muted onPress={onShare} testID="series-share" />

@@ -79,7 +79,7 @@ export const instructions = {
     'Read it a third time. Reflect on how these thoughts might be showing up in your relationships or choices.',
   ],
   outro:
-    'The videos and artwork are there to spark curiosity. Sit with what arises, then when ready, use the thought diary to write, or voice-record your insights, follow what feels right.',
+    'The artwork and music are there to spark curiosity. Sit with what arises, then when ready, use the thought diary to write, or voice-record your insights, follow what feels right.',
 } as const;
 
 export const journalHelp = {
@@ -159,8 +159,10 @@ export const intakeQuestions = [
     kind: 'scale' as const,
     min: 1,
     max: 10,
-    minLabel: '1',
-    maxLabel: '10',
+    // Labelled endpoints per MP's review note (Sep 2026) — the bare numerals
+    // left the direction of the scale unreadable.
+    minLabel: 'Not afraid at all',
+    maxLabel: 'Deeply afraid',
   },
   {
     id: 'motivation',

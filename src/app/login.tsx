@@ -30,6 +30,9 @@ import { anchor, anchorBottom, color, font, radius, space, type } from '@/theme/
  */
 const inputStyle = {
   ...type.body,
+  // 16 minimum: anything smaller makes iOS Safari zoom in on focus, and the
+  // zoom sticks for the rest of the session (MP's review, Sep 2026).
+  fontSize: 16,
   height: 24,
   paddingVertical: 0,
   borderBottomWidth: 1,

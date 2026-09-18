@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-end', gap: space.md },
   input: {
     ...type.body,
+    fontSize: 16, // iOS auto-zoom guard (MP's review, Sep 2026)
     flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: color.line,

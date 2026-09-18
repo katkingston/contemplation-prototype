@@ -17,6 +17,7 @@
  */
 import { Asset } from 'expo-asset';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useIsFocused } from '@react-navigation/native';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -140,6 +141,9 @@ export function GetReadyScreen({
   const gradient = seriesContext?.gradient ?? seriesPalettes['s1-impermanence'];
   // Viewport-proportional grid (type never scales) — see useAnchor in ui.tsx.
   const ax = useAnchor();
+  // Web keeps left screens mounted; a still-mounted video could resurface as
+  // a bare fullscreen image when navigating back (MP's review, Sep 2026).
+  const isFocused = useIsFocused();
 
   // --- Begin → countdown (Kat, Aug 17): everything but the footage fades
   // away, 5..1 counts down centred over the naked video, then video and
@@ -240,7 +244,7 @@ export function GetReadyScreen({
       {/* The day's footage now lives HERE (the player uses the animated
           ember gradient). Gradient stays underneath as the loading backdrop;
           MediaWash blurs and sinks it into this series' own dark stop. */}
-      <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />
+      {isFocused && <VideoBackground source={PLACEHOLDER_VIDEO} paused={false} />}
       {/* The wash STAYS through the countdown (Kat, Aug 17) — only the page
           chrome fades; the numbers play over the filtered, blurred footage. */}
       <MediaWash tint={gradient[0]} />
