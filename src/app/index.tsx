@@ -2,7 +2,7 @@
 import { router, useRootNavigationState } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { AppText, Button, Gap, Screen, Wordmark } from '@/components/ui';
+import { AppText, Button, Gap, Screen, Wordmark, LogoMark } from '@/components/ui';
 import { splashTagline } from '@/content/copy';
 import { seriesLength } from '@/content/series';
 import {
@@ -84,7 +84,7 @@ export default function Splash() {
   return (
     <Screen dark scroll={false} style={{ justifyContent: 'center' }}>
       <View style={{ alignItems: 'center' }}>
-        <AppText style={{ fontSize: 40, color: color.onDarkMuted } as never}>꩜</AppText>
+        <LogoMark size={64} />
       </View>
       <Gap size="xl" />
       <Wordmark dark size={34} />

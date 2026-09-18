@@ -30,7 +30,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Dither } from '@/components/Dither';
-import { TextLink, useAnchor } from '@/components/ui';
+import { LogoMark, TextLink, useAnchor } from '@/components/ui';
 import { pauseAmbient, playAmbient } from '@/services/ambient';
 import { anchor, color, space, timing, type } from '@/theme/tokens';
 
@@ -402,7 +402,7 @@ export function ContemplationPlayer({
             <View style={styles.center}>
               {/* Controls sit just below the (blurred) question block. */}
               <View style={{ height: ax(anchor.statement) + 120 }} />
-              <Text style={styles.pausedSpiral}>꩜</Text>
+              <LogoMark size={44} />
               <View style={{ height: space.xl }} />
               <Text style={styles.pausedLabel}>contemplation paused</Text>
               <View style={{ height: space.md }} />
@@ -471,13 +471,6 @@ const styles = StyleSheet.create({
     opacity: 0.55,
     textShadowColor: 'transparent',
     color: color.onOverlay,
-  },
-  pausedSpiral: {
-    fontSize: 30,
-    color: color.onOverlay,
-    textAlign: 'left',
-    opacity: 0.8,
-    fontFamily: type.body.fontFamily,
   },
   pausedLabel: {
     ...type.monoBody,

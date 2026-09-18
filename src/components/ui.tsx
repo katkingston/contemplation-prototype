@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import {
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -279,6 +280,28 @@ export function Button({
         {arrow ? `${label} →` : label}
       </Text>
     </Pressable>
+  );
+}
+
+// ---------- LogoMark ----------
+
+const LOGO_MARK = require('../../assets/brand/logo-mark.png');
+
+/**
+ * The hand-drawn spiral mark (Kat, Sep 18 — "Spiral Thick 1" in the Figma
+ * file) — replaces the ꩜ glyph that stood in for it. The chalky texture
+ * lives in the alpha channel, so `tint` recolours it per surface without
+ * losing the grain; the default is the light sage of Kat's reference.
+ */
+export function LogoMark({ size = 44, tint = color.sage }: { size?: number; tint?: string }) {
+  return (
+    <Image
+      source={LOGO_MARK}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel="Contemplate"
+      style={{ width: size, height: size, resizeMode: 'contain', tintColor: tint }}
+    />
   );
 }
 

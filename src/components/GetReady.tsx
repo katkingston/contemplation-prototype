@@ -31,7 +31,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MediaWash, PLACEHOLDER_VIDEO, VideoBackground } from '@/components/Player';
 import { Dither } from '@/components/Dither';
 import { SeriesDashes } from '@/components/SeriesDashes';
-import { AppText, Gap, MonoHeader, Row, Sheet, TextLink, useAnchor } from '@/components/ui';
+import { AppText, Gap, LogoMark, MonoHeader, Row, Sheet, TextLink, useAnchor } from '@/components/ui';
 import { instructions } from '@/content/copy';
 import { pauseAmbient, playAmbient } from '@/services/ambient';
 import { useApp } from '@/services/provider';
@@ -255,7 +255,7 @@ export function GetReadyScreen({
             <SeriesDashes total={seriesContext.total} done={seriesContext.done} active dark />
           </MonoHeader>
         ) : (
-          <AppText style={styles.spiral as never}>꩜</AppText>
+          <LogoMark size={44} />
         )}
         <View style={{ position: 'absolute', left: space.lg, right: space.lg, top: ax(anchor.lead) }}>
           <AppText variant="monoBody" dark>
@@ -372,7 +372,6 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 10,
   },
-  spiral: { fontSize: 30, color: color.onDarkMuted, fontFamily: font.grotesk },
   optionRow: { flexDirection: 'row', justifyContent: 'space-between' },
   option: {
     fontFamily: font.mono,

@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, Gap, TextLink } from '@/components/ui';
+import { AppText, Gap, TextLink, LogoMark } from '@/components/ui';
 import { color, space } from '@/theme/tokens';
 
 export default function SignedOut() {
@@ -14,7 +14,7 @@ export default function SignedOut() {
     <View style={styles.root} testID="signed-out-screen">
       <SafeAreaView style={styles.content}>
         <View style={styles.center}>
-          <AppText style={styles.spiral as never}>꩜</AppText>
+          <LogoMark size={48} />
           <Gap size="xl" />
           <AppText variant="monoBody" style={{ color: color.onOverlay }} center>
             you are signed out
@@ -31,5 +31,4 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.overlay },
   content: { flex: 1, paddingHorizontal: space.lg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  spiral: { fontSize: 34, color: color.onOverlay, opacity: 0.85 },
 });
