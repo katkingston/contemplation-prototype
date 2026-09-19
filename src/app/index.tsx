@@ -1,7 +1,7 @@
 /** O1 — Splash / Loading. Routes first-run vs returning. */
 import { router, useRootNavigationState } from 'expo-router';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { AppText, Button, Gap, Screen, Wordmark, LogoMark } from '@/components/ui';
 import { splashTagline } from '@/content/copy';
 import { seriesLength } from '@/content/series';
@@ -13,7 +13,6 @@ import {
   progressFor,
 } from '@/services/logic';
 import { useApp } from '@/services/provider';
-import { color } from '@/theme/tokens';
 
 export default function Splash() {
   const { hydrated, hydrationFailed, data, retryHydration } = useApp();
@@ -93,8 +92,8 @@ export default function Splash() {
       <AppText variant="monoBody" dark muted style={{ maxWidth: 300 }}>
         {splashTagline}
       </AppText>
-      <Gap size="lg" />
-      <ActivityIndicator color={color.onDarkMuted} />
+      {/* The forming spiral IS the loading indicator (Kat, Sep 18) — no
+          second spinner beneath it. */}
     </Screen>
   );
 }
